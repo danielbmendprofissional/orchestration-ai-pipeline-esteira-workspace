@@ -35,6 +35,10 @@ Vocabulário padrão de 5 papéis (`needs-triage`, `needs-info`, `ready-for-agen
 
 Camadas de segurança além do checklist automático do subagent `security` (`.pi/agents/security.md`): skills do Claude Code (`security-review`, `owasp-audit`, `dependency-audit`, `secrets-audit`, entre outras) rodadas sob demanda, mais o scanner de infra (`Security-Scanner`, que também roda no stage `security` da esteira). Instalação é setup de projeto, fora deste repo; camadas e fluxo de correção de achado em `docs/agents/security-review.md`.
 
+### Infra (Postgres, Redis, RabbitMQ, Keycloak, observabilidade)
+
+O projeto não sobe esses serviços: usa a infra compartilhada do `ai-infra`, onde ganhou uma "casa" isolada (banco, vhost, realm, prefixo Redis) que não enxerga a de outros projetos. Código e configuração leem **só as chaves do contrato** em `docs/agents/infra-local.md` (`ConnectionStrings:Postgres`, `RabbitMQ:*`, `Keycloak:*`...), em dev via user-secrets — nunca senha em `appsettings*.json` versionado, nunca superusuário/`guest`/`default`, nunca nome de chave inventado. Toda chave/canal Redis com `Redis:KeyPrefix`. Precisa de algo novo na infra (outro serviço, outra role)? Não é código do projeto: vira pedido pro agent `ai-ops/agents/infra/local-environment-config`. Log/métrica/health: `docs/agents/observabilidade-backup.md`.
+
 ### Domain docs
 
 `CONTEXT.md`/`CONTEXT-MAP.md` + `docs/adr/` — quantos contextos existem e onde cada um mora é decidido em conversa com o humano (via `/domain-modeling`), não uma estrutura fixa de pasta. Ver `docs/agents/domain.md`.
