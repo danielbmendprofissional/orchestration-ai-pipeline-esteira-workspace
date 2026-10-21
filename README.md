@@ -22,10 +22,10 @@ GitLab: orchestration-ai/ai-pipeline/esteira/     Local: ai-pipeline/esteira/   
 
 ```powershell
 cd C:\Users\danib\source\repos\orquestracao-ai\ai-pipeline
-git clone git@gitlab.com:orchestration-ai/ai-pipeline/esteira/esteira-workspace.git esteira
+git clone https://gitlab.com/orchestration-ai/ai-pipeline/esteira/esteira-workspace.git esteira
 cd esteira
-git clone git@gitlab.com:orchestration-ai/ai-pipeline/esteira/esteira-api.git
-git clone git@gitlab.com:orchestration-ai/ai-pipeline/esteira/esteira-frontend.git
+git clone https://gitlab.com/orchestration-ai/ai-pipeline/esteira/esteira-api.git
+git clone https://gitlab.com/orchestration-ai/ai-pipeline/esteira/esteira-frontend.git
 ```
 
 Depois reinstalar as skills (não versionadas): `ai-ops/docs-human/ai-base/comandos-para-rodar.md`, seções 8, 9 e 13.
