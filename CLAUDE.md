@@ -19,7 +19,9 @@ Ver `docs/workflow.md` para o fluxo completo ponta a ponta, `docs/agents/orchest
 
 ## Agent skills
 
-Todas as skills em `.claude/skills/` têm `disable-model-invocation: true` — nenhuma dispara sozinha por descrição bater com o contexto. Só rodam quando chamadas explicitamente (`/grill-me`, "use a skill code-review", etc.). Isso é deliberado, pra não gastar token com skill que o agente decidiu invocar por conta própria.
+As skills em `.claude/skills/` têm `disable-model-invocation: true` — nenhuma dispara sozinha por descrição bater com o contexto. Só rodam quando chamadas explicitamente (`/grill-me`, "use a skill code-review", etc.). Isso é deliberado, pra não gastar token com skill que o agente decidiu invocar por conta própria.
+
+**Exceção obrigatória — peças internas:** skill que outra skill chama pelo Skill tool (`grill-with-docs` → `grilling` + `domain-modeling`; `implement` → `tdd` + `code-review`; `improve-codebase-architecture` → `codebase-design`…) **não** pode ter a flag, senão o comando composto quebra. É o mesmo desenho do repositório de origem (mattpocock/skills: só os comandos de entrada têm a flag). A lista sai de um grep, não de memória — `ai-ops/agents/infra/local-environment-config/docs/enviroment/security-skills.md`, passo 3.
 
 ### Issue tracker
 
