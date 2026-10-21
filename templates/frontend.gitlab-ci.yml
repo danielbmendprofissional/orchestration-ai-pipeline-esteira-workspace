@@ -1,0 +1,17 @@
+# =================================================================
+# = .gitlab-ci.yml do <projeto>-frontend — copiar pra raiz do repositório
+# =================================================================
+# Também copiar template-ci/examples/angular/nginx/ pra nginx/ do repositório.
+# Variáveis: template-ci/README.md e template-ci/examples/angular.
+include:
+  - project: orchestration-ai/ai-pipeline/template-ci
+    file: /ci-template.yml
+    ref: v2.0.0
+
+variables:
+  APP_TECHNOLOGY: angular
+  ANGULAR_DIST_PATH: ""        # ex: dist/meu-front/browser
+  ANGULAR_APP_NAME: web
+  TEST_COMMAND: ""             # ex: test:ci (sem watch)
+  HEALTH_PATH: /healthz
+  REVIEW_GATE_ENABLED: "true"

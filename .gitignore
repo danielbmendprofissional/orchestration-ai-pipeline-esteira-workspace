@@ -1,0 +1,11 @@
+# Skills instaladas por comando (npx skills add / git clone) — não versionadas.
+# Ver docs/comandos-para-rodar.md, seção 8, e skills-lock.json (esse sim versionado).
+.claude/skills/*
+Claude outputs/*
+Claude outputs/
+Claude outputs
+
+# Workspace: cada componente é um repositório git próprio dentro desta pasta
+# (ver docs/agents/workspace.md). Componente novo → linha nova aqui.
+/*-api/
+/*-frontend/
