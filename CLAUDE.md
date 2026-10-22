@@ -43,6 +43,8 @@ O projeto não sobe esses serviços: usa a infra compartilhada do `ai-infra`, on
 
 ### Domain docs
 
+**Glossário é sempre `CONTEXT.md`/`CONTEXT-MAP.md`, nunca `GLOSSARY.md`/`GLOSSARY-MAP.md`** — as skills `domain-modeling`/`grill-with-docs` usam esses nomes por padrão; neste repo, onde elas falarem em `GLOSSARY.md` leia `CONTEXT.md`, e `GLOSSARY-MAP.md` leia `CONTEXT-MAP.md`.
+
 `CONTEXT.md`/`CONTEXT-MAP.md` + `docs/adr/` — quantos contextos existem e onde cada um mora é decidido em conversa com o humano (via `/domain-modeling`), não uma estrutura fixa de pasta. Ver `docs/agents/domain.md`.
 
 ## Convenções de repo

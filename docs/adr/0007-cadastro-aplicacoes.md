@@ -1,16 +1,15 @@
-# ADR-0007 — Cadastro de aplicações e variáveis do GitLab dentro da Esteira
+# ADR-0007 — Cadastro de aplicações dentro da Esteira; configuração de CI por pull
 
-Status: Proposto (precisa de discovery — `/grill-with-docs`) · 2026-10-21
+Status: Aceito · 2026-10-22 · Discovery fechado (ver ADR-0008). Substitui a versão "Proposto" de 2026-10-21, que escrevia variáveis no GitLab
 
-## Decisão até aqui
+A Esteira tem área própria de cadastro: **Aplicação → Projetos → Ambientes → Destinos**, mais os papéis de cada pessoa na Aplicação. A Aplicação aponta para um **grupo do GitLab**, e a Esteira lista os projetos do grupo para marcar quais são Projetos dela (stack sugerida pelo `APP_TECHNOLOGY`, editável). A configuração não secreta de CI de cada Projeto por Ambiente/Destino mora **só na Esteira** e a pipeline a **puxa** na resposta do `esteira-abrir`. A Esteira **não guarda nem escreve segredo**: segredos, chaves de segurança e variáveis globais continuam como variáveis do GitLab, cadastradas lá.
 
-- **Sem "Portfólio de Sistemas"** separado: a Esteira tem uma área própria pra **cadastrar aplicação** (nome, sigla, projetos GitLab ligados, tecnologia de cada projeto).
-- Na mesma área, cadastrar as **variáveis do GitLab** de cada projeto (as do template-ci: `APP_TECHNOLOGY`, `KUBE_CONTEXT`, `K8S_NAMESPACE`, `APP_URL`… por ambiente), pra Esteira aplicar via **API do GitLab** e o projeto ficar pronto pra publicar.
-- O `FluxoDeploy` passa a referenciar a aplicação cadastrada (hoje recebe só uma sigla de sistema).
+## Considered Options
 
-## Em aberto (discovery)
+- **Push** (a Esteira escreve as variáveis no GitLab via API, versão anterior desta ADR): duas cópias da mesma configuração para dessincronizar, e a Esteira precisaria decidir como tratar segredo (guardar cifrado ou escrever às cegas).
 
-- Valor de variável sensível: a Esteira guarda (cifrado) ou só escreve no GitLab e nunca relê? (Recomendação: só escreve, `masked`/`protected`, nunca devolve o valor.)
-- Token do GitLab usado pela Esteira: de quem, com qual escopo, onde fica.
-- Variáveis por ambiente (`environment_scope`) e quais são obrigatórias por tecnologia.
-- Relação com a pendência "tecnologias e projetos por fluxo" (`esteira-api/docs/PENDENCIAS.md`).
+## Consequences
+
+- O formato da configuração é JSON estruturado (um Ambiente pode ter vários Destinos, cada um com a sua configuração), não dotenv. O template itera os Destinos (`docs/mudancas-template.md`, itens 3 e o child pipeline por Destino).
+- O token usado para listar projetos do grupo é o mesmo bot por grupo da ADR-0008.
+- O `FluxoDeploy` passa a referenciar Projeto (e, por ele, Aplicação) por ID, não mais sigla de sistema. `ConfiguracaoSistema` vira a política de severidade da Aplicação por Ambiente.
