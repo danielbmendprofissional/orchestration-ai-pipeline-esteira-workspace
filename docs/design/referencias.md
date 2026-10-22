@@ -5,9 +5,9 @@ Papel real de cada site/ferramenta neste template (Angular-fixo). "Ferramenta co
 | Site/ferramenta | O que é | Papel aqui |
 |---|---|---|
 | [dark.design](https://www.dark.design/) | Galeria de inspiração de UI em dark mode | Inspiração visual — paleta/composição em dark mode |
-| [Aceternity UI](https://ui.aceternity.com/) | Catálogo de componentes React + Tailwind, muito animado | Inspiração visual/interação — reimplementar em Angular/PrimeNG + anime.js/Motion, nunca importar o pacote React |
+| [Aceternity UI](https://ui.aceternity.com/) | Catálogo de componentes React + Tailwind, muito animado | Inspiração visual/interação — reimplementar em Angular/spartan + anime.js/Motion, nunca importar o pacote React |
 | [21st.dev](https://21st.dev/) | Marketplace de componentes React ("shadcn-like") | Mesmo papel do Aceternity: inspiração, não dependência |
-| [PrimeNG](https://primeng.org/) | Biblioteca de componentes **Angular nativa** | **Default de componentes deste template** — ver `component-library.md` |
+| [spartan/ui](https://www.spartan.ng/) | Biblioteca de componentes **Angular nativa**, MIT, modelo shadcn (helm copiado pro repositório) | **Default de componentes da Esteira** — ver `component-library.md` e ADR-0015 |
 | [bklit UI](https://bklit.com/) (`github.com/bklit/bklit-ui`) | Biblioteca de charts/data-viz React, construída sobre shadcn/ui | Inspiração pra visualização de dados densa (dashboard) — reimplementar com a lib de chart Angular do projeto (ex: PrimeNG Charts/Chart.js), nunca o pacote React |
 | [anime.js](https://animejs.com/) | Motor de animação JS puro | **Ferramenta usável direto em Angular** — ver seção Motion em `component-library.md` |
 | [Motion](https://motion.dev/) (ex-Framer Motion) | Biblioteca de animação; tem API vanilla e integração React | Usar só a API vanilla (`motion` core) em Angular; os componentes `motion/react` não se aplicam |

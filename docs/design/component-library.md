@@ -2,13 +2,13 @@
 
 **Angular é a stack fixa pra todo site/aplicativo web enterprise/SaaS deste template.** React fica reservado só pra landing page isolada ou uso futuro pontual.
 
-## Default: Angular + PrimeNG + Tailwind
+## Default: Angular + spartan/ui + Tailwind
 
-**[PrimeNG](https://primeng.org/)** é o default de componentes pra qualquer projeto Angular nascido deste template.
+**[spartan/ui](https://www.spartan.ng/)** é o default de componentes da Esteira (ADR-0015 — o PrimeNG, default anterior do template, deixou de ser MIT na versão 22). Duas camadas: `@spartan-ng/brain` (primitivas acessíveis sobre o Angular CDK, pacote npm) e o **helm** (o estilo), copiado pra `src/app/shared/ui` pela CLI — o código do componente é nosso. Componente novo: `npx ng g @spartan-ng/cli:ui <nome>`; import por `@spartan-ng/helm/<nome>`.
 
-**[Tailwind CSS](https://tailwindcss.com/)** entra como default junto do PrimeNG, não como alternativa. PrimeNG cuida do componente em si (`p-button`, `p-table`); Tailwind cuida do entorno (grid/flex da página, espaçamento entre componentes, ajuste fino de utilitário). `tailwind.config` mapeado a partir de `tokens.md` (cor, espaçamento, tipografia) — preset do PrimeNG e `tailwind.config` sempre com os mesmos valores, nunca um com token e o outro no default de fábrica.
+**[Tailwind CSS](https://tailwindcss.com/)** (MIT; pago é só o catálogo Tailwind Plus, que não usamos) estiliza o helm e o entorno (grid/flex da página, espaçamento entre componentes). Tokens com **fonte única** em `src/styles.css`: o `@theme` alimenta os utilitários e o `:root` traduz os mesmos valores pras variáveis que o helm lê (`--primary`, `--background`, `--border`…).
 
-**Regra:** tema default do PrimeNG intocado, ou classe Tailwind de fábrica sem token por trás, é P0. A task de `ui` sempre aplica o tema gerado a partir de `tokens.md` nos dois (preset PrimeNG e `tailwind.config`), nunca aceita a paleta "Aura"/"Lara" de fábrica do PrimeNG nem a paleta default do Tailwind sem customização de cor/tipografia/raio.
+**Regra:** tema de fábrica do spartan (`stone`, `zinc`…) ou classe Tailwind de fábrica sem token por trás é P0. Variante nova de componente entra no próprio arquivo do helm (`cva`), não como classe solta na página.
 
 ### Skills oficiais do Angular
 
@@ -17,7 +17,7 @@ Skills mantidas pelo time do Angular (`github.com/angular/skills`), instaladas v
 - **`angular-developer`** — geração de código e orientação arquitetural: componentes standalone, signals, forms, injeção de dependência, roteamento, SSR, acessibilidade (ARIA), animações, estilo, testes, CLI. Fonte de verdade de convenção de código Angular pras tasks `front` e `ui`, acima de qualquer hábito antigo (NgModules, RxJS-first sem necessidade).
 - **`angular-new-app`** — bootstrap de projeto novo via Angular CLI com estrutura moderna recomendada.
 
-Instalação real (PrimeNG + Tailwind) roda por projeto, na configuração de ambiente daquele projeto — não faz parte do `ai-base` em si.
+Instalação real (spartan/ui + Tailwind) roda por projeto, na configuração de ambiente daquele projeto — não faz parte do `ai-base` em si.
 
 ### Se o caso for React (landing page isolada ou uso futuro)
 
@@ -25,7 +25,7 @@ Instalação real (PrimeNG + Tailwind) roda por projeto, na configuração de am
 
 ### Bibliotecas de referência (não pra copiar direto — Angular ≠ React)
 
-`Aceternity UI`, `21st.dev` e `bklit UI` são catálogos de componentes **React/Tailwind**. Não dá pra instalar num projeto Angular. Uso correto: **referência de padrão visual e de interação** (um card com hover específico, uma animação de entrada de dashboard, um jeito de estruturar um chart) — a task de `ui` reimplementa a ideia em Angular/PrimeNG/CSS, nunca importa o pacote React. Ver `referencias.md` pra lista completa e papel de cada site.
+`Aceternity UI`, `21st.dev` e `bklit UI` são catálogos de componentes **React/Tailwind**. Não dá pra instalar num projeto Angular. Uso correto: **referência de padrão visual e de interação** (um card com hover específico, uma animação de entrada de dashboard, um jeito de estruturar um chart) — a task de `ui` reimplementa a ideia em Angular/spartan/CSS, nunca importa o pacote React. Ver `referencias.md` pra lista completa e papel de cada site.
 
 ## Motion / animação
 
@@ -40,4 +40,4 @@ Quando o pedido envolve ligar algo visual a um evento do navegador (asset de ví
 
 ## Regra fixa, independente da biblioteca escolhida
 
-Nenhuma biblioteca de componentes ou utilitário de CSS substitui `tokens.md`. Um `p-button` do PrimeNG com tema default não customizado é P0, exatamente como uma classe Tailwind de fábrica (`bg-blue-500`, `rounded-2xl shadow-lg`) usada sem passar pelo `tailwind.config` mapeado dos tokens.
+Nenhuma biblioteca de componentes ou utilitário de CSS substitui `tokens.md`. Um `hlmBtn` com as variáveis do tema de fábrica do spartan é P0, exatamente como uma classe Tailwind de fábrica (`bg-blue-500`, `rounded-2xl shadow-lg`) usada sem passar pelo `tailwind.config` mapeado dos tokens.

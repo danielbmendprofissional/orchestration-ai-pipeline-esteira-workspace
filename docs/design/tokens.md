@@ -4,10 +4,10 @@ Este arquivo é um **starter/seed**, não a resposta final. Desde a adoção da 
 
 Formato neutro (JSON), pra não prender a um framework — o mapeamento real acontece assim:
 
-- **Angular (default deste template)**: os valores viram **os dois ao mesmo tempo, batendo entre si** — o tema do **PrimeNG** (Design Tokens da API de Theming, `definePreset`) pra componente, e o `tailwind.config` pra layout/espaçamento/utilitário (Tailwind é oficialmente suportado em Angular 20+) — ver `component-library.md`. Nunca mapear só um dos dois e deixar o outro no default de fábrica.
+- **Angular (default deste template)**: os valores viram **os dois ao mesmo tempo, batendo entre si** — o `@theme` do Tailwind 4 em `src/styles.css` (utilitários) e, no mesmo arquivo, as variáveis que os componentes spartan/ui leem (`--primary`, `--background`…) apontando pros mesmos tokens — ver `component-library.md`. Nunca mapear só um dos dois e deixar o outro no default de fábrica.
 - **React (landing page isolada)**: `tailwind.config` ou tema do shadcn/ui, como antes.
 
-O `ui` (`.pi/agents/ui.md`) deve sempre consumir tokens a partir do tema já mapeado (PrimeNG preset ou `DESIGN.md` do projeto), nunca inventar um valor de cor/espaçamento ad-hoc no meio de uma task.
+O `ui` (`.pi/agents/ui.md`) deve sempre consumir tokens a partir do tema já mapeado (`src/styles.css` ou `DESIGN.md` do projeto), nunca inventar um valor de cor/espaçamento ad-hoc no meio de uma task.
 
 ## Cor
 
@@ -89,7 +89,7 @@ Escala geométrica, não "gap/padding uniforme em tudo" (P1 do catálogo — fal
 
 ## Raio e sombra
 
-Não usar o mesmo raio/sombra em toda superfície por reflexo (P1 — no PrimeNG isso é o preset "Aura"/"Lara" default intocado, ver `component-library.md`). Ter no máximo 2-3 níveis, usados com intenção:
+Não usar o mesmo raio/sombra em toda superfície por reflexo (P1 — num kit de componentes isso é o tema de fábrica intocado, ver `component-library.md`). Ter no máximo 2-3 níveis, usados com intenção:
 
 ```json
 {
