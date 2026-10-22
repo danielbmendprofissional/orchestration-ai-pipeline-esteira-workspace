@@ -9,3 +9,6 @@ Claude outputs
 # (ver docs/agents/workspace.md). Componente novo → linha nova aqui.
 /*-api/
 /*-frontend/
+
+# Referências locais (telas e código de outros sistemas): nunca versionar
+docs/referencias/
