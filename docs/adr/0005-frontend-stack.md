@@ -7,8 +7,8 @@ Status: Aceito · 2026-10-21 · Base: Valuto ADR-029/030/032 + exemplo fluxo-dep
 | Peça | Escolha |
 |---|---|
 | Framework | Angular **22.x** (estável em 2026-10; `ng update` pra 23 quando sair) · standalone · **zoneless** (`provideZonelessChangeDetection`) |
-| Componentes | PrimeNG 22 + `@primeuix/themes` com **preset próprio** a partir dos tokens (nunca Aura/Lara de fábrica) |
-| Estilo | Tailwind 4 + `tailwindcss-primeui`, mesmos tokens do preset |
+| Componentes | **spartan/ui** (brain + helm copiado em `shared/ui`) com as variáveis do helm apontando pros tokens — ver **ADR-0015** (PrimeNG 22 deixou de ser MIT) |
+| Estilo | Tailwind 4, tokens no `@theme` de `src/styles.css` (fonte única pros utilitários e pro helm) |
 | Estado | Signals (`signal`/`computed`, `effect` só pra side effect real) |
 | Dados | `resource()`/`httpResource` pra leitura; Promise/`firstValueFrom` pra comando |
 | Contrato | `openapi-typescript` gera tipos do OpenAPI da `esteira-api` (`npm run generate:api-types`); CI falha se divergir do commitado |

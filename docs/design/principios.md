@@ -28,17 +28,17 @@ Roda em `/skill:avoid-ai-design detect` no `/code-review` final (`docs/workflow.
 
 ## Regra central: default não escolhido é o "tell"
 
-Vale pra fonte, espaçamento, ícone, cópia, e pro tema default do PrimeNG (ver `component-library.md`).
+Vale pra fonte, espaçamento, ícone, cópia, e pro tema de fábrica da biblioteca de componentes (ver `component-library.md`).
 
 ### P0 — qualquer pessoa reconhece como "feito por IA"
 - Gradiente roxo-pro-azul, texto com `bg-clip-text`
 - Fonte `Inter`/`Roboto`/system default sem ter sido decisão de `tokens.md`
-- Tema padrão do PrimeNG (Aura/Lara de fábrica) intocado
+- Tema de fábrica da biblioteca de componentes (spartan `stone`/`zinc`…) intocado
 - Glassmorphism reflexivo
 - Hero centralizado + três cards de feature ("template de SaaS genérico")
 
 ### P1 — dev/designer reconhece
-- `rounded-2xl shadow-lg`/equivalente PrimeNG em toda superfície sem variação
+- `rounded-2xl shadow-lg` em toda superfície sem variação
 - Ícone-dentro-de-quadrado-arredondado repetido
 - Botão azul/indigo "de fábrica"
 - Cópia tipo "Elevate your workflow", "Seamless", "Powerful" sem substância
@@ -78,7 +78,7 @@ Dois casos concretos desse tipo de pedido:
 1. Task de `ui` lê `tokens.md`, `component-library.md` e este arquivo antes de qualquer classe/estilo.
 2. Consulta `interfaces.rauno.me` e `lazyweb` (MCP, se disponível no projeto) pra validar o padrão de interação antes de implementar.
 3. Usa `ui-ux-pro-max-skill` pra obter a direção de design.
-4. Implementa em Angular + PrimeNG, tema mapeado a partir de `tokens.md`.
+4. Implementa em Angular + spartan/ui, tema mapeado a partir de `tokens.md`.
 5. Roda `/impeccable detect` contra o localhost do projeto (se já configurado) e resolve com `/impeccable adapt|harden|polish`, depois `/impeccable audit` de confirmação.
 6. Se `impeccable` ainda não estiver instalado no projeto, roda pelo menos `/skill:avoid-ai-design detect` como rede mínima antes de devolver a task.
 7. No `/code-review` final, qualquer diff que toque UI roda `/skill:avoid-ai-design detect` de novo.
