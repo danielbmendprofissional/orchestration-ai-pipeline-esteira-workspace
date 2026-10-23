@@ -74,6 +74,7 @@ Feature `features/aplicacoes/` (ADR-0005: api service · domain service · pages
 9. Se alguém tentar desabilitar `producao`, a Esteira deve recusar (`ambiente.producao-obrigatorio`).
 10. Se a configuração de um Destino tiver chave cujo nome indique segredo (contém `PASSWORD`, `SENHA`, `SECRET`, `TOKEN`, `KEY`, `CREDENTIAL`, sem diferenciar maiúsculas), a Esteira deve recusar (`destino.configuracao-com-segredo`) e a mensagem deve orientar a cadastrar como variável no GitLab.
 11. Se um limite de severidade for negativo, a Esteira deve recusar (`politica.limite-negativo`).
+11a. Se a alteração afrouxar o piso fixo — em `qa`, `hml` ou `producao`, modo diferente de `bloqueia` ou limite de Crítica/Alta acima de 0 — a Esteira deve recusar (`politica.abaixo-do-minimo`). Endurecer é permitido (ex.: `dev` bloqueando, Média com limite).
 12. Enquanto o usuário não tiver papel na Aplicação e não for MOR, a Esteira não deve listá-la nem devolver o detalhe (404, não 403 — não revelar existência).
 13. Se um usuário sem o papel exigido chamar uma rota de alteração, a Esteira deve recusar com 403 (`acesso.papel-insuficiente`).
 14. Quando qualquer item do cadastro é alterado, a Esteira deve registrar quem, quando e o antes/depois.

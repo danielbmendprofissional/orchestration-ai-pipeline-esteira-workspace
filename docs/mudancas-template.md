@@ -97,3 +97,8 @@ Disparo é por **candidata nova**, não por ambiente — cobre a correção nasc
 - Jobs: `agent-code-review` e `agent-security` antes do `esteira-gate` (toda candidata nova / toda pipeline); `agent-qa` depois do primeiro deploy da candidata, por Destino, antes do `esteira-resultado`.
 - Saída em JSON no formato de Análise (formato na spec E2). Respeitar o teto de custo por execução que a Esteira devolve no `esteira-abrir`.
 - Substitui o princípio "nenhuma IA roda no CI" do README; o gate local em `feature/*` continua.
+
+## 9. Toda MR referencia uma issue (Conferência de escopo)
+
+- A Esteira cruza as issues declaradas na Entrega com as MRs mergeadas entre a última versão publicada e a candidata ("Closes #N" na MR ou número da issue no nome da branch).
+- O template passa a recusar MR `feature/* → dev` sem issue referenciada (job no stage `review`, junto do gate de code review). Sem isso a conferência fica cega.

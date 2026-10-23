@@ -107,4 +107,4 @@ Padrão: nenhum, a menos que a task de `ui` justifique. Se precisar, usar `anime
 
 ---
 
-Este arquivo deixa de ser a fonte de verdade assim que o `DESIGN.md` do projeto real existir (ver primeiro parágrafo). A sequência de como isso acontece — rodar a cadeia de `principios.md`, gerar o `DESIGN.md`, mapear pro tema/`tailwind.config`, registrar a virada no `CONTEXT.md` — é passo do nascimento do projeto, parte da configuração de ambiente daquele projeto, não deste arquivo.
+Este arquivo deixa de ser a fonte de verdade assim que o `DESIGN.md` do projeto real existir (ver primeiro parágrafo). A sequência de como isso acontece — rodar a cadeia de `principios.md`, gerar o `DESIGN.md`, mapear pro `@theme`/`:root` do `src/styles.css`, registrar a virada no `CONTEXT.md` — é passo do nascimento do projeto, parte da configuração de ambiente daquele projeto, não deste arquivo.

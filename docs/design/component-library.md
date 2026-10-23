@@ -40,4 +40,4 @@ Quando o pedido envolve ligar algo visual a um evento do navegador (asset de ví
 
 ## Regra fixa, independente da biblioteca escolhida
 
-Nenhuma biblioteca de componentes ou utilitário de CSS substitui `tokens.md`. Um `hlmBtn` com as variáveis do tema de fábrica do spartan é P0, exatamente como uma classe Tailwind de fábrica (`bg-blue-500`, `rounded-2xl shadow-lg`) usada sem passar pelo `tailwind.config` mapeado dos tokens.
+Nenhuma biblioteca de componentes ou utilitário de CSS substitui `tokens.md`. Um `hlmBtn` com as variáveis do tema de fábrica do spartan é P0, exatamente como uma classe Tailwind de fábrica (`bg-blue-500`, `rounded-2xl shadow-lg`) usada sem token por trás no `@theme`.
