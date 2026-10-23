@@ -30,7 +30,7 @@ Rodar `glab issue view <number> --comments`.
 
 ## Quando a spec já existe como arquivo versionado no repo
 
-Alguns projetos (ex: `valuto`) guardam a spec como arquivo Markdown no próprio repo (`specs/feature/{module}/NN-nome.md`) — fonte de verdade versionada junto com o código, com seção `## Contexto necessário` explícita, porque nem todo executor empilha `CLAUDE.md` automaticamente por pasta.
+É o modelo padrão deste template (formato em `docs/agents/spec-format.md`): a spec é arquivo Markdown no workspace (`specs/feature/<área>/NN-nome.md`) — fonte de verdade versionada, com seção `## Contexto necessário` explícita, porque nem todo executor empilha `CLAUDE.md` automaticamente por pasta.
 
 Nesse modelo, `/to-spec` não substitui o arquivo por uma issue: abre uma **issue-mãe** que referencia o arquivo (link relativo + resumo na descrição, nunca o conteúdo inteiro copiado). Essa issue-mãe é a superfície que os agentes-pai usam pra orquestrar os subagents via GitLab — mesmo papel do **map** nas operações de wayfinding abaixo. `/to-tickets` continua criando as issues filhas normalmente, cada uma `Part of #<issue-mãe>`.
 
