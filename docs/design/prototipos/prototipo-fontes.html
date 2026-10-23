@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Escolha da fonte (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+.lead{color:var(--mu);font-size:13.5px;margin:-2px 0 20px;max-width:760px}
+.ops4{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.op{border:1px solid var(--ln);border-radius:12px;background:linear-gradient(180deg,var(--s1),#0C0C0E);box-shadow:inset 0 1px 0 var(--hl);padding:18px;font-family:var(--sans);display:flex;flex-direction:column;gap:16px;min-width:0}
+.op.on{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433,inset 0 1px 0 var(--hl)}
+.op .mono{font-family:var(--mono)}
+.oph{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--ln)}
+.oph .btn,.oph .pill{flex:none;white-space:nowrap}
+.oph b{font-size:15px;display:block}.oph small{color:var(--mu);font-size:12px}
+.rot{font-size:11px;color:var(--di);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:system-ui,sans-serif}
+.h1x{font-size:26px;font-weight:650;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;flex-wrap:wrap;line-height:1.15}
+.metax{color:var(--mu);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}
+.linhax{border:1px solid var(--ln);border-radius:10px;padding:12px 14px;background:var(--s1)}
+.linhax .n1{font-weight:600;display:flex;align-items:center;gap:8px}
+.linhax .n2{color:var(--di);font-size:12.5px;margin-top:2px}
+.linhax .n3{font-size:12.5px;color:var(--tx2);margin-top:8px}
+.txtx{font-size:13.5px;color:var(--tx2);line-height:1.6}
+.tabx{width:100%;border-collapse:collapse;font-size:13px}
+.tabx td,.tabx th{padding:7px 8px;border-bottom:1px solid var(--ln);text-align:left;white-space:normal}
+.tabx th{white-space:nowrap}.tabx td.mono{overflow-wrap:anywhere}
+.tabx th{font-size:12px;color:var(--mu);font-weight:500;background:none}
+.vls{display:grid;border-top:1px solid var(--ln)}.vl{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--ln);font-size:13px}.vl .pill{flex:none}.vl .mono{color:var(--mu);font-size:12.5px;margin-top:2px;overflow-wrap:anywhere}
+.nums{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+.nums b{font-size:28px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.nums small{color:var(--mu);font-size:12px;display:block}
+.conf{font-family:var(--mono);font-size:14px;color:var(--tx);line-height:1.7;word-break:break-all}
+.conf .g{font-size:22px;letter-spacing:.06em}
+</style></head>
+<body data-pagina="" data-sem-fonte="1">
+<nav data-menu></nav>
+<main>
+  <div class="crumb"><svg class="i"><use href="#i-file"/></svg>Escolha da fonte · protótipo</div>
+  <div class="head"><h1>Escolha da fonte</h1></div>
+  <p class="lead">Os mesmos trechos das telas em cada opção. Escolhida em 23/10/2026: C · Mona Sans + Geist Mono, já aplicada em todas as telas.</p>
+  <div class="ops4" data-ops></div>
+</main>
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const ORIGEM={geist:'Vercel',inter:'GitLab (GitLab Sans é Inter; GitLab Mono é JetBrains Mono)',mona:'GitHub',plex:'IBM · técnica, menos "cara de SaaS"',hibrida:'Vercel no texto, GitLab no código'};
+const ops=document.querySelector('[data-ops]');
+function desenha(){
+  const atual='mona';
+  ops.innerHTML=Object.entries(FONTES).map(([k,[nome,sans,mono]])=>`
+  <section class="op ${k===atual?'on':''}" style="--sans:'${sans}',system-ui,sans-serif;--mono:'${mono}',ui-monospace,monospace">
+    <div class="oph"><div><b>${nome}</b><small>${ORIGEM[k]}</small></div>${k===atual?`<span class="pill blue">${ic('check')}escolhida</span>`:''}</div>
+    <div><div class="rot">Título e status</div><div class="h1x">Extrato em PDF <span class="pill run">${ic('run','spin')}Em andamento</span></div>
+      <div class="metax"><span class="mono">#ENT-0042</span><span class="mono">api v4.0.0 · front v2.1.0</span><span>3 issues</span></div></div>
+    <div><div class="rot">Linha de lista</div><div class="linhax"><div class="n1"><span class="stat run">${ic('wait')}</span>Aprovar candidata <span class="mono" style="font-weight:500">v4.0.0-rc2</span></div>
+      <div class="n2">Extrato em PDF · valuto-api em QA · há 40 min</div><div class="n3"><span class="stat ok" style="font-weight:500">${ic('ok')}qa-agent, code-review e security aprovaram</span></div></div></div>
+    <div><div class="rot">Texto corrido</div><p class="txtx">Na tela de extrato, o cliente agora baixa o extrato do mês em PDF, com saldo inicial, movimentações e saldo final.</p></div>
+    <div><div class="rot">Lista de achados</div><div class="vls">
+      <div class="vl"><span class="pill run">Alta</span><div><div>SQL montado com interpolação</div><div class="mono">ExtratoRepository.cs:88 · Opengrep</div></div></div>
+      <div class="vl"><span class="pill">Média</span><div><div>Dependência com CVE média</div><div class="mono">QuestPDF 2026.9.1 · Trivy</div></div></div></div></div>
+    <div><div class="rot">Números</div><div class="nums"><div><b>6,2 dias</b><small>até produção</small></div><div><b>1.284</b><small>deploys</small></div><div><b>0123456789</b><small>algarismos alinhados</small></div></div></div>
+    <div><div class="rot">Código: caracteres que se confundem</div><div class="conf"><span class="g">Il1| 0Oo rn m</span><br>sha256:9f2c…e41a · v1.11.0-rc1<br>KUBE_CONTEXT=k3d-dev · CVE-2026-40112</div></div>
+  </section>`).join('');
+  ops.querySelectorAll('[data-usar]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('esteira-fonte',b.dataset.usar)}catch{}aplicaFonte(b.dataset.usar);desenha()});
+}
+desenha();
+</script>
+</body></html>

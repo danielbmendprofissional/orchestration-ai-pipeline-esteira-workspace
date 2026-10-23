@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Abrir entrega (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+main{max-width:1180px}
+[hidden]{display:none!important}
+.pill .mono{font-weight:500}
+.lead{color:var(--mu);font-size:13px;margin:-2px 0 22px}
+.num{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--s3);border:1px solid var(--ln2);color:var(--tx2);font-size:13px;font-weight:700}
+.num.ok{background:var(--ok-bg);border-color:var(--ok-ln);color:var(--ok-tx)}
+.num .i{width:14px;height:14px;stroke-width:2.6}
+.opcional{font-size:12px;font-weight:500;color:var(--mu);border:1px dashed var(--ln2);border-radius:6px;padding:1px 8px}
+.form2{display:grid;grid-template-columns:minmax(220px,300px) minmax(260px,1fr);gap:16px;margin-bottom:18px}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.fld>span{color:var(--tx2);font-weight:600}
+.fld small{color:var(--di);font-size:12px}
+.rot-campo{color:var(--tx2);font-weight:600;font-size:13px;margin-bottom:8px}
+.inp,.sel{padding:9px 12px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx);font:inherit;outline:none}
+textarea.inp{resize:vertical;min-height:72px}
+.inp:focus,.sel:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.inp.erro{border-color:var(--bad-ln);box-shadow:0 0 0 3px #F8514922}
+.sel.sm{padding:5px 10px;font-size:13px}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opc{display:flex;gap:12px;border:1px solid var(--ln2);border-radius:10px;padding:14px 16px;background:var(--s1);cursor:pointer}
+.opc:hover{border-color:#4A4A52}
+.opc:has(input:checked){border-color:var(--blue2);background:var(--blue-bg)}
+.opc:has(input:focus-visible){outline:2px solid var(--blue-tx);outline-offset:2px}
+.opc input{accent-color:var(--blue2);width:16px;height:16px;margin-top:2px;flex:none}
+.opc p{color:var(--mu);font-size:13px;margin:2px 0 10px}
+.trilha{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:11.5px;color:var(--tx2)}
+.trilha span{padding:2px 8px;border:1px solid var(--ln2);border-radius:6px;background:var(--s2);white-space:nowrap}
+.trilha .i{width:12px;height:12px;color:var(--di)}
+
+/* projetos */
+.cabp,.prj{display:grid;grid-template-columns:24px minmax(200px,1.4fr) minmax(120px,.8fr) 150px 200px;gap:14px;align-items:center;padding:0 16px}
+.cabp{height:36px;font-size:12px;color:var(--di);background:var(--s2);border-bottom:1px solid var(--ln)}
+.prj{min-height:68px;padding-top:12px;padding-bottom:12px;border-bottom:1px solid var(--ln);cursor:pointer}
+.prj:last-child{border-bottom:0}.prj:hover{background:#FFFFFF05}
+.prj.sim{background:#0A4EE40D}
+.prj.off .so{opacity:.35;pointer-events:none}
+.prj>input{width:16px;height:16px;accent-color:var(--blue2)}
+.pnome{font-weight:600;font-family:var(--mono);font-size:13px}
+.sub2{color:var(--di);font-size:12.5px;margin-top:2px}
+.hoje{font-size:12.5px;color:var(--mu);display:grid;gap:3px}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:8px;padding:2px;background:var(--s1)}
+.seg button{border:0;background:none;color:var(--mu);padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.seg button.on{background:var(--s3);color:#fff;box-shadow:inset 0 1px 0 var(--hl)}
+.ver .inp{width:120px;font-family:var(--mono);font-size:13px;padding:7px 10px}
+.ver small{display:block;color:var(--di);font-size:12px;margin-top:5px}
+.ver small.erro{color:var(--bad-tx)}
+.ordem{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 4px 0;font-size:13px;color:var(--mu)}
+.ordem .cad{display:inline-flex;align-items:center;gap:8px;color:var(--tx2);font-family:var(--mono);font-size:13px}
+.ordem .cad .i{color:var(--mu)}
+.lk{background:none;border:0;color:var(--blue-tx);font-size:13px;padding:0}.lk:hover{text-decoration:underline}
+.dl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--mu);padding:10px 4px 0}
+.dic{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
+.dl .mono{color:var(--tx2);min-width:150px}
+
+/* issues */
+.campo{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--mu);margin-bottom:10px}
+.campo:focus-within{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.campo input{border:0;background:none;color:var(--tx);font:inherit;outline:none;width:100%}
+.res .tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.res .mono{min-width:42px}
+.mais{padding:8px 14px;color:var(--di);font-size:12px;border-top:1px solid var(--ln)}
+.avisos-esc{display:grid;gap:8px;margin-top:12px}
+.avisos-esc .aviso-etapa{margin:0}
+.avisos-esc ul{margin:4px 0 0;padding-left:18px;color:var(--tx2)}
+.motivo-hf{margin-top:16px;max-width:720px}
+
+#resumo .linha{min-height:48px}
+.vazio{color:var(--di)}
+
+@media (max-width:900px){
+  .form2,.tipos{grid-template-columns:1fr}
+  .cabp{display:none}
+  .prj{grid-template-columns:24px 1fr;row-gap:8px}
+  .prj>:nth-child(n+3){grid-column:2}
+}
+@media (max-width:620px){
+  .res{flex-wrap:wrap;row-gap:6px}
+  .res .tt{flex:1 1 calc(100% - 60px);white-space:normal}
+  .res .pill{margin-left:54px}
+}
+</style></head>
+<body data-pagina="entregas">
+<nav data-menu></nav>
+<main>
+  <div class="crumb"><svg class="i"><use href="#i-layers"/></svg>Entregas <svg class="i"><use href="#i-chev"/></svg> Abrir entrega · dados fictícios
+</div>
+  <div class="head"><h1>Abrir entrega</h1>
+    <div class="acoes-topo">
+      <div class="sino-wrap">
+        <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
+        <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
+          <div class="av-h">Aguardando você</div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><button class="btn g">Revisar</button></div></div></div>
+        </div>
+      </div>
+    </div></div>
+  <p class="lead" data-lead></p>
+
+  <!-- 1 -->
+  <section class="panel" aria-labelledby="t1">
+    <div class="ph"><h2 id="t1"><span class="num" data-num="1">1</span>Aplicação e tipo</h2><span data-st="1"></span></div>
+    <div class="form2">
+      <label class="fld"><span>Aplicação</span>
+        <select class="sel" data-app><option value="valuto">Valuto</option><option value="portal">Portal do Cliente</option></select>
+        <small data-grupo></small></label>
+      <label class="fld"><span>Nome da entrega</span>
+        <input class="inp" data-nome placeholder="ex.: Extrato em PDF" maxlength="80">
+        <small>Em linguagem de produto: é assim que ela aparece na lista, nos avisos e para o aprovador de negócio.</small></label>
+    </div>
+    <div class="rot-campo" id="rot-tipo">Tipo</div>
+    <div class="tipos" role="radiogroup" aria-labelledby="rot-tipo">
+      <label class="opc"><input type="radio" name="tipo" value="normal" checked><div><b>Normal</b><p>Versão MAJOR ou MINOR nova, em um ou mais projetos. Passa por todas as etapas.</p><div class="trilha" data-trilha="normal"></div></div></label>
+      <label class="opc"><input type="radio" name="tipo" value="hotfix"><div><b>Hotfix</b><p>Correção sobre o que está em produção. Um projeto só, versão PATCH, etapas reduzidas.</p><div class="trilha" data-trilha="hotfix"></div></div></label>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="panel" aria-labelledby="t2">
+    <div class="ph"><h2 id="t2"><span class="num" data-num="2">2</span><span data-t2>Projetos e versões</span></h2><span data-st="2"></span></div>
+    <div class="box">
+      <div class="cabp"><span></span><span>Projeto</span><span>Em produção</span><span>Incremento</span><span>Versão</span></div>
+      <div data-projetos></div>
+    </div>
+    <div data-dep></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="panel" aria-labelledby="t3">
+    <div class="ph"><h2 id="t3"><span class="num" data-num="3">3</span>Issues <span class="opcional" data-opcional hidden>opcional no hotfix</span></h2><span data-st="3"></span></div>
+    <label class="campo"><svg class="i"><use href="#i-search"/></svg><input type="search" data-q placeholder="Buscar issue no GitLab (número ou título)" aria-label="Buscar issue"></label>
+    <div class="filtros" role="group" aria-label="Filtro de issues">
+      <button class="f on" data-fi="todas">Todas abertas</button>
+      <button class="f" data-fi="mr" title="Issues com MR já mergeada em dev desde a última versão publicada e que ainda não estão em nenhuma entrega">Com MR em dev e sem entrega <span class="n" data-n-mr></span></button>
+    </div>
+    <div class="box"><div data-res></div></div>
+
+    <h3 class="sub"><svg class="i"><use href="#i-issue"/></svg>Na entrega <span class="n" data-qtd>0</span></h3>
+    <div class="box tw"><table><thead><tr><th>Issue</th><th>Título</th><th>Área</th><th></th></tr></thead><tbody data-sel></tbody></table></div>
+    <div class="avisos-esc" data-avisos-esc></div>
+    <p class="txt aviso-escopo" style="color:var(--mu)"><svg class="i"><use href="#i-git"/></svg><span>Depois de aberta, a <span class="dic" title="Compara estas issues com as MRs mergeadas em cada projeto desde a última versão publicada. Issue sem código e código de issue fora da lista bloqueiam a aprovação da entrega; código sem issue só avisa.">Conferência de escopo</span> compara estas issues com o código.</span></p>
+    <label class="fld motivo-hf" data-motivo hidden><span>Motivo do hotfix</span>
+      <textarea class="inp" data-motivo-txt placeholder="ex.: extrato de contas encerradas devolve erro 500 desde a v3.4.1"></textarea>
+      <small>Obrigatório quando o hotfix não tem issue.</small></label>
+  </section>
+
+  <!-- resumo -->
+  <section class="panel" id="resumo" aria-labelledby="tr">
+    <div class="ph"><h2 id="tr"><span class="ib"><svg class="i"><use href="#i-file"/></svg></span>Resumo</h2></div>
+    <div class="resumo" data-resumo></div>
+  </section>
+  <div class="barra-acao">
+    <a class="btn g" href="prototipo-entregas.html" style="text-decoration:none">Cancelar</a>
+    <button class="btn p" data-abrir disabled><svg class="i"><use href="#i-layers"/></svg>Abrir entrega</button>
+  </div>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+const ETAPAS={normal:['Abertura','Proposta','DEV','QA','HML','Negócio','Entrega','PRD'],hotfix:['Abertura','Entrega','PRD']};
+const trilha=t=>ETAPAS[t].map(e=>`<span>${e}</span>`).join(ic('chev'));
+document.querySelectorAll('[data-trilha]').forEach(d=>d.innerHTML=trilha(d.dataset.trilha));
+
+/* dados fictícios. and = fluxos em andamento [versão, candidata atual, entrega]; dep = dependência declarada no cadastro */
+const APPS={
+ valuto:{nome:'Valuto',grupo:'valuto',projetos:[
+  {id:'valuto-api',stack:'.NET',area:'backend',prd:'3.4.1',and:[['4.0.0','rc2','Extrato em PDF'],['3.8.0','rc1','Busca de transações']]},
+  {id:'valuto-frontend',stack:'Angular',area:'frontend',prd:'2.0.3',and:[['2.1.0','rc1','Extrato em PDF'],['2.2.0','rc1','Cadastro de cartões']],dep:'valuto-api'},
+  {id:'valuto-batch',stack:'outro',area:'backend',prd:'1.2.0',and:[],dep:'valuto-api'}],
+  // [issue, título, tipo, área, MR mergeada em dev (projeto e MR), entrega em que já está]
+  issues:[['#118','Gerar extrato mensal em PDF','Feature','backend','','Extrato em PDF'],['#121','Botão de download no extrato','Feature','frontend','','Extrato em PDF'],
+   ['#127','Extrato com filtro por categoria','Feature','frontend','valuto-frontend !58',''],['#130','Corrigir arredondamento no saldo','Bug','backend','valuto-api !61',''],
+   ['#133','Exportar extrato em CSV','Feature','backend','',''],['#136','Limite diário de Pix configurável','Feature','backend','',''],['#137','Tela de limite de Pix','Feature','frontend','',''],
+   ['#140','Conciliação noturna de transações','Task','backend','',''],['#142','Erro 500 no extrato de conta encerrada','Bug','backend','','']]},
+ portal:{nome:'Portal do Cliente',grupo:'portal-cliente',projetos:[
+  {id:'portal-api',stack:'.NET',area:'backend',prd:'2.2.0',and:[['2.3.0','rc1','Notificações por e-mail']]},
+  {id:'portal-web',stack:'Angular',area:'frontend',prd:'1.8.0',and:[['1.9.0','rc1','Novo login'],['1.10.0','rc1','Notificações por e-mail'],['1.11.0','rc2','Tema escuro']],dep:'portal-api'}],
+  issues:[['#51','Recuperar senha por SMS','Feature','backend','',''],['#52','Tela de recuperar senha','Feature','frontend','',''],['#55','Contraste do tema escuro','Bug','frontend','portal-web !33',''],['#58','Preferências de notificação','Feature','frontend','','Notificações por e-mail']]}
+};
+
+/* versões: base = maior versão já usada no projeto (publicada ou em andamento) */
+const v=s=>s.split('.').map(Number),fmt=a=>a.join('.'),cmp=(a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2];
+const base=p=>[p.prd,...p.and.map(a=>a[0])].map(v).sort(cmp).at(-1);
+const sugere=(p,inc)=>{const b=base(p),r=v(p.prd);return inc==='major'?[b[0]+1,0,0]:inc==='minor'?[b[0],b[1]+1,0]:[r[0],r[1],r[2]+1]};
+function valida(p,txt){
+  const m=/^v?(\d+)\.(\d+)\.(\d+)$/.exec(txt.trim());if(!m)return['','Use o formato vX.Y.Z'];
+  const a=[+m[1],+m[2],+m[3]],b=base(p);
+  if(a[2]!==0)return[fmt(a),'Entrega normal sobe MAJOR ou MINOR; PATCH só no hotfix'];
+  if(cmp(a,b)<=0){const emAnd=p.and.find(x=>x[0]===fmt(b));return[fmt(a),`Precisa ser maior que v${fmt(b)}${emAnd?` (em andamento em ${emAnd[2]})`:' (em produção)'}`]}
+  return[fmt(a),''];
+}
+
+let st;
+const novo=app=>({app,tipo:document.querySelector('[name=tipo]:checked')?.value||'normal',sel:{},dep:{},issues:[],fi:'todas',editaDep:false});
+st=novo('valuto');
+const A=()=>APPS[st.app],hf=()=>st.tipo==='hotfix',proj=id=>A().projetos.find(p=>p.id===id);
+
+/* passo 2 */
+function desenhaProjetos(){
+  $('[data-t2]').textContent=hf()?'Projeto e versão':'Projetos e versões';
+  $('[data-projetos]').innerHTML=A().projetos.map(p=>{const s=st.sel[p.id],on=!!s;
+    const ver=on?s.ver:fmt(sugere(p,hf()?'patch':'minor'));
+    const seg=hf()?`<span class="pill">PATCH</span>`:`<div class="seg" role="group" aria-label="Incremento de ${p.id}"><button data-inc="major" class="${s?.inc==='major'?'on':''}">MAJOR</button><button data-inc="minor" class="${!s||s.inc==='minor'?'on':''}">MINOR</button></div>`;
+    return `<div class="prj ${on?'sim':'off'}" data-p="${p.id}">
+      <input type="${hf()?'radio':'checkbox'}" name="prj" ${on?'checked':''} aria-label="Incluir ${p.id}">
+      <div><div class="pnome">${p.id}</div><div class="sub2">${p.stack}${p.dep?` · depende de ${p.dep}`:''}</div></div>
+      <div class="hoje mono" style="color:var(--tx2)">v${p.prd}</div>
+      <div class="so">${seg}</div>
+      <div class="so ver"><input class="inp ${s?.err?'erro':''}" value="v${ver}" ${hf()?'readonly title="No hotfix a versão é sempre PATCH+1 sobre produção"':''} aria-label="Versão de ${p.id}" data-ver><small class="${s?.err?'erro':''}">${s?.err||`1ª candidata v${ver}-rc1`}</small></div>
+    </div>`}).join('');
+  document.querySelectorAll('.prj').forEach(r=>{
+    const p=proj(r.dataset.p),chk=r.querySelector('input[name=prj]');
+    const marca=on=>{if(hf())st.sel={};if(on)st.sel[p.id]={inc:hf()?'patch':'minor',ver:fmt(sugere(p,hf()?'patch':'minor')),err:''};else delete st.sel[p.id];desenhaProjetos();tudo()};
+    chk.onchange=()=>marca(chk.checked);
+    r.onclick=e=>{if(e.target.closest('input,button,select'))return;if(hf()&&st.sel[p.id])return;marca(!st.sel[p.id])};
+    r.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>{const s=st.sel[p.id];s.inc=b.dataset.inc;s.ver=fmt(sugere(p,s.inc));s.err='';desenhaProjetos();tudo()});
+    const inp=r.querySelector('[data-ver]');
+    inp.oninput=()=>{const s=st.sel[p.id];if(!s||hf())return;const [ver,err]=valida(p,inp.value);s.ver=ver||inp.value.replace(/^v/,'');s.err=err;
+      if(!err)s.inc=v(ver)[0]>base(p)[0]?'major':'minor';
+      inp.classList.toggle('erro',!!err);const sm=r.querySelector('.ver small');sm.className=err?'erro':'';sm.textContent=err||`1ª candidata v${ver}-rc1`;
+      r.querySelectorAll('[data-inc]').forEach(b=>b.classList.toggle('on',!err&&b.dataset.inc===s.inc));tudo()};
+  });
+  desenhaDep();
+}
+const cadastroDep=id=>{const d=proj(id).dep;return d&&st.sel[d]?d:''};
+const deps=()=>Object.fromEntries(Object.keys(st.sel).map(i=>[i,st.dep[i]!==undefined?st.dep[i]:cadastroDep(i)]));
+function ordem(){ // ordem topológica; null = dependência circular
+  const d=deps(),ids=Object.keys(st.sel),feitos=[];
+  while(feitos.length<ids.length){const prox=ids.find(i=>!feitos.includes(i)&&(!d[i]||feitos.includes(d[i])));if(!prox)return null;feitos.push(prox)}
+  return feitos;
+}
+function desenhaDep(){
+  const box=$('[data-dep]'),ids=Object.keys(st.sel);
+  if(hf()||ids.length<2){box.innerHTML='';return}
+  const d=deps(),o=ordem(),mudou=ids.some(i=>st.dep[i]!==undefined&&st.dep[i]!==cadastroDep(i));
+  box.innerHTML=`<div class="ordem" title="Os parceiros andam e publicam nessa ordem; num rollback, voltam na ordem inversa">${ic('branch')}<span>Ordem</span>${o?`<span class="cad">${o.join(` ${ic('arrow')} `)}</span>`:`<span class="stat bad">${ic('fail')}Dependência circular</span>`}
+      <span class="pill" title="${mudou?'Vale só para esta entrega; o cadastro da Aplicação continua igual':'Dependência declarada no cadastro da Aplicação'}">${mudou?'só nesta entrega':'do cadastro'}</span>
+      <button class="lk" data-edita>${st.editaDep?'Pronto':'Mudar só nesta entrega'}</button></div>
+    ${st.editaDep||!o?ids.map(i=>`<div class="dl"><span class="mono">${i}</span><span>depende de</span><select class="sel sm" data-dep-de="${i}" aria-label="Dependência de ${i}"><option value="">nenhum</option>${ids.filter(x=>x!==i).map(x=>`<option ${d[i]===x?'selected':''}>${x}</option>`).join('')}</select></div>`).join(''):''}`;
+  box.querySelector('[data-edita]').onclick=()=>{st.editaDep=!st.editaDep;desenhaDep()};
+  box.querySelectorAll('[data-dep-de]').forEach(s=>s.onchange=()=>{st.dep[s.dataset.depDe]=s.value;desenhaDep();tudo()});
+}
+
+/* passo 3 */
+function desenhaIssues(){
+  const q=$('[data-q]').value.toLowerCase().trim(),livres=A().issues.filter(i=>i[4]&&!i[5]);
+  $('[data-n-mr]').textContent=livres.length;
+  document.querySelectorAll('[data-fi]').forEach(b=>b.classList.toggle('on',b.dataset.fi===st.fi));
+  let l=A().issues.filter(i=>(i[0]+' '+i[1]).toLowerCase().includes(q));if(st.fi==='mr')l=l.filter(i=>i[4]&&!i[5]);
+  const POR=5;
+  $('[data-res]').innerHTML=(l.length?l.slice(0,POR).map(i=>{const ja=st.issues.includes(i[0]),outra=i[5],off=ja||outra;
+    return `<button class="res${off?' ja':''}" data-id="${i[0]}" ${off?'disabled':''} title="${i[2]} · ${i[3]}${i[4]?' · MR '+i[4]+' mergeada em dev':''}"><span class="mono">${i[0]}</span><span class="tt">${i[1]}</span><span class="pill">${i[3]}</span><span class="dir">${ja?'já na entrega':outra?`em ${outra}`:ic('plus')+'Adicionar'}</span></button>`}).join('')
+    :`<div class="empty" style="border:0">${ic('search','lg')}Nenhuma issue aberta com esse filtro</div>`)+(l.length>POR?`<div class="mais">mostrando ${POR} de ${l.length} · refine a busca</div>`:'');
+  document.querySelectorAll('.res[data-id]').forEach(b=>b.onclick=()=>{st.issues.push(b.dataset.id);desenhaIssues();tudo()});
+  const sel=st.issues.map(id=>A().issues.find(i=>i[0]===id));
+  $('[data-qtd]').textContent=sel.length;
+  $('[data-sel]').innerHTML=sel.length?sel.map(i=>`<tr title="${i[2]}${i[4]?' · MR '+i[4]+' em dev':''}"><td class="mono">${i[0]}</td><td>${i[1]}</td><td>${i[3]}</td><td class="dir"><button class="icone" title="Abrir no GitLab">${ic('ext')}</button><button class="icone" data-tira="${i[0]}" title="Tirar da entrega">${ic('x')}</button></td></tr>`).join('')
+    :`<tr><td colspan="4"style="text-align:center;color:var(--mu);padding:22px">Nenhuma issue ainda. Busque acima e adicione.</td></tr>`;
+  document.querySelectorAll('[data-tira]').forEach(b=>b.onclick=()=>{st.issues=st.issues.filter(x=>x!==b.dataset.tira);desenhaIssues();tudo()});
+}
+function desenhaAvisosEscopo(){ // antecipa o que a Conferência de escopo vai apontar
+  const ps=Object.keys(st.sel).map(proj),areas=new Set(ps.map(p=>p.area)),sel=st.issues.map(id=>A().issues.find(i=>i[0]===id));
+  const semProjeto=ps.length?sel.filter(i=>!areas.has(i[3])):[];
+  const foraDoEscopo=hf()?[]:A().issues.filter(i=>i[4]&&!i[5]&&!st.issues.includes(i[0])&&st.sel[i[4].split(' ')[0]]);
+  let h='';
+  if(semProjeto.length)h+=`<div class="aviso-etapa">${ic('alert')}<div><b>Issue sem projeto da mesma área</b><ul>${semProjeto.map(i=>`<li><span class="mono">${i[0]}</span> é de ${i[3]}, mas nenhum projeto de ${i[3]} está na entrega: a conferência vai apontar "falta entregar".</li>`).join('')}</ul></div></div>`;
+  if(foraDoEscopo.length)h+=`<div class="aviso-etapa">${ic('alert')}<div><b>Código em dev que vai junto na candidata</b><ul>${foraDoEscopo.map(i=>`<li>MR <span class="mono">${i[4]}</span> (issue <span class="mono">${i[0]}</span>) já está em dev. Se ela não entrar aqui, a conferência vai apontar "entrou sem estar no escopo".</li>`).join('')}</ul></div></div>`;
+  $('[data-avisos-esc]').innerHTML=h;
+}
+
+/* estado de cada passo, resumo e botão */
+function falta(){
+  const f={1:[],2:[],3:[]},ids=Object.keys(st.sel);
+  if(!$('[data-nome]').value.trim())f[1].push('dê um nome à entrega');
+  if(!ids.length)f[2].push(hf()?'escolha o projeto':'escolha ao menos um projeto');
+  ids.filter(i=>st.sel[i].err).forEach(i=>f[2].push(`corrija a versão de ${i}`));
+  if(ids.length>1&&!hf()&&!ordem())f[2].push('resolva a dependência circular');
+  if(hf()){if(!st.issues.length&&!$('[data-motivo-txt]').value.trim())f[3].push('inclua uma issue ou informe o motivo')}
+  else if(!st.issues.length)f[3].push('inclua ao menos uma issue');
+  return f;
+}
+function tudo(){
+  const f=falta();
+  [1,2,3].forEach(n=>{const ok=!f[n].length,num=$(`[data-num="${n}"]`);num.classList.toggle('ok',ok);num.innerHTML=ok?ic('check'):n;
+    $(`[data-st="${n}"]`).innerHTML=ok?`<span class="stat ok">${ic('ok')}Completo</span>`:`<span class="stat none" title="${f[n].join('; ')}">${ic('none')}Pendente</span>`});
+  const ids=ordem()||Object.keys(st.sel),o=ordem(),todas=[...f[1],...f[2],...f[3]];
+  const ab=$('[data-abrir]');ab.disabled=!!todas.length;ab.title=todas.length?'Falta: '+todas.join('; '):'';
+  $('[data-lead]').textContent=hf()?'Hotfix sobre produção. Depois de aberto, vai direto para a aprovação da entrega por um aprovador técnico.':'Junte os projetos que entregam as mesmas issues. Depois de aberta, a entrega vai para a aprovação da proposta por um aprovador técnico.';
+  const nome=$('[data-nome]').value.trim(),motivo=$('[data-motivo-txt]').value.trim();
+  const linha=(icone,rot,val)=>`<div class="linha"><span class="rot">${ic(icone)}${rot}</span><span class="val">${val}</span></div>`;
+  const pend=t=>`<span class="stat none">${ic('none')}${t}</span>`;
+  $('[data-resumo]').innerHTML=
+    linha('grid','Aplicação',`${A().nome} <span class="mono" style="color:var(--di)">grupo ${A().grupo}</span>`)+
+    linha('layers','Entrega',nome||pend('sem nome'))+
+    linha('tag','Tipo',hf()?'<span class="pill">Hotfix · PATCH</span>':'<span class="pill">Normal</span>')+
+    linha('box',hf()?'Projeto':'Projetos',ids.length?ids.map(i=>`<span class="pill${st.sel[i].err?' bad':''}">${ic('box')}<span class="mono">${i} · v${st.sel[i].ver}-rc1</span></span>`).join(''):pend('nenhum'))+
+    (!hf()&&ids.length>1?linha('branch','Ordem',o?o.map(i=>`<span class="mono">${i}</span>`).join(ic('arrow')):`<span class="stat bad">${ic('fail')}circular</span>`):'')+
+    linha('issue','Issues',st.issues.length?`${st.issues.map(i=>`<span class="mono">${i}</span>`).join(', ')} <span class="n">${st.issues.length}</span>`:hf()&&motivo?'nenhuma · motivo informado':pend(hf()?'nenhuma (opcional)':'nenhuma'))+
+    linha('git','Etapas',`<span class="trilha">${trilha(st.tipo)}</span>`);
+  desenhaAvisosEscopo();
+}
+
+/* eventos */
+$('[data-app]').onchange=e=>{st=novo(e.target.value);$('[data-q]').value='';inicia()};
+document.querySelectorAll('[name=tipo]').forEach(r=>r.onchange=()=>{st.tipo=r.value;st.sel={};st.dep={};inicia()});
+$('[data-nome]').oninput=tudo;$('[data-motivo-txt]').oninput=tudo;
+$('[data-q]').oninput=desenhaIssues;
+document.querySelectorAll('[data-fi]').forEach(b=>b.onclick=()=>{st.fi=b.dataset.fi;desenhaIssues()});
+$('[data-abrir]').onclick=()=>location.href='prototipo-entrega.html';
+function inicia(){
+  $('[data-grupo]').innerHTML=`Grupo do GitLab <span class="mono">${A().grupo}</span> · ${A().projetos.length} projetos`;
+  $('[data-opcional]').hidden=!hf();$('[data-motivo]').hidden=!hf();
+  desenhaProjetos();desenhaIssues();tudo();
+}
+inicia();
+
+const sino=$('.sino'),avisos=$('#avisos');
+const mostrar=x=>{avisos.hidden=!x;sino.setAttribute('aria-expanded',x)};
+sino.onclick=e=>{e.stopPropagation();mostrar(avisos.hidden)};
+document.addEventListener('click',e=>{if(!avisos.hidden&&!avisos.contains(e.target))mostrar(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')mostrar(false)});
+</script>
+</body></html>

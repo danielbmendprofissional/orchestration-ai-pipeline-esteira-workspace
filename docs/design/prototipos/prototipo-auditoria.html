@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Auditoria (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+[hidden]{display:none!important}
+.topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 18px}
+.topo h1{margin-right:auto}
+.filtrobar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.campo{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--mu);flex:0 1 280px;min-width:0}
+.campo:focus-within{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.campo input{border:0;background:none;color:var(--tx);font:inherit;outline:none;width:100%}
+.sel{padding:7px 11px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx2);font:inherit;max-width:100%}
+.filtros{margin-bottom:14px}
+.ativo{display:inline-flex;align-items:center;gap:8px;padding:5px 6px 5px 12px;border:1px solid var(--blue2);border-radius:999px;background:var(--blue-bg);color:#fff;font-size:13px;margin-bottom:12px}
+.ativo button{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:0;background:#FFFFFF1A;color:#fff}
+.ativo .i{width:12px;height:12px}
+.demo{flex-wrap:wrap;justify-content:flex-end;max-width:100%}.demo select{min-width:0;max-width:100%}
+
+/* linha do tempo */
+.lista{border:1px solid var(--ln);border-radius:12px;background:var(--s1);box-shadow:inset 0 1px 0 var(--hl);overflow:hidden}
+.dia{padding:8px 20px;font-size:12px;font-weight:600;color:var(--mu);background:var(--s2);border-bottom:1px solid var(--ln)}
+.ev{display:grid;grid-template-columns:44px 28px minmax(0,1fr) minmax(110px,160px) 20px;gap:14px;align-items:center;width:100%;padding:12px 20px;border:0;border-bottom:1px solid var(--ln);background:none;text-align:left;color:inherit;font-size:13.5px}
+.ev:last-child{border-bottom:0}.ev:hover{background:var(--s2)}
+.hora{font-family:var(--mono);font-size:12.5px;color:var(--mu)}
+.ci{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--s3);border:1px solid var(--ln2);color:var(--tx2)}
+.ci .i{width:14px;height:14px}
+.fr{line-height:1.45}.fr b{font-weight:600}
+.fr .obj{font-family:var(--mono);font-size:12.5px;color:var(--tx)}
+.mud{color:var(--di);font-size:12.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mud s{color:var(--di)}.mud .para{color:var(--tx2)}
+.app{color:var(--mu);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ator-bot{display:inline-flex;align-items:center;gap:5px}
+.pagl{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--mu);font-size:13px}
+.nums{display:flex;gap:4px}
+.nums button{min-width:32px;height:32px;border-radius:8px;border:1px solid var(--ln2);background:var(--s1);color:var(--tx2)}
+.nums button.on{border-color:var(--blue2);background:var(--blue-bg);color:#fff}
+.nums button:disabled{opacity:.4;cursor:not-allowed}
+.obs{color:var(--mu);font-size:12.5px;margin-top:14px}.obs .i{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+
+/* gaveta */
+.gaveta .kv{margin-bottom:6px}
+.acoes.dir{justify-content:flex-end;flex-wrap:wrap}
+table.dif td{white-space:normal;vertical-align:top}
+table.dif td.antes{color:var(--di);text-decoration:line-through}
+table.dif td.depois{color:var(--tx)}
+.motivo-box{border-left:2px solid var(--ln2);padding:2px 0 2px 14px;color:var(--tx2);font-size:13.5px;line-height:1.6}
+
+@media (max-width:900px){.ev{grid-template-columns:44px 28px minmax(0,1fr);row-gap:4px}.ev .app{grid-column:3}.ev>:last-child{display:none}}
+</style></head>
+<body data-pagina="auditoria">
+<nav data-menu></nav>
+<main>
+  <div class="crumb" data-crumb></div>
+  <div class="topo">
+    <h1>Auditoria</h1>
+    <button class="btn g" title="Baixa os registros com os filtros atuais"><svg class="i"><use href="#i-file"/></svg>Exportar CSV</button>
+    <div class="acoes-topo">
+      <div class="sino-wrap">
+        <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
+        <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
+          <div class="av-h">Aguardando você</div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><a class="btn g" style="text-decoration:none" href="prototipo-excecoes.html#ver=SEC-2291">Revisar</a></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="filtrobar">
+    <label class="campo"><svg class="i"><use href="#i-search"/></svg><input type="search" placeholder="Buscar por pessoa, código ou texto" data-busca aria-label="Buscar na auditoria"></label>
+    <select class="sel" data-app aria-label="Aplicação"></select>
+    <select class="sel" data-quem-f aria-label="Quem"></select>
+    <select class="sel" data-periodo aria-label="Período"><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="9999">Tudo</option></select>
+  </div>
+  <div class="filtros" role="group" aria-label="Tipo de registro" data-cats></div>
+  <div data-ativo></div>
+  <div class="lista"><div data-lista></div></div>
+  <div class="pagl"><span data-pag-info></span><div class="nums" data-nums></div></div>
+  <p class="obs"><svg class="i"><use href="#i-lock"/></svg>Registros não podem ser alterados nem apagados.</p>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+const HOJE=new Date(2026,9,23),DIA=864e5;
+const dataDe=s=>{const [d,m,a]=s.split(' ')[0].split('/');return new Date(+a,m-1,+d)};
+const rotDia=s=>{const n=Math.round((HOJE-dataDe(s))/DIA);return n===0?'Hoje':n===1?'Ontem':s.split(' ')[0]};
+
+const QUEM={mor:{nome:'Daniel',ini:'DB',rot:'MOR',apps:null},aprovador:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico',apps:['Valuto','Cobrança Pix']},membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro',apps:['Valuto','Portal do Cliente','Gestão de Contratos']}};
+let quem='mor';
+
+const CATS={aprovacao:['Aprovações','user-ok'],escopo:['Escopo','issue'],entrega:['Entregas','layers'],publicacao:['Publicações','rocket'],excecao:['Exceções','shield'],politica:['Política','shield-ok'],cadastro:['Cadastro','grid'],papeis:['Papéis','users']};
+const ORIGEM={tela:'Tela da Esteira',bot:'Bot da Esteira, no GitLab',pipeline:'Pipeline do GitLab (template-ci)'};
+/* [quando, quem, origem, categoria, verbo, objeto [código, nome, link], aplicação, mudanças [[campo, antes, depois]], motivo, autoaprovação] */
+const EV=[
+ ['23/10/2026 15:40','Daniel','tela','excecao','aprovou a exceção',['SEC-2311','Path traversal no upload','prototipo-excecoes.html#ver=SEC-2311'],'Valuto',[['Estado','Aguardando aprovação','Ativa']],'Único aprovador técnico disponível hoje.',true],
+ ['23/10/2026 14:58','bot da Esteira','bot','publicacao','promoveu para QA',['v4.0.0-rc2','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Tag','—','v4.0.0-rc2'],['Merge','—','!88 (dev → qa)']]],
+ ['23/10/2026 14:50','pipeline #2841','pipeline','publicacao','gate de QA liberou',['v4.0.0-rc2','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Resultado','—','Liberado (1 alta coberta pela SEC-2291)']]],
+ ['23/10/2026 11:20','Bruno Lima','tela','excecao','pediu a exceção',['SEC-2310','CVE crítica no Npgsql','prototipo-excecoes.html#ver=SEC-2310'],'Valuto',[['Tipo','—','Risco aceito'],['Vale em','—','QA, HML'],['Validade','—','até 20/11/2026']]],
+ ['23/10/2026 10:40','Ana Souza','tela','cadastro','adicionou o destino',['prd-rj / valuto','valuto-api · PRD','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['KUBE_CONTEXT','—','prd-rj'],['NAMESPACE','—','valuto'],['REPLICAS','—','4']]],
+ ['23/10/2026 10:05','Daniel','tela','politica','endureceu a política de PRD',['Valuto','Política de segurança','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Média (máx. sem exceção)','sem limite','5']]],
+ ['23/10/2026 09:14','bot da Esteira','bot','publicacao','cortou a candidata',['v4.0.0-rc2','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Tag','—','v4.0.0-rc2 sobre dev @ 9f2c1e4']]],
+ ['22/10/2026 18:30','Carla Mendes','tela','excecao','aprovou a exceção',['SEC-2298','Chave de API no repositório','prototipo-excecoes.html#ver=SEC-2298'],'Portal do Cliente',[['Estado','Aguardando aprovação','Ativa']]],
+ ['22/10/2026 17:02','Ana Souza','tela','excecao','pediu a exceção',['SEC-2298','Chave de API no repositório','prototipo-excecoes.html#ver=SEC-2298'],'Portal do Cliente',[['Tipo','—','Falso positivo'],['Vale em','—','QA, HML, PRD']]],
+ ['22/10/2026 16:45','Daniel','tela','escopo','adicionou a issue #124 à entrega',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Issues','#118, #121','#118, #121, #124']]],
+ ['22/10/2026 16:44','Daniel','tela','escopo','tirou a issue #119 da entrega',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Issues','#118, #119, #121','#118, #121']],'Fica para a entrega de filtros do extrato.'],
+ ['22/10/2026 14:10','Daniel','tela','papeis','deu o papel Publicador a Fábio Nunes',['Valuto','Pessoas e papéis','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Fábio Nunes','—','Publicador']]],
+ ['22/10/2026 11:00','Elisa Prado','tela','aprovacao','aprovou a issue #131 na aprovação de negócio',['ENT-0046','Pix agendado','prototipo-entrega.html'],'Valuto',[['#131','Pendente','Aprovada']]],
+ ['21/10/2026 19:30','Daniel','tela','aprovacao','reprovou a candidata',['v4.0.0-rc1','valuto-api · Extrato em PDF · QA','prototipo-entrega.html'],'Valuto',[['Candidata','Aguardando aprovação','Reprovada']],'Saldo inicial do extrato não bate com o fechamento de agosto.'],
+ ['21/10/2026 16:40','Ana Souza','tela','cadastro','desabilitou QA no projeto',['valuto-batch','Projeto','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['QA','habilitado','desabilitado']]],
+ ['21/10/2026 15:00','Carla Mendes','tela','excecao','reprovou a exceção',['SEC-2280','XSS refletido na busca','prototipo-excecoes.html#ver=SEC-2280'],'Portal do Cliente',[['Estado','Aguardando aprovação','Reprovada']],'Tem correção simples (escapar o termo); corrigir em vez de aceitar.'],
+ ['21/10/2026 09:00','Diego Rocha','tela','entrega','abriu a entrega',['ENT-0043','Notificações por e-mail','prototipo-entrega.html'],'Portal do Cliente',[['Projetos','—','portal-api v2.3.0, portal-web v1.10.0'],['Issues','—','#58, #61']]],
+ ['20/10/2026 18:00','Daniel','tela','entrega','cancelou a entrega',['ENT-0037','Exportação para ERP','prototipo-entrega.html'],'Valuto',[['Estado','Em andamento','Cancelada'],['Código em dev','—','absorvido pela próxima entrega']],'Cliente adiou a integração com o ERP para 2027.'],
+ ['20/10/2026 16:20','Bruno Lima','tela','politica','endureceu a política de DEV',['Cobrança Pix','Política de segurança','prototipo-aplicacoes.html#app=CPX'],'Cobrança Pix',[['Modo em DEV','avisa','bloqueia'],['Crítica (máx. sem exceção)','—','0']]],
+ ['20/10/2026 11:12','pipeline #2830','pipeline','publicacao','gate de QA bloqueou',['v2.2.0-rc1','valuto-frontend · Cadastro de cartões','prototipo-entrega.html'],'Valuto',[['Resultado','—','Bloqueado: 1 crítica sem exceção']]],
+ ['19/10/2026 16:40','bot da Esteira','bot','publicacao','cortou a candidata',['v4.0.0-rc1','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Tag','—','v4.0.0-rc1 sobre dev @ 41b7a02']]],
+ ['19/10/2026 10:30','Daniel','tela','cadastro','adicionou o projeto',['valuto-batch','Projeto','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Stack','—','outro'],['Ambientes','—','DEV, QA, PRD']]],
+ ['18/10/2026 15:02','Daniel','tela','aprovacao','aprovou a proposta',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Aprovação da proposta','Pendente','Aprovada']],'Único aprovador técnico disponível.',true],
+ ['18/10/2026 14:46','Daniel','tela','entrega','abriu a entrega',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Projetos','—','valuto-api v4.0.0, valuto-frontend v2.1.0'],['Issues','—','#118, #119, #121']]],
+ ['17/10/2026 18:05','Carla Mendes','tela','aprovacao','publicou em produção',['v2.4.0','cpx-web · Pix por QR code','prototipo-entrega.html'],'Cobrança Pix',[['PRD','v2.3.2','v2.4.0']]],
+ ['16/10/2026 09:40','Daniel','tela','papeis','tirou o papel Analista de Gabi Torres',['Valuto','Pessoas e papéis','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Gabi Torres','Analista, Membro','Membro']],'Mudou de time.'],
+ ['15/10/2026 14:00','Diego Rocha','tela','entrega','abriu a entrega',['ENT-0039','Aditivos em lote','prototipo-entrega.html'],'Gestão de Contratos',[['Projetos','—','contratos-api v3.2.0']]],
+ ['14/10/2026 10:15','Daniel','tela','cadastro','criou a aplicação',['CPX','Cobrança Pix','prototipo-aplicacoes.html#app=CPX'],'Cobrança Pix',[['Grupo do GitLab','—','cobranca-pix'],['Política','—','padrão']]]
+].map(([quando,quem,orig,cat,verbo,obj,app,mud,motivo,auto],i)=>({id:'AUD-'+String(9120-i),quando,quem,orig,cat,verbo,obj,app,mud,motivo,auto}));
+
+const ini=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+const ator=e=>e.orig==='tela'?`<b>${e.quem}</b>`:`<span class="ator-bot">${ic(e.orig==='bot'?'bot':'git')}<b>${e.quem}</b></span>`;
+const resumoMud=e=>e.mud.slice(0,2).map(([c,a,d])=>`${c}: ${a==='—'?'':`<s>${a}</s> → `}<span class="para">${d}</span>`).join(' · ');
+
+/* filtro vindo de outra tela: #obj=ENT-0042&cat=escopo · #app=Valuto&cat=politica */
+let objF='',filtroCat='todas',pagina=0;
+function lerHash(){
+  const h=new URLSearchParams(location.hash.slice(1));
+  objF=h.get('obj')||'';filtroCat=h.get('cat')||'todas';pagina=0;
+  if(h.get('app')){desenhaSelects();$('[data-app]').value=h.get('app')}
+}
+const visiveis=()=>EV.filter(e=>!QUEM[quem].apps||QUEM[quem].apps.includes(e.app));
+function desenhaSelects(){
+  const a=$('[data-app]'),q=$('[data-quem-f]'),va=a.value,vq=q.value,l=visiveis();
+  a.innerHTML='<option value="">Todas as aplicações</option>'+[...new Set(l.map(e=>e.app))].sort().map(x=>`<option ${x===va?'selected':''}>${x}</option>`).join('');
+  q.innerHTML='<option value="">Qualquer pessoa</option>'+[...new Set(l.filter(e=>e.orig==='tela').map(e=>e.quem))].sort().map(x=>`<option ${x===vq?'selected':''}>${x}</option>`).join('')+`<option value="@bot" ${vq==='@bot'?'selected':''}>Bot da Esteira</option><option value="@pipeline" ${vq==='@pipeline'?'selected':''}>Pipelines</option>`;
+}
+function crumb(){
+  $('[data-crumb]').innerHTML=`${ic('clock')}Auditoria · dados fictícios
+   <label class="demo">Ver como <select data-quem>${Object.entries(QUEM).map(([k,q])=>`<option value="${k}" ${k===quem?'selected':''}>${q.nome} · ${q.rot}</option>`).join('')}</select></label>`;
+  $('[data-quem]').onchange=e=>{quem=e.target.value;$('.me').innerHTML=`<span class="av">${QUEM[quem].ini}</span><div>${QUEM[quem].nome}<small>${quem==='mor'?'MOR':'sem papel global'}</small></div>`;desenhaSelects();lista()};
+}
+function lista(){
+  const app=$('[data-app]').value,qf=$('[data-quem-f]').value,per=+$('[data-periodo]').value,q=$('[data-busca]').value.toLowerCase();
+  const filtra=c=>visiveis().filter(e=>(c==='todas'||e.cat===c)&&(!app||e.app===app)&&(!objF||e.obj[0]===objF)
+    &&(!qf||(qf==='@bot'?e.orig==='bot':qf==='@pipeline'?e.orig==='pipeline':e.quem===qf))&&(HOJE-dataDe(e.quando))/DIA<=per
+    &&(e.quem+' '+e.verbo+' '+e.obj.join(' ')+' '+e.mud.flat().join(' ')+' '+(e.motivo||'')).toLowerCase().includes(q));
+  $('[data-cats]').innerHTML=`<button class="f ${filtroCat==='todas'?'on':''}" data-cat="todas">Todos <span class="n">${filtra('todas').length}</span></button>`+Object.entries(CATS).map(([k,[n]])=>`<button class="f ${filtroCat===k?'on':''}" data-cat="${k}">${n} <span class="n">${filtra(k).length}</span></button>`).join('');
+  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{filtroCat=b.dataset.cat;pagina=0;lista()});
+  $('[data-ativo]').innerHTML=objF?`<span class="ativo">Só <span class="mono">${objF}</span><button aria-label="Tirar este filtro" data-limpa>${ic('x')}</button></span>`:'';
+  $('[data-limpa]')?.addEventListener('click',()=>{objF='';history.replaceState(null,'',location.pathname);lista()});
+  const l=filtra(filtroCat),POR=12,paginas=Math.max(1,Math.ceil(l.length/POR));pagina=Math.min(Math.max(pagina,0),paginas-1);
+  let ult='';
+  $('[data-lista]').innerHTML=l.length?l.slice(pagina*POR,pagina*POR+POR).map(e=>{const d=rotDia(e.quando),cab=d!==ult?`<div class="dia">${d}</div>`:'';ult=d;
+    return cab+`<button class="ev" data-id="${e.id}" title="${e.mud.map(([c,a,dd])=>`${c}: ${a} → ${dd}`).join('\n')}${e.motivo?'\nMotivo: '+e.motivo:''}">
+      <span class="hora">${e.quando.split(' ')[1]}</span>
+      <span class="ci" title="${CATS[e.cat][0]}">${ic(CATS[e.cat][1])}</span>
+      <div style="min-width:0"><div class="fr">${ator(e)} ${e.verbo} <span class="obj">${e.obj[0]}</span>${e.auto?' <span class="pill run">autoaprovação</span>':''}</div><div class="mud">${e.obj[1]} · ${resumoMud(e)}</div></div>
+      <span class="app">${e.app}</span>${ic('chev')}</button>`}).join('')
+    :`<div class="empty" style="margin:18px;border:0">${ic('clock','lg')}<b style="color:var(--tx)">Nenhum registro com esses filtros</b>${QUEM[quem].apps?'<span>Você só vê as aplicações em que tem papel.</span>':''}</div>`;
+  $('[data-pag-info]').textContent=l.length?`${pagina*POR+1}–${Math.min(l.length,pagina*POR+POR)} de ${l.length}`:'';
+  $('[data-nums]').innerHTML=paginas>1?`<button data-p="${pagina-1}" ${pagina===0?'disabled':''} aria-label="Página anterior">‹</button>`+Array.from({length:paginas},(_,i)=>`<button data-p="${i}" class="${i===pagina?'on':''}">${i+1}</button>`).join('')+`<button data-p="${pagina+1}" ${pagina>=paginas-1?'disabled':''} aria-label="Próxima página">›</button>`:'';
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pagina=+b.dataset.p;lista()});
+  document.querySelectorAll('.ev').forEach(b=>b.onclick=()=>detalhe(b.dataset.id));
+}
+['[data-app]','[data-quem-f]','[data-periodo]'].forEach(s=>$(s).onchange=()=>{pagina=0;lista()});
+$('[data-busca]').oninput=()=>{pagina=0;lista()};
+
+/* gaveta do registro */
+function detalhe(id){
+  const e=EV.find(x=>x.id===id);
+  const veu=document.createElement('div');veu.className='veu';
+  const g=document.createElement('aside');g.className='gaveta';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');
+  g.innerHTML=`<div class="dh"><div><span class="pill">${ic(CATS[e.cat][1])}${CATS[e.cat][0]}</span> <span class="mono" style="color:var(--mu);margin-left:6px">${e.id}</span><h2>${e.quem} ${e.verbo} <span class="mono" style="font-size:inherit">${e.obj[0]}</span></h2></div><button class="x" data-fechar aria-label="Fechar">${ic('x')}</button></div>
+    <dl class="kv">
+      <dt>Quando</dt><dd>${e.quando}</dd>
+      <dt>Quem</dt><dd>${e.orig==='tela'?`<span class="av sm">${ini(e.quem)}</span>`:ic(e.orig==='bot'?'bot':'git')}${e.quem}${e.auto?' <span class="pill run">autoaprovação</span>':''}</dd>
+      <dt>Origem</dt><dd>${ORIGEM[e.orig]}</dd>
+      <dt>Aplicação</dt><dd>${e.app}</dd>
+      <dt>Objeto</dt><dd><span class="mono">${e.obj[0]}</span> · ${e.obj[1]}</dd>
+    </dl>
+    <h3 class="sub">O que mudou</h3>
+    <div class="box tw"><table class="dif"><thead><tr><th>Campo</th><th>Antes</th><th>Depois</th></tr></thead><tbody>${e.mud.map(([c,a,d])=>`<tr><td>${c}</td><td class="${a==='—'?'':'antes'}">${a}</td><td class="depois">${d}</td></tr>`).join('')}</tbody></table></div>
+    ${e.motivo?`<h3 class="sub">Motivo</h3><div class="motivo-box">${e.motivo}</div>`:''}
+    <div class="acoes dir"><button class="btn g" data-fechar>Fechar</button><a class="btn p" style="text-decoration:none" href="${e.obj[2]}">${ic('ext')}Abrir ${e.obj[0]}</a></div>`;
+  const fechar=()=>{veu.remove();g.remove();document.removeEventListener('keydown',esc)};
+  const esc=k=>{if(k.key==='Escape')fechar()};
+  veu.onclick=fechar;g.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fechar);document.addEventListener('keydown',esc);
+  document.body.append(veu,g);g.querySelector('[data-fechar]').focus();
+}
+
+const sino=$('.sino'),avisos=$('#avisos');
+const mostrar=x=>{avisos.hidden=!x;sino.setAttribute('aria-expanded',x)};
+sino.onclick=e=>{e.stopPropagation();mostrar(avisos.hidden)};
+document.addEventListener('click',e=>{if(!avisos.hidden&&!avisos.contains(e.target))mostrar(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')mostrar(false)});
+
+crumb();desenhaSelects();lerHash();lista();
+addEventListener('hashchange',()=>{lerHash();lista()});
+</script>
+</body></html>

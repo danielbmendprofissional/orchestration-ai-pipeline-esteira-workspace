@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Aguardando você (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+[hidden]{display:none!important}
+.topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 4px}
+.topo h1{margin-right:auto}
+.resumo-t{color:var(--mu);font-size:13.5px;margin-bottom:18px}
+.filtrobar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.sel{padding:7px 11px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx2);font:inherit;max-width:100%}
+.demo{flex-wrap:wrap;justify-content:flex-end;max-width:100%}.demo select{min-width:0;max-width:100%}
+
+.lista{border:1px solid var(--ln);border-radius:12px;background:var(--s1);box-shadow:inset 0 1px 0 var(--hl);overflow:hidden}
+.secao{display:flex;align-items:center;gap:8px;padding:8px 20px;font-size:12px;font-weight:600;color:var(--mu);background:var(--s2);border-bottom:1px solid var(--ln)}
+.it{display:grid;grid-template-columns:28px minmax(0,1fr) 150px 96px 170px;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--ln);color:inherit;text-decoration:none}
+.it:last-child{border-bottom:0}.it:hover{background:var(--s2)}
+.ci{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--s3);border:1px solid var(--ln2);color:var(--tx2)}
+.ci .i{width:14px;height:14px}
+.ci.run{color:var(--run-tx);background:var(--run-bg);border-color:var(--run-ln)}
+.ci.bad{color:var(--bad-tx);background:var(--bad-bg);border-color:var(--bad-ln)}
+.tit{font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctx{color:var(--mu);font-size:12.5px;margin-top:3px}
+.ev{color:var(--tx2);font-size:12.5px;margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ev .i{width:13px;height:13px}
+.pq{color:var(--di);font-size:12.5px}
+.ha{color:var(--mu);font-size:12.5px;white-space:nowrap}.ha.run{color:var(--run-tx)}
+.it .btn{white-space:nowrap;justify-self:end}
+.vazio{display:flex;flex-direction:column;align-items:center;gap:8px;padding:48px 20px;color:var(--mu);text-align:center}
+.vazio .ib{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--ok-bg);border:1px solid var(--ok-ln);color:var(--ok-tx)}
+.obs{color:var(--mu);font-size:12.5px;margin-top:14px}.obs .i{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+
+@media (max-width:1100px){.it{grid-template-columns:28px minmax(0,1fr) 170px}.it .pq,.it .ha{display:none}}
+@media (max-width:620px){.it{grid-template-columns:28px minmax(0,1fr)}.it .btn{grid-column:2;justify-self:start}}
+</style></head>
+<body data-pagina="aguardando">
+<nav data-menu></nav>
+<main>
+  <div class="crumb" data-crumb></div>
+  <div class="topo"><h1>Aguardando você</h1></div>
+  <p class="resumo-t" data-resumo></p>
+  <div class="filtrobar">
+    <select class="sel" data-app aria-label="Aplicação"></select>
+  </div>
+  <div class="lista" data-lista></div>
+  <p class="obs"><svg class="i"><use href="#i-inbox"/></svg>Cada item também chega por e-mail. Some daqui quando alguém decide ou o motivo deixa de existir.</p>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+
+const QUEM={
+ mor:{nome:'Daniel',ini:'DB',rot:'MOR'},
+ aprovador:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico'},
+ negocio:{nome:'Elisa Prado',ini:'EP',rot:'Aprovadora de negócio'},
+ membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro'}};
+let quem='mor';
+
+const SEC={decisao:['Decisões','user-ok'],corrigir:['Para corrigir','alert'],acompanhar:['Para acompanhar','clock']};
+/* para: quem vê o item (o MOR vê tudo); papel: por que é com você; auto: quem abriu/pediu (vira autoaprovação se for o MOR) */
+const ITENS=[
+ {sec:'decisao',ic:'flask',t:'Aprovar candidata',v:'v4.0.0-rc2',ctx:'Extrato em PDF · valuto-api em QA',ev:[['ok','ok','qa-agent, code-review e security aprovaram'],['shield','','1 alta coberta por exceção']],app:'Valuto',papel:'Aprovador técnico',ha:'40 min',min:40,acao:'Aprovar candidata',href:'prototipo-entrega.html',para:['aprovador'],auto:'Daniel'},
+ {sec:'decisao',ic:'rocket',t:'Publicar em produção',v:'v3.8.0',ctx:'Busca de transações · valuto-api',ev:[['ok','ok','aprovação da entrega concluída'],['clock','','janela livre em PRD']],app:'Valuto',papel:'Publicador',ha:'30 min',min:30,acao:'Publicar',href:'prototipo-entrega.html',para:[]},
+ {sec:'decisao',ic:'user-ok',t:'Aprovar proposta',v:'v3.6.0',ctx:'Limite por cartão · valuto-api',ev:[['issue','','2 issues'],['file','','1 migration prevista']],app:'Valuto',papel:'Aprovador técnico',ha:'1 h',min:60,acao:'Ver proposta',href:'prototipo-entrega.html',para:['aprovador']},
+ {sec:'decisao',ic:'shield',t:'Aprovar exceção',v:'SEC-2310',ctx:'CVE crítica no Npgsql · pedida por Bruno Lima · vale em QA e HML',ev:[['alert','run','risco aceito até 20/11/2026']],app:'Valuto',papel:'Aprovador técnico',ha:'4 h',min:240,acao:'Decidir',href:'prototipo-excecoes.html#ver=SEC-2310',para:[]},
+ {sec:'decisao',ic:'brief',t:'Aprovação de negócio',v:'',ctx:'Pix agendado · valuto-api v3.5.0',ev:[['issue','','1 de 4 issues aprovadas'],['file','','notas de entrega prontas']],app:'Valuto',papel:'Aprovador de negócio',ha:'3 h',min:180,acao:'Ler notas',href:'prototipo-entrega.html',para:['negocio']},
+ {sec:'decisao',ic:'shield-ok',t:'Aprovar a entrega',v:'v1.11.0-rc2',ctx:'Tema escuro · portal-web',ev:[['ok','ok','conferência de escopo sem pendência'],['ok','ok','banco compatível']],app:'Portal do Cliente',papel:'Aprovador técnico',ha:'1 dia',min:1440,acao:'Aprovar entrega',href:'prototipo-entrega.html',para:[]},
+ {sec:'corrigir',ic:'fail',cls:'bad',t:'Gate bloqueou em QA',v:'v2.2.0-rc1',ctx:'Cadastro de cartões · valuto-frontend',ev:[['fail','bad','1 crítica sem exceção (CVE-2026-40112)']],app:'Valuto',dono:'Diego Rocha',papel:'Você abriu a entrega',ha:'20 min',min:20,acao:'Ver o bloqueio',href:'prototipo-entrega.html',para:['membro']},
+ {sec:'acompanhar',ic:'alert',cls:'run',t:'Exceção vence em 4 dias',v:'SEC-2291',ctx:'SQL montado com interpolação · Valuto',ev:[['alert','run','depois disso o achado volta a bloquear QA, HML e PRD']],app:'Valuto',dono:'Daniel',papel:'Você pediu',ha:'',min:0,acao:'Renovar ou corrigir',href:'prototipo-excecoes.html#ver=SEC-2291',para:[]},
+ {sec:'acompanhar',ic:'fail',cls:'bad',t:'Exceção vencida',v:'SEC-2287',ctx:'Deserialização insegura · Gestão de Contratos',ev:[['fail','bad','o achado voltou a bloquear QA']],app:'Gestão de Contratos',dono:'Diego Rocha',papel:'Você pediu',ha:'3 dias',min:4320,acao:'Renovar',href:'prototipo-excecoes.html#ver=SEC-2287',para:['membro']},
+ {sec:'acompanhar',ic:'wait',t:'Seu pedido aguarda outra pessoa',v:'SEC-2310',ctx:'CVE crítica no Npgsql · Valuto',ev:[['user-ok','','quem pediu não aprova: Carla Mendes ou Daniel']],app:'Valuto',dono:'Bruno Lima',papel:'Você pediu',ha:'4 h',min:240,acao:'Ver pedido',href:'prototipo-excecoes.html#ver=SEC-2310',para:['aprovador'],soPara:true}
+];
+// o MOR vê tudo, menos o que é "seu pedido" de outra pessoa
+const meus=()=>ITENS.filter(i=>quem==='mor'?!i.soPara:i.para.includes(quem));
+
+function crumb(){
+  $('[data-crumb]').innerHTML=`${ic('inbox')}Aguardando você · dados fictícios
+   <label class="demo">Ver como <select data-quem>${Object.entries(QUEM).map(([k,q])=>`<option value="${k}" ${k===quem?'selected':''}>${q.nome} · ${q.rot}</option>`).join('')}</select></label>`;
+  $('[data-quem]').onchange=e=>{quem=e.target.value;$('.me').innerHTML=`<span class="av">${QUEM[quem].ini}</span><div>${QUEM[quem].nome}<small>${quem==='mor'?'MOR':'sem papel global'}</small></div>`;apps();lista()};
+}
+function apps(){const s=$('[data-app]'),v=s.value,l=[...new Set(meus().map(i=>i.app))].sort();s.innerHTML='<option value="">Todas as aplicações</option>'+l.map(a=>`<option ${a===v?'selected':''}>${a}</option>`).join('');s.hidden=l.length<2}
+function lista(){
+  const app=$('[data-app]').value,l=meus().filter(i=>!app||i.app===app);
+  const cnt=Object.keys(SEC).map(k=>[k,l.filter(i=>i.sec===k).length]).filter(([,n])=>n);
+  $('[data-resumo]').textContent=l.length?cnt.map(([k,n])=>`${n} ${({decisao:n>1?'decisões':'decisão',corrigir:'para corrigir',acompanhar:'para acompanhar'})[k]}`).join(' · '):'';
+  const cntNav=document.querySelector('nav .ni[data-pagina=aguardando] .cnt');if(cntNav){cntNav.textContent=meus().length;cntNav.hidden=!meus().length}
+  $('[data-lista]').innerHTML=l.length?Object.entries(SEC).map(([k,[n,icone]])=>{const its=l.filter(i=>i.sec===k).sort((a,b)=>b.min-a.min);if(!its.length)return'';
+    return `<div class="secao">${ic(icone)}${n}</div>`+its.map(i=>{const auto=quem==='mor'&&i.auto==='Daniel';
+      return `<a class="it" href="${i.href}" title="${i.ctx}">
+        <span class="ci ${i.cls||''}">${ic(i.ic)}</span>
+        <div style="min-width:0"><div class="tit">${i.t}${i.v?` <span class="mono" style="font-weight:500">${i.v}</span>`:''}${auto?' <span class="pill run" title="Você abriu esta entrega: a aprovação fica marcada como autoaprovação, com motivo">autoaprovação</span>':''}</div>
+          <div class="ctx">${i.ctx}</div>
+          <div class="ev">${i.ev.map(([e,c,t])=>`<span class="stat ${c||'none'}" style="font-weight:500">${ic(e)}${t}</span>`).join('<span style="color:var(--ln2)">·</span>')}</div></div>
+        <span class="pq" title="${i.dono?'De '+i.dono:'Papel: '+i.papel}">${i.dono?(i.dono===QUEM[quem].nome?i.papel:'como MOR'):quem==='mor'?'como MOR':'como '+i.papel}</span>
+        <span class="ha ${i.min>=1440?'run':''}">${i.ha?`há ${i.ha}`:''}</span>
+        <span class="btn g sm">${i.acao}${ic('chev')}</span></a>`}).join('')}).join('')
+    :`<div class="vazio"><span class="ib">${ic('check','lg')}</span><b style="color:var(--tx)">Nada esperando por você</b><span>Quando alguma decisão depender de você, ela aparece aqui e chega por e-mail.</span></div>`;
+}
+$('[data-app]').onchange=lista;
+crumb();apps();lista();
+</script>
+</body></html>
