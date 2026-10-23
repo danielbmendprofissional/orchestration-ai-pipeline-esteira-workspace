@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Aplicações (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+[hidden]{display:none!important}
+.topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 18px}
+.topo h1{margin-right:auto}
+.filtrobar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.campo{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--mu);min-width:260px}
+.campo:focus-within{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.campo input{border:0;background:none;color:var(--tx);font:inherit;outline:none;width:100%}
+.inp,.sel{padding:8px 11px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx);font:inherit;outline:none}
+.inp:focus,.sel:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.inp.erro,.sel.erro{border-color:var(--bad-ln);box-shadow:0 0 0 3px #F8514922}
+.inp[readonly]{color:var(--tx2);background:var(--s2)}
+.inp.mono{font-family:var(--mono);font-size:13px}
+.sel.sm,.inp.sm{padding:5px 9px;font-size:13px}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:16px}
+.fld>span{color:var(--tx2);font-weight:600}
+.fld small{color:var(--di);font-size:12px}.fld small.erro{color:var(--bad-tx)}.fld small.ok{color:var(--ok-tx)}
+.lado{display:grid;grid-template-columns:1fr 110px;gap:12px}
+.dic{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
+.obs{display:block;color:var(--mu);font-size:12.5px;margin-top:14px}
+.obs .i{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+table.mat td:first-child{white-space:nowrap}
+
+/* lista */
+.lista{border:1px solid var(--ln);border-radius:12px;background:var(--s1);box-shadow:inset 0 1px 0 var(--hl);overflow:hidden}
+.cab,.apl{display:grid;grid-template-columns:minmax(220px,1.4fr) minmax(140px,1fr) 90px 130px minmax(160px,1fr) 20px;gap:16px;align-items:center;padding:0 20px}
+.cab{height:38px;color:var(--di);font-size:12px;border-bottom:1px solid var(--ln);background:var(--s2)}
+.apl{min-height:60px;padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--ln);color:inherit;text-decoration:none}
+.apl:last-child{border-bottom:0}.apl:hover{background:var(--s2)}
+.apl.inativa{color:var(--mu)}
+.nome{display:flex;align-items:center;gap:8px;font-weight:600}
+.papeis{display:flex;gap:4px;flex-wrap:wrap}
+.sub2{color:var(--di);font-size:12.5px;margin-top:2px}
+.pagl{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--mu);font-size:13px}
+.nums{display:flex;gap:4px}
+.nums button{min-width:32px;height:32px;border-radius:8px;border:1px solid var(--ln2);background:var(--s1);color:var(--tx2)}
+.nums button.on{border-color:var(--blue2);background:var(--blue-bg);color:#fff}
+.nums button:disabled{opacity:.4;cursor:not-allowed}
+
+/* detalhe */
+.so-leitura{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:12.5px;margin-bottom:14px}
+.so-leitura .i{width:14px;height:14px}
+.ech{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;border:1px solid var(--ln2);color:var(--tx2);margin-right:3px}
+.ech.off{border-style:dashed;color:var(--di);text-decoration:line-through}
+tr.inativo td{color:var(--mu)}
+.tg{appearance:none;width:30px;height:18px;border-radius:9px;background:var(--s3);border:1px solid var(--ln2);position:relative;cursor:pointer;flex:none;margin:0}
+.tg::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--mu);transition:left .15s}
+.tg:checked{background:var(--blue);border-color:var(--blue2)}
+.tg:checked::after{left:14px;background:#fff}
+.tg:disabled{opacity:.5;cursor:not-allowed}
+.tg:focus-visible{outline:2px solid var(--blue-tx);outline-offset:2px}
+
+/* matriz projetos × ambientes */
+table.mat td{vertical-align:top;white-space:normal}
+table.mat th.amb,table.mat td.amb{min-width:150px}
+.dests{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.dn{background:none;border:0;padding:0;font-family:var(--mono);font-size:12.5px;color:var(--tx2);text-align:left}
+.dn:hover{color:#fff;text-decoration:underline}
+.mais-d{display:inline-flex;align-items:center;gap:4px;background:none;border:0;padding:2px 0 0;color:var(--di);font-size:12px}
+.mais-d:hover{color:var(--blue-tx)}.mais-d .i{width:13px;height:13px}
+.desab{color:var(--ln2)}
+.semd{display:inline-flex;align-items:center;gap:5px;color:var(--run-tx);font-size:12.5px}.semd .i{width:13px;height:13px}
+
+/* política em tabela */
+table.pol td,table.pol th{text-align:center}
+table.pol td:first-child,table.pol th:first-child{text-align:left}
+table.pol th small{display:block;font-weight:400;color:var(--di);font-size:11.5px;margin-top:2px}
+table.pol th small.endu{color:var(--tx2);font-weight:600}
+table.pol .inp{width:96px;padding:5px 8px;font-family:var(--mono);font-size:12.5px;text-align:right}
+table.pol .inp::placeholder{font-family:var(--sans);font-size:12px}
+table.pol .inp::-webkit-inner-spin-button{display:none}
+table.pol .inp:disabled{opacity:.45}
+.travado{display:inline-flex;align-items:center;gap:6px;color:var(--mu);font-family:var(--mono);font-size:12.5px}
+.travado .i{width:13px;height:13px}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:8px;padding:2px;background:var(--s1)}
+.seg button{border:0;background:none;color:var(--mu);padding:4px 9px;border-radius:6px;font-size:12px;font-weight:600}
+.seg button.on{background:var(--s3);color:#fff;box-shadow:inset 0 1px 0 var(--hl)}
+.seg button:disabled{cursor:not-allowed}
+.sevn{display:inline-flex;align-items:center;gap:8px}
+
+.mor-g{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--mu);margin-bottom:12px}
+table.pap td.c,table.pap th.c{text-align:center}
+table.pap th.c{cursor:help}
+table.pap input{width:16px;height:16px;accent-color:var(--blue2)}
+.pessoa{display:flex;align-items:center;gap:10px}.pessoa small{display:block;color:var(--di);font-size:12px}
+tr.nova td{background:#0A4EE40D}
+.erro-tx{color:var(--bad-tx);font-size:12px;margin-top:4px;white-space:normal}
+.links{display:flex;gap:22px;flex-wrap:wrap}
+
+/* gaveta */
+.acoes.dir{justify-content:flex-end;flex-wrap:wrap}.acoes .esq{margin-right:auto}
+.gaveta .kv{margin-bottom:18px}
+.ambs-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ambs-g label{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--ln2);border-radius:9px;padding:9px 11px;font-size:12.5px;font-weight:600;color:var(--tx2)}
+.ambs-g .i{width:13px;height:13px;color:var(--di)}
+.cfg{display:grid;gap:8px}
+.cfg-l,.cfg-h{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 30px;gap:8px;align-items:start}
+.cfg-l .inp{font-family:var(--mono);font-size:12.5px;width:100%;padding:7px 9px}
+.cfg-h{font-size:12px;color:var(--di)}
+.add-d{border:1px dashed var(--ln2);background:none;color:var(--mu);border-radius:8px;padding:7px;font-size:12px;display:flex;gap:6px;justify-content:center;align-items:center;width:100%;margin-top:8px}
+.add-d:hover{color:var(--tx);border-color:#4A4A52}
+.segredo{display:flex;gap:10px;border:1px solid var(--bad-ln);background:var(--bad-bg);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--tx2);margin-top:12px}
+.segredo .i{color:var(--bad-tx);margin-top:2px}
+.ck{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--ln);font-size:13px}
+.ck:last-child{border-bottom:0}
+.ck input{width:16px;height:16px;accent-color:var(--blue2)}
+.ck.ja{opacity:.5}
+.ck .sel{margin-left:auto}
+.dica-g{color:var(--di);font-size:12px}
+
+@media (max-width:1100px){.cab{display:none}.apl{grid-template-columns:1fr}}
+@media (max-width:520px){.ambs-g{grid-template-columns:repeat(2,1fr)}.lado{grid-template-columns:1fr}}
+</style></head>
+<body data-pagina="aplicacoes">
+<nav data-menu></nav>
+<main>
+  <div class="crumb" data-crumb></div>
+
+  <section data-vista="lista">
+    <div class="topo">
+      <h1>Aplicações</h1>
+      <button class="btn p" data-nova><svg class="i"><use href="#i-plus"/></svg>Nova aplicação</button>
+    </div>
+    <div class="filtrobar">
+      <label class="campo"><svg class="i"><use href="#i-search"/></svg><input type="search" placeholder="Buscar por nome, sigla ou grupo" data-busca aria-label="Buscar aplicação"></label>
+      <button class="f on" data-st="ativas">Ativas <span class="n" data-c="ativas"></span></button>
+      <button class="f" data-st="inativas">Inativas <span class="n" data-c="inativas"></span></button>
+      <button class="f" data-st="todas">Todas <span class="n" data-c="todas"></span></button>
+    </div>
+    <div class="lista" data-lista-box>
+      <div class="cab" data-cab></div>
+      <div data-lista></div>
+    </div>
+    <div class="pagl"><span data-pag-info></span><div class="nums" data-nums></div></div>
+  </section>
+
+  <section data-vista="det" hidden>
+    <div class="head"><h1><span data-d-nome></span> <span data-d-estado></span></h1>
+      <div class="acoes-topo">
+        <div class="sino-wrap">
+          <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
+          <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
+            <div class="av-h">Aguardando você</div>
+            <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
+            <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><button class="btn g">Revisar</button></div></div></div>
+          </div>
+        </div>
+        <button class="btn g"><svg class="i"><use href="#i-ext"/></svg>Abrir no GitLab</button>
+        <button class="btn g" data-editar><svg class="i"><use href="#i-file"/></svg>Editar aplicação</button>
+      </div></div>
+    <div class="meta" data-d-meta></div>
+    <section class="panel">
+      <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-grid"/></svg></span>Cadastro</h2></div>
+      <div class="tabs" role="tablist">
+        <button class="tab on" data-aba="projetos"><svg class="i"><use href="#i-box"/></svg>Projetos <span class="n" data-n-proj></span></button>
+        <button class="tab" data-aba="ambientes"><svg class="i"><use href="#i-server"/></svg>Ambientes e destinos</button>
+        <button class="tab" data-aba="politica"><svg class="i"><use href="#i-shield"/></svg>Política de segurança</button>
+        <button class="tab" data-aba="papeis"><svg class="i"><use href="#i-users"/></svg>Pessoas e papéis <span class="n" data-n-pes></span></button>
+      </div>
+      <div id="aba" aria-live="polite"></div>
+    </section>
+    <div class="barra-acao" id="barra"></div>
+  </section>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s),clone=o=>JSON.parse(JSON.stringify(o));
+
+/* quem está vendo (cenário de demonstração) */
+const QUEM={mor:{nome:'Daniel',ini:'DB',rot:'MOR'},analista:{nome:'Ana Souza',ini:'AS',rot:'Analista'},aprovador:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico'},membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro'}};
+let quem='mor';
+const pode={criar:()=>quem==='mor',cad:()=>quem==='mor'||quem==='analista',pol:()=>quem==='mor'||quem==='aprovador',pap:()=>quem==='mor'};
+
+const APLS=[
+ ['Valuto','VLT','valuto',3,7,6,true,{analista:['Analista','Membro'],aprovador:['Aprovador técnico','Membro'],membro:['Membro']},'valuto-api, valuto-frontend, valuto-batch'],
+ ['Portal do Cliente','PCL','portal-cliente',2,5,3,true,{analista:['Analista'],membro:['Membro']},'portal-api, portal-web'],
+ ['Cobrança Pix','CPX','cobranca-pix',4,6,1,true,{aprovador:['Aprovador técnico']},'cpx-api, cpx-web, cpx-worker, cpx-gateway'],
+ ['Gestão de Contratos','GCT','contratos',3,8,2,true,{membro:['Membro']},'contratos-api, contratos-web, contratos-batch'],
+ ['Cadastro Único','CDU','cadastro-unico',2,4,0,true,{},'cdu-api, cdu-web'],
+ ['Ouvidoria','OUV','ouvidoria',1,3,0,true,{},'ouvidoria-web'],
+ ['Folha de Pagamento','FPG','folha',2,5,1,true,{},'folha-api, folha-web'],
+ ['Agenda de Serviços','AGS','agenda',2,3,0,true,{},'agenda-api, agenda-web'],
+ ['Protocolo Digital','PTD','protocolo',3,6,1,true,{},'protocolo-api, protocolo-web, protocolo-ocr'],
+ ['Licitações','LCT','licitacoes',2,4,0,true,{},'licitacoes-api, licitacoes-web'],
+ ['Indicadores','IND','indicadores',1,2,0,true,{},'indicadores-web'],
+ ['Portal da Transparência','PTR','transparencia',2,5,1,true,{},'transparencia-api, transparencia-web'],
+ ['Atendimento por chat','ATC','atendimento',2,3,0,false,{},'atendimento-api, atendimento-web'],
+ ['Arquivo legado','ARQ','arquivo',1,1,0,false,{},'arquivo-web']
+].map(([nome,sigla,grupo,proj,pes,abertas,ativa,papeis,lista])=>({nome,sigla,grupo,proj,pes,abertas,ativa,papeis,lista}));
+const visiveis=()=>APLS.filter(a=>quem==='mor'||a.papeis[quem]);
+
+const STACK={dotnet:'.NET',angular:'Angular',outro:'outro'},AMBS=['dev','qa','hml','prd'],AMB_N={dev:'DEV',qa:'QA',hml:'HML',prd:'PRD'};
+const SEVS=[['critica','Crítica','var(--bad)'],['alta','Alta','var(--run)'],['media','Média','#C9B458'],['baixa','Baixa','var(--low)']];
+const PAPEIS=[['analista','Analista','Mantém projetos, ambientes, destinos e a configuração de publicação'],['membro','Membro','Abre entrega, corta nova candidata, reexecuta'],['aprovador-tecnico','Aprovador técnico','Aprova proposta, candidata e entrega; aprova exceções; ajusta a política de segurança'],['aprovador-negocio','Aprovador de negócio','Aprovação de negócio, issue por issue, lendo as notas de entrega'],['publicador','Publicador','Publica em produção']];
+const SEGREDO=/PASSWORD|SENHA|SECRET|TOKEN|KEY|CREDENTIAL/i;
+const dst=(nome,ordem,cfg)=>({nome,ordem,cfg:Object.entries(cfg)});
+let dados={
+ projetos:[{id:'valuto-api',stack:'dotnet',prd:'3.4.1',dep:'',ativo:true,branches:'dev, qa, hml, main'},{id:'valuto-frontend',stack:'angular',prd:'2.0.3',dep:'valuto-api',ativo:true,branches:'dev, qa, hml, main'},{id:'valuto-batch',stack:'outro',prd:'1.2.0',dep:'valuto-api',ativo:true,branches:'dev, main'}],
+ amb:{
+  'valuto-api':{dev:{on:true,d:[dst('k3d-dev / no-1',1,{KUBE_CONTEXT:'k3d-dev',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.dev.local'}),dst('k3d-dev / no-2',2,{KUBE_CONTEXT:'k3d-dev-2',NAMESPACE:'valuto',REPLICAS:'1',INGRESS_HOST:'api2.valuto.dev.local'})]},
+   qa:{on:true,d:[dst('k3d-qa / valuto',1,{KUBE_CONTEXT:'k3d-qa',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.qa.local'})]},
+   hml:{on:true,d:[dst('k3d-hml / valuto',1,{KUBE_CONTEXT:'k3d-hml',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.hml.local'})]},
+   prd:{on:true,d:[dst('prd-sp / valuto',1,{KUBE_CONTEXT:'prd-sp',NAMESPACE:'valuto',REPLICAS:'4',INGRESS_HOST:'api.valuto.com.br'}),dst('prd-rj / valuto',2,{KUBE_CONTEXT:'prd-rj',NAMESPACE:'valuto',REPLICAS:'4',INGRESS_HOST:'api.valuto.com.br'})]}},
+  'valuto-frontend':{dev:{on:true,d:[dst('k3d-dev / no-1',1,{KUBE_CONTEXT:'k3d-dev',NAMESPACE:'valuto',INGRESS_HOST:'valuto.dev.local'})]},qa:{on:true,d:[dst('k3d-qa / valuto',1,{KUBE_CONTEXT:'k3d-qa',NAMESPACE:'valuto',INGRESS_HOST:'valuto.qa.local'})]},
+   hml:{on:true,d:[dst('k3d-hml / valuto',1,{KUBE_CONTEXT:'k3d-hml',NAMESPACE:'valuto',INGRESS_HOST:'valuto.hml.local'})]},prd:{on:true,d:[dst('prd-sp / valuto',1,{KUBE_CONTEXT:'prd-sp',NAMESPACE:'valuto',INGRESS_HOST:'valuto.com.br'})]}},
+  'valuto-batch':{dev:{on:true,d:[dst('k3d-dev / jobs',1,{KUBE_CONTEXT:'k3d-dev',NAMESPACE:'valuto-jobs',SCHEDULE:'0 3 * * *'})]},qa:{on:false,d:[]},hml:{on:false,d:[]},prd:{on:true,d:[]}}},
+ pol:{dev:{modo:'avisa',lim:{critica:'',alta:'',media:'',baixa:''}},qa:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}},hml:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}},prd:{modo:'bloqueia',lim:{critica:0,alta:0,media:5,baixa:''}}},
+ papeis:[{n:'Ana Souza',u:'ana.souza',p:['analista','membro']},{n:'Bruno Lima',u:'bruno.lima',p:['membro','aprovador-tecnico']},{n:'Carla Mendes',u:'carla.mendes',p:['aprovador-tecnico','publicador']},{n:'Diego Rocha',u:'diego.rocha',p:['membro']},{n:'Elisa Prado',u:'elisa.prado',p:['aprovador-negocio']},{n:'Fábio Nunes',u:'fabio.nunes',p:['publicador']},{n:'Gabi Torres',u:'gabi.torres',p:['membro']}]
+};
+let salvo=clone(dados);
+const padrao=a=>a==='dev'?{modo:'avisa',lim:{critica:'',alta:'',media:'',baixa:''}}:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}};
+const ini=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+
+let atual=null,aba='projetos',pagina=0;
+function rota(){
+  const m=/app=(\w+)/.exec(location.hash),a=m&&visiveis().find(x=>x.sigla===m[1]);
+  atual=a||null;
+  $('[data-vista=lista]').hidden=!!atual;$('[data-vista=det]').hidden=!atual;
+  crumb();
+  if(atual)detalhe();else lista();
+}
+function crumb(){
+  $('[data-crumb]').innerHTML=`${ic('grid')}${atual?`<a href="#" style="color:inherit">Aplicações</a> ${ic('chev')} ${atual.nome}`:'Aplicações'} · dados fictícios
+   <label class="demo">Ver como <select data-quem>${Object.entries(QUEM).map(([k,q])=>`<option value="${k}" ${k===quem?'selected':''}>${q.nome} · ${q.rot}</option>`).join('')}</select></label>`;
+  $('[data-quem]').onchange=e=>{quem=e.target.value;$('.me').innerHTML=`<span class="av">${QUEM[quem].ini}</span><div>${QUEM[quem].nome}<small>${quem==='mor'?'MOR':'sem papel global'}</small></div>`;rota()};
+}
+
+/* ---------- lista ---------- */
+function lista(){
+  const mor=quem==='mor';
+  $('[data-nova]').hidden=!pode.criar();
+
+  $('[data-cab]').innerHTML=`<span>Aplicação</span><span>Grupo do GitLab</span><span>Projetos</span><span>Entregas abertas</span><span>Seus papéis</span><span></span>`;
+  const st=$('[data-st].on').dataset.st,q=$('[data-busca]').value.toLowerCase();
+  const filtra=s=>visiveis().filter(a=>(s==='todas'||(s==='ativas')===a.ativa)&&(a.nome+a.sigla+a.grupo).toLowerCase().includes(q));
+  document.querySelectorAll('[data-c]').forEach(c=>c.textContent=filtra(c.dataset.c).length);
+  const l=filtra(st),POR=8,paginas=Math.max(1,Math.ceil(l.length/POR));pagina=Math.min(Math.max(pagina,0),paginas-1);
+  $('[data-lista]').innerHTML=l.length?l.slice(pagina*POR,pagina*POR+POR).map(a=>`<a class="apl${a.ativa?'':' inativa'}" href="#app=${a.sigla}" title="Projetos: ${a.lista} · ${a.pes} pessoas com papel">
+      <div><div class="nome">${a.nome}${a.ativa?'':' <span class="pill">inativa</span>'}</div><div class="sub2 mono">${a.sigla}</div></div>
+      <span class="mono" style="color:var(--tx2)">${a.grupo}</span>
+      <span>${a.proj}</span>
+      <span>${a.abertas||'<span style="color:var(--di)">nenhuma</span>'}</span>
+      <span class="papeis">${(mor?['MOR']:a.papeis[quem]).map(p=>`<span class="pill${p==='MOR'?' blue':''}">${p}</span>`).join('')}</span>
+      ${ic('chev')}</a>`).join(''):`<div class="empty" style="margin:18px;border:0">${ic('grid','lg')}<b style="color:var(--tx)">Nenhuma aplicação com esses filtros</b>${mor?'':'<span>Você só vê as aplicações em que tem papel.</span>'}</div>`;
+  $('[data-pag-info]').textContent=l.length?`${pagina*POR+1}–${Math.min(l.length,pagina*POR+POR)} de ${l.length}`:'';
+  $('[data-nums]').innerHTML=paginas>1?`<button data-p="${pagina-1}" ${pagina===0?'disabled':''} aria-label="Página anterior">‹</button>`+Array.from({length:paginas},(_,i)=>`<button data-p="${i}" class="${i===pagina?'on':''}">${i+1}</button>`).join('')+`<button data-p="${pagina+1}" ${pagina>=paginas-1?'disabled':''} aria-label="Próxima página">›</button>`:'';
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pagina=+b.dataset.p;lista()});
+}
+document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-st]').forEach(x=>x.classList.toggle('on',x===b));pagina=0;lista()});
+$('[data-busca]').oninput=()=>{pagina=0;lista()};
+
+/* ---------- gaveta ---------- */
+function gaveta(html,ligar){
+  const veu=document.createElement('div');veu.className='veu';
+  const g=document.createElement('aside');g.className='gaveta';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');g.innerHTML=html;
+  const fechar=()=>{veu.remove();g.remove();document.removeEventListener('keydown',esc)};
+  const esc=e=>{if(e.key==='Escape')fechar()};
+  veu.onclick=fechar;g.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fechar);document.addEventListener('keydown',esc);
+  document.body.append(veu,g);ligar?.(g,fechar);(g.querySelector('input:not([readonly]):not(:disabled),select:not(:disabled)')||g.querySelector('[data-fechar]')).focus();
+}
+const topoG=(sup,titulo)=>`<div class="dh"><div>${sup}<h2>${titulo}</h2></div><button class="x" data-fechar aria-label="Fechar">${ic('x')}</button></div>`;
+const rodapeG=(ed,salvar,extra='')=>`<div class="acoes dir">${extra}<button class="btn g" data-fechar>${ed?'Cancelar':'Fechar'}</button>${ed?`<button class="btn p" data-salvar>${ic('check')}${salvar}</button>`:''}</div>`;
+
+/* nova aplicação (só MOR) */
+const GRUPOS={'cobranca-pix':['Cobrança Pix',4],'valuto':['Valuto',3],'recursos-humanos':['Recursos Humanos',5]};
+$('[data-nova]').onclick=()=>gaveta(topoG('<span class="pill blue">MOR</span>','Nova aplicação')+`
+  <label class="fld"><span>Nome</span><input class="inp" data-n placeholder="ex.: Recursos Humanos"></label>
+  <label class="fld"><span>Sigla</span><input class="inp mono" data-s maxlength="6" placeholder="ex.: RHU" style="text-transform:uppercase"><small data-s-msg></small></label>
+  <label class="fld"><span>Grupo do GitLab</span><input class="inp mono" data-g placeholder="ex.: recursos-humanos"><small data-g-msg>Conferido ao sair do campo.</small></label>
+  <p class="obs">${ic('shield')}Nasce com a <span class="dic" title="DEV só avisa; QA, HML e produção bloqueiam crítica e alta sem exceção. Projetos e papéis vêm depois.">política padrão</span>.</p>
+  <div class="acoes dir"><button class="btn g" data-fechar>Cancelar</button><button class="btn p" data-criar disabled title="Preencha nome, sigla e um grupo válido">${ic('plus')}Criar aplicação</button></div>`,(g,fechar)=>{
+  let grupoOk=false;const n=g.querySelector('[data-n]'),s=g.querySelector('[data-s]'),gr=g.querySelector('[data-g]'),gm=g.querySelector('[data-g-msg]'),sm=g.querySelector('[data-s-msg]'),bt=g.querySelector('[data-criar]');
+  const ver=()=>{const sig=s.value.trim().toUpperCase(),dup=APLS.some(a=>a.sigla===sig);
+    sm.className=dup?'erro':'';sm.textContent=dup?`A sigla ${sig} já existe.`:'';s.classList.toggle('erro',dup);
+    const ok=n.value.trim()&&sig&&!dup&&grupoOk;bt.disabled=!ok;bt.title=ok?'':'Preencha nome, sigla e um grupo válido'};
+  gr.onblur=()=>{const k=gr.value.trim().toLowerCase();if(!k){grupoOk=false;ver();return}
+    const vinc=APLS.find(a=>a.grupo===k),achou=GRUPOS[k];
+    grupoOk=!!achou&&!vinc;gr.classList.toggle('erro',!grupoOk);
+    gm.className=grupoOk?'ok':'erro';gm.textContent=vinc?`Já pertence à aplicação ${vinc.nome}.`:achou?`Encontrado: ${achou[0]} · ${achou[1]} projetos`:'Não encontrado, ou o bot da Esteira não tem acesso.';ver()};
+  gr.oninput=()=>{grupoOk=false;gm.className='';gm.textContent='Conferido ao sair do campo.';gr.classList.remove('erro');ver()};
+  n.oninput=ver;s.oninput=ver;
+  bt.onclick=()=>{APLS.unshift({nome:n.value.trim(),sigla:s.value.trim().toUpperCase(),grupo:gr.value.trim().toLowerCase(),proj:0,pes:0,abertas:0,ativa:true,papeis:{},lista:'nenhum ainda'});fechar();pagina=0;lista()};
+});
+
+/* ---------- detalhe ---------- */
+function detalhe(){
+  const a=atual,meus=quem==='mor'?['MOR']:a.papeis[quem];
+  $('[data-d-nome]').textContent=a.nome;
+  $('[data-d-estado]').innerHTML=a.ativa?`<span class="pill ok">${ic('ok')}Ativa</span>`:`<span class="pill">Inativa</span>`;
+  $('[data-d-meta]').innerHTML=`<span class="mono">${a.sigla}</span><span>${ic('git')}<span class="mono">${a.grupo}</span></span><span>${ic('box')}${dados.projetos.length} projetos</span><span>${ic('layers')}${a.abertas} entregas abertas</span><span>${ic('user-ok')}${meus.join(', ')}</span>`;
+  $('[data-editar]').hidden=!pode.criar();
+  $('[data-n-proj]').textContent=dados.projetos.length;$('[data-n-pes]').textContent=dados.papeis.length;
+  document.querySelectorAll('[data-aba]').forEach(t=>t.classList.toggle('on',t.dataset.aba===aba));
+  ({projetos:abaProjetos,ambientes:abaAmbientes,politica:abaPolitica,papeis:abaPapeis})[aba]();
+}
+document.querySelectorAll('[data-aba]').forEach(t=>t.onclick=()=>{aba=t.dataset.aba;detalhe()});
+const soLeitura=quemAltera=>`<div class="so-leitura">${ic('lock')}Somente leitura · quem altera: ${quemAltera}</div>`;
+const linkAud=(t,cat='cadastro')=>`<a class="link-aud" href="prototipo-auditoria.html#app=${encodeURIComponent(atual.nome)}&cat=${cat}">${ic('clock')}${t}: ver na auditoria${ic('chev')}</a>`;
+const barra=html=>$('#barra').innerHTML=html;
+function barraSalvar(fatia,rotulo,erro,antes=''){
+  const sujo=JSON.stringify(dados[fatia])!==JSON.stringify(salvo[fatia]);
+  barra(`${antes}<button class="btn g" data-desc ${sujo?'':'disabled'}>Descartar</button><button class="btn p" data-salvar ${sujo&&!erro?'':'disabled'} title="${erro||(sujo?'':'Nada alterado')}">${ic('check')}${rotulo}</button>`);
+  $('[data-desc]').onclick=()=>{dados[fatia]=clone(salvo[fatia]);detalhe()};
+  $('[data-salvar]').onclick=()=>{salvo[fatia]=clone(dados[fatia]);detalhe()};
+}
+const persiste=()=>{salvo.projetos=clone(dados.projetos);salvo.amb=clone(dados.amb)};
+
+/* aba Projetos: tabela só de leitura; editar = clicar na linha */
+function abaProjetos(){
+  const ed=pode.cad();
+  $('#aba').innerHTML=(ed?'':soLeitura('Analista ou MOR'))+`<div class="box tw"><table class="clic"><thead><tr><th>Projeto</th><th>Stack</th><th>Em produção</th><th>Ambientes</th><th>Depende de</th><th></th></tr></thead><tbody>${dados.projetos.map(p=>{const am=dados.amb[p.id];
+    return `<tr data-pid="${p.id}" tabindex="0" class="${p.ativo?'':'inativo'}" title="${ed?'Editar':'Ver'} ${p.id}"><td class="mono">${p.id}${p.ativo?'':' <span class="pill">inativo</span>'}</td><td>${STACK[p.stack]}</td><td class="mono">${p.prd==='—'?'<span style="color:var(--di)">nunca publicado</span>':'v'+p.prd}</td>
+      <td>${AMBS.map(x=>`<span class="ech${am[x].on?'':' off'}" title="${AMB_N[x]} ${am[x].on?'habilitado':'desabilitado'}">${AMB_N[x]}</span>`).join('')}</td>
+      <td>${p.dep?`<span class="mono">${p.dep}</span>`:'<span style="color:var(--di)">—</span>'}</td><td class="dir">${ic('chev')}</td></tr>`}).join('')}</tbody></table></div>
+    <div class="links" style="margin-top:4px">${linkAud('Quem mudou o cadastro e quando')}</div>`;
+  document.querySelectorAll('[data-pid]').forEach(tr=>{tr.onclick=()=>editarProjeto(tr.dataset.pid);tr.onkeydown=e=>{if(e.key==='Enter')editarProjeto(tr.dataset.pid)}});
+  barra(ed?`<button class="btn p" data-add-proj>${ic('plus')}Adicionar projetos</button>`:'');
+  if(ed)$('[data-add-proj]').onclick=addProjetos;
+}
+function criaCiclo(id,dep){let x=dep,n=0;while(x&&n<10){if(x===id)return true;x=dados.projetos.find(p=>p.id===x)?.dep;n++}return false}
+function editarProjeto(id){
+  const ed=pode.cad(),p=dados.projetos.find(x=>x.id===id),am=dados.amb[id],dis=ed?'':'disabled';
+  gaveta(topoG(`<span class="pill">${ic('box')}projeto</span>`,`<span class="mono" style="font-size:inherit">${id}</span>`)+`
+    <dl class="kv"><dt>GitLab</dt><dd class="mono">${atual.grupo}/${id} ${ic('ext')}</dd><dt>Em produção</dt><dd class="mono">${p.prd==='—'?'nunca publicado':'v'+p.prd}</dd><dt>Branches</dt><dd class="mono">${p.branches}</dd></dl>
+    <div class="lado"><label class="fld"><span>Stack</span><select class="sel" data-stack ${dis}>${Object.entries(STACK).map(([k,n])=>`<option value="${k}" ${p.stack===k?'selected':''}>${n}</option>`).join('')}</select></label>
+      <label class="fld"><span>Ativo</span><span style="height:38px;display:flex;align-items:center"><input type="checkbox" class="tg" data-ativo ${p.ativo?'checked':''} ${dis} aria-label="Projeto ativo"></span></label></div>
+    <label class="fld"><span>Depende de</span><select class="sel" data-dep ${dis}><option value="">nenhum</option>${dados.projetos.filter(o=>o.id!==id).map(o=>`<option ${p.dep===o.id?'selected':''}>${o.id}</option>`).join('')}</select><small data-dep-msg>Vem marcada em toda entrega nova; dá para mudar só na entrega.</small></label>
+    <div class="fld"><span>Ambientes</span><div class="ambs-g">${AMBS.map(x=>x==='prd'?`<label title="Produção é obrigatória">PRD ${ic('lock')}</label>`:`<label>${AMB_N[x]}<input type="checkbox" class="tg" data-amb="${x}" ${am[x].on?'checked':''} ${dis} aria-label="${AMB_N[x]} habilitado"></label>`).join('')}</div><small data-amb-msg></small></div>
+    ${rodapeG(ed,'Salvar projeto')}`,(g,fechar)=>{
+    if(!ed)return;
+    const dep=g.querySelector('[data-dep]'),s=g.querySelector('[data-salvar]'),dm=g.querySelector('[data-dep-msg]'),amsg=g.querySelector('[data-amb-msg]');
+    const valida=()=>{const c=dep.value&&criaCiclo(id,dep.value);dep.classList.toggle('erro',!!c);dm.className=c?'erro':'';dm.textContent=c?`Dependência circular: ${dep.value} já depende de ${id}.`:'Vem marcada em toda entrega nova; dá para mudar só na entrega.';
+      const perde=[...g.querySelectorAll('[data-amb]')].filter(t=>!t.checked&&am[t.dataset.amb].d.length).map(t=>`${AMB_N[t.dataset.amb]} (${am[t.dataset.amb].d.length} destino${am[t.dataset.amb].d.length>1?'s':''})`);
+      amsg.textContent=perde.length?`Desabilitar ${perde.join(', ')}: os destinos ficam guardados, mas o ambiente deixa de publicar.`:'';
+      s.disabled=!!c;s.title=c?'Resolva a dependência circular':''};
+    dep.onchange=valida;g.querySelectorAll('[data-amb]').forEach(t=>t.onchange=valida);valida();
+    s.onclick=()=>{p.stack=g.querySelector('[data-stack]').value;p.dep=dep.value;p.ativo=g.querySelector('[data-ativo]').checked;
+      g.querySelectorAll('[data-amb]').forEach(t=>am[t.dataset.amb].on=t.checked);persiste();fechar();detalhe()};
+  });
+}
+const DO_GRUPO=[['valuto-api','dotnet'],['valuto-frontend','angular'],['valuto-batch','outro'],['valuto-mobile-bff','dotnet'],['valuto-docs',''],['valuto-infra','']];
+function addProjetos(){
+  gaveta(topoG(`<span class="pill">${ic('git')}<span class="mono">${atual.grupo}</span></span>`,'Adicionar projetos')+`
+    <div class="box">${DO_GRUPO.map(([id,sug])=>{const ja=dados.projetos.some(p=>p.id===id);
+      return `<label class="ck${ja?' ja':''}"><input type="checkbox" data-pid="${id}" ${ja?'disabled checked':''}><span class="mono">${id}</span>${ja?'<span class="dica-g" style="margin-left:auto">já cadastrado</span>':`<select class="sel sm" data-pst="${id}" aria-label="Stack de ${id}" title="${sug?'Sugerida pelo APP_TECHNOLOGY do .gitlab-ci.yml':'Sem APP_TECHNOLOGY no .gitlab-ci.yml'}">${Object.entries(STACK).map(([k,n])=>`<option value="${k}" ${sug===k||(!sug&&k==='outro')?'selected':''}>${n}</option>`).join('')}</select>`}</label>`}).join('')}</div>
+    <p class="obs">${ic('server')}Entra com <span class="dic" title="Produção sempre habilitada; DEV, QA e HML conforme existam as branches no projeto.">os 4 ambientes</span> e stack <span class="dic" title="Lida do APP_TECHNOLOGY no .gitlab-ci.yml, quando existe">sugerida</span>.</p>
+    <div class="acoes dir"><button class="btn g" data-fechar>Cancelar</button><button class="btn p" data-ok disabled title="Marque ao menos um projeto">${ic('plus')}Adicionar</button></div>`,(g,fechar)=>{
+    const bt=g.querySelector('[data-ok]'),marc=()=>[...g.querySelectorAll('[data-pid]:checked:not(:disabled)')];
+    g.querySelectorAll('[data-pid]').forEach(c=>c.onchange=()=>{const n=marc().length;bt.disabled=!n;bt.title=n?'':'Marque ao menos um projeto';bt.innerHTML=ic('plus')+(n?`Adicionar ${n} projeto${n>1?'s':''}`:'Adicionar')});
+    bt.onclick=()=>{marc().forEach(c=>{const id=c.dataset.pid;dados.projetos.push({id,stack:g.querySelector(`[data-pst="${id}"]`).value,prd:'—',dep:'',ativo:true,branches:'dev, main'});
+      dados.amb[id]={dev:{on:true,d:[]},qa:{on:false,d:[]},hml:{on:false,d:[]},prd:{on:true,d:[]}}});persiste();fechar();detalhe()};
+  });
+}
+
+/* aba Ambientes e destinos: uma matriz projeto × ambiente */
+function abaAmbientes(){
+  const ed=pode.cad();barra('');
+  $('#aba').innerHTML=(ed?'':soLeitura('Analista ou MOR'))+`<div class="box tw"><table class="mat"><thead><tr><th>Projeto</th>${AMBS.map(x=>`<th class="amb">${AMB_N[x]}</th>`).join('')}</tr></thead><tbody>${dados.projetos.map(p=>`<tr><td class="mono">${p.id}</td>${AMBS.map(x=>{const e=dados.amb[p.id][x];
+      if(!e.on)return `<td class="amb"><span class="desab" title="${AMB_N[x]} desabilitado: as entregas deste projeto pulam o ${AMB_N[x]}. Habilite no projeto.">—</span></td>`;
+      return `<td class="amb"><div class="dests">${e.d.sort((a,b)=>a.ordem-b.ordem).map((d,i)=>`<button class="dn" data-d="${p.id}|${x}|${i}" title="${d.cfg.map(c=>c.join('=')).join('\n')}">${d.nome}</button>`).join('')}
+        ${e.d.length?'':`<span class="semd" title="Ambiente habilitado sem destino: não publica">${ic('alert')}sem destino</span>`}
+        ${ed?`<button class="mais-d" data-novo="${p.id}|${x}" aria-label="Novo destino em ${AMB_N[x]} de ${p.id}">${ic('plus')}destino</button>`:''}</div></td>`}).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="links" style="margin-top:4px"><p class="obs" style="margin:14px 0 0">${ic('key')}A configuração vai para a pipeline; <span class="dic" title="Segredo continua como variável protegida do GitLab; aqui só valores não secretos.">segredo não fica aqui</span>.</p>${linkAud('Quem mudou destinos e quando')}</div>`;
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const [p,x,i]=b.dataset.d.split('|');editarDestino(p,x,+i)});
+  document.querySelectorAll('[data-novo]').forEach(b=>b.onclick=()=>{const [p,x]=b.dataset.novo.split('|');editarDestino(p,x,-1)});
+}
+function editarDestino(pid,amb,i){
+  const ed=pode.cad(),lista=dados.amb[pid][amb].d,d=i>=0?clone(lista[i]):{nome:'',ordem:lista.length+1,cfg:[['KUBE_CONTEXT',''],['NAMESPACE','']]},ro=ed?'':'readonly';
+  gaveta(topoG(`<span class="pill">${AMB_N[amb]} · <span class="mono">${pid}</span></span>`,i>=0?(ed?'Editar destino':'Destino'):'Novo destino')+`
+    <div class="lado"><label class="fld"><span>Nome</span><input class="inp mono" data-nome value="${d.nome}" placeholder="ex.: k3d-qa / valuto" ${ro}><small data-nome-msg></small></label>
+      <label class="fld"><span>Ordem</span><input class="inp" type="number" min="1" data-ordem value="${d.ordem}" ${ro}></label></div>
+    <div class="fld" style="margin-bottom:8px"><span>Configuração</span></div>
+    <div class="cfg"><div class="cfg-h"><span>Chave</span><span>Valor</span><span></span></div><div class="cfg" data-cfg></div></div>
+    ${ed?`<button class="add-d" data-add-cfg>${ic('plus')}Chave</button>`:''}
+    <div data-segredo></div>
+    ${rodapeG(ed,'Salvar destino',ed&&i>=0?`<button class="btn d esq" data-excluir>${ic('trash')}Excluir</button>`:'')}`,(g,fechar)=>{
+    const box=g.querySelector('[data-cfg]');
+    const desenha=()=>{box.innerHTML=d.cfg.map(([k,v],j)=>`<div class="cfg-l"><input class="inp${SEGREDO.test(k)?' erro':''}" data-k="${j}" value="${k}" aria-label="Chave ${j+1}" ${ro} spellcheck="false"><input class="inp" data-v="${j}" value="${v}" aria-label="Valor ${j+1}" ${ro} spellcheck="false">${ed?`<button class="icone" data-rm="${j}" title="Tirar a chave">${ic('x')}</button>`:'<span></span>'}</div>`).join('');
+      box.querySelectorAll('[data-k]').forEach(n=>n.oninput=()=>{d.cfg[+n.dataset.k][0]=n.value;n.classList.toggle('erro',SEGREDO.test(n.value));valida()});
+      box.querySelectorAll('[data-v]').forEach(n=>n.oninput=()=>{d.cfg[+n.dataset.v][1]=n.value;valida()});
+      box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{d.cfg.splice(+b.dataset.rm,1);desenha();valida()})};
+    const valida=()=>{
+      const seg=d.cfg.filter(([k])=>SEGREDO.test(k)).map(([k])=>k),nome=g.querySelector('[data-nome]').value.trim(),dup=lista.some((x,j)=>j!==i&&x.nome===nome),vazia=d.cfg.some(([k])=>!k.trim());
+      g.querySelector('[data-segredo]').innerHTML=seg.length?`<div class="segredo">${ic('key')}<div><b>${seg.map(k=>`<span class="mono">${k}</span>`).join(', ')} parece segredo</b><br>Cadastre como variável protegida no GitLab e use só o nome dela no job.</div></div>`:'';
+      const nm=g.querySelector('[data-nome-msg]');nm.className=dup?'erro':'';nm.textContent=dup?'Já existe um destino com esse nome aqui.':'';
+      const s=g.querySelector('[data-salvar]');if(!s)return;
+      const motivo=!nome?'Dê um nome ao destino':dup?'Nome repetido':seg.length?'Tire a chave com cara de segredo':vazia?'Há chave sem nome':'';
+      s.disabled=!!motivo;s.title=motivo};
+    desenha();valida();
+    g.querySelector('[data-nome]').oninput=valida;
+    g.querySelector('[data-add-cfg]')?.addEventListener('click',()=>{d.cfg.push(['','']);desenha();valida();box.querySelector(`[data-k="${d.cfg.length-1}"]`).focus()});
+    g.querySelector('[data-salvar]')?.addEventListener('click',()=>{d.nome=g.querySelector('[data-nome]').value.trim();d.ordem=+g.querySelector('[data-ordem]').value||1;if(i>=0)lista[i]=d;else lista.push(d);persiste();fechar();abaAmbientes()});
+    g.querySelector('[data-excluir]')?.addEventListener('click',()=>{if(!confirm(`Excluir o destino ${d.nome}? Os próximos deploys de ${AMB_N[amb]} deixam de publicar nele.`))return;lista.splice(i,1);persiste();fechar();abaAmbientes()});
+  });
+}
+
+/* aba Política: uma tabela severidade × ambiente */
+function abaPolitica(){
+  const ed=pode.pol(),P=dados.pol;
+  const cab=x=>{const endu=JSON.stringify(P[x])!==JSON.stringify(padrao(x));return `<th>${AMB_N[x]}<small class="${endu?'endu':''}">${endu?'endurecida':'padrão'}</small></th>`};
+  const modo=x=>x==='dev'?`<span class="seg" role="group" aria-label="Modo em DEV"><button data-modo="avisa" class="${P.dev.modo==='avisa'?'on':''}" ${ed?'':'disabled'}>Avisa</button><button data-modo="bloqueia" class="${P.dev.modo==='bloqueia'?'on':''}" ${ed?'':'disabled'}>Bloqueia</button></span>`
+    :`<span class="travado" style="font-family:inherit;font-size:13px" title="Piso fixo: em ${AMB_N[x]} sempre bloqueia">Bloqueia ${ic('lock')}</span>`;
+  const cel=(x,k,n)=>x!=='dev'&&(k==='critica'||k==='alta')?`<span class="travado" title="Piso fixo: ${n.toLowerCase()} em ${AMB_N[x]} só passa com exceção">0 ${ic('lock')}</span>`
+    :`<input class="inp" type="number" min="0" data-lim="${x}|${k}" value="${P[x].lim[k]}" placeholder="${P[x].modo==='avisa'?'só avisa':'sem limite'}" ${ed&&P[x].modo==='bloqueia'?'':'disabled'} aria-label="Máximo de ${n} sem exceção em ${AMB_N[x]}">`;
+  $('#aba').innerHTML=(ed?'':soLeitura('Aprovador técnico ou MOR'))+`<div class="box tw"><table class="pol"><thead><tr><th><span class="dic" title="Número = quantas passam sem exceção (0 = nenhuma). Vazio = sem limite.">Máximo sem exceção</span></th>${AMBS.map(cab).join('')}</tr></thead><tbody>
+      <tr><td>Modo</td>${AMBS.map(x=>`<td>${modo(x)}</td>`).join('')}</tr>
+      ${SEVS.map(([k,n,c])=>`<tr><td><span class="sevn"><i class="dotc" style="--c:${c}"></i>${n}</span></td>${AMBS.map(x=>`<td>${cel(x,k,n)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="links"><p class="obs">${ic('lock')}<span class="dic" title="Em QA, HML e produção, crítica e alta só não bloqueiam com exceção; em DEV só avisa. A aplicação pode endurecer, nunca afrouxar.">Piso fixo da Esteira</span>: dá para endurecer, nunca afrouxar.</p><a class="link-aud" href="prototipo-excecoes.html">${ic('shield')}2 exceções ativas${ic('chev')}</a>${linkAud('Quem mudou a política','politica')}</div>`;
+  if(!ed){barra('');return}
+  document.querySelectorAll('[data-modo]').forEach(b=>b.onclick=()=>{P.dev.modo=b.dataset.modo;if(P.dev.modo==='avisa')P.dev.lim={critica:'',alta:'',media:'',baixa:''};abaPolitica()});
+  document.querySelectorAll('[data-lim]').forEach(n=>n.oninput=()=>{const [x,k]=n.dataset.lim.split('|');P[x].lim[k]=n.value===''?'':Math.max(0,Math.floor(+n.value));
+    const th=document.querySelectorAll('table.pol thead th')[AMBS.indexOf(x)+1],endu=JSON.stringify(P[x])!==JSON.stringify(padrao(x));th.querySelector('small').className=endu?'endu':'';th.querySelector('small').textContent=endu?'endurecida':'padrão';
+    barraSalvar('pol','Salvar política')});
+  barraSalvar('pol','Salvar política');
+}
+
+/* aba Pessoas e papéis: matriz pessoa × papel */
+function abaPapeis(){
+  const ed=pode.pap();
+  $('#aba').innerHTML=(ed?'':soLeitura('MOR'))+`
+    <div class="mor-g"><span class="av sm">DB</span><span>Daniel é <b style="color:var(--tx2)">MOR</b>: pode tudo, sem papel aqui.</span></div>
+    <div class="box tw"><table class="pap"><thead><tr><th>Pessoa</th>${PAPEIS.map(([k,n,d])=>`<th class="c"><span class="dic" title="${d}">${n}</span></th>`).join('')}${ed?'<th></th>':''}</tr></thead><tbody>${dados.papeis.map((pe,i)=>`<tr class="${salvo.papeis.some(s=>s.u===pe.u)?'':'nova'}">
+      <td><div class="pessoa"><span class="av sm">${ini(pe.n)}</span><div>${pe.n}<small class="mono">${pe.u}</small></div></div>${!pe.p.length?'<div class="erro-tx">marque ao menos um papel</div>':''}</td>
+      ${PAPEIS.map(([k,n])=>`<td class="c">${ed?`<input type="checkbox" data-pp="${i}|${k}" ${pe.p.includes(k)?'checked':''} aria-label="${pe.n}: ${n}">`:pe.p.includes(k)?`<span class="stat ok" aria-label="sim">${ic('check')}</span>`:'<span style="color:var(--ln2)" aria-label="não">—</span>'}</td>`).join('')}
+      ${ed?`<td class="dir"><button class="icone" data-tirar="${i}" title="Tirar ${pe.n} da aplicação">${ic('x')}</button></td>`:''}</tr>`).join('')}</tbody></table></div>
+    <div class="links" style="margin-top:4px">${linkAud('Quem deu ou tirou papel','papeis')}</div>`;
+  if(!ed){barra('');return}
+  document.querySelectorAll('[data-pp]').forEach(c=>c.onchange=()=>{const [i,k]=c.dataset.pp.split('|'),pe=dados.papeis[+i];pe.p=c.checked?[...pe.p,k]:pe.p.filter(x=>x!==k);abaPapeis()});
+  document.querySelectorAll('[data-tirar]').forEach(b=>b.onclick=()=>{dados.papeis.splice(+b.dataset.tirar,1);abaPapeis()});
+  barraSalvar('papeis','Salvar papéis',dados.papeis.some(p=>!p.p.length)?'Toda pessoa precisa de ao menos um papel':'',`<button class="btn g" data-add-pes>${ic('plus')}Adicionar pessoa</button>`);
+  $('[data-add-pes]').onclick=addPessoa;
+}
+const KEYCLOAK=[['Helena Costa','helena.costa'],['Igor Martins','igor.martins'],['Joana Reis','joana.reis'],['Bruno Lima','bruno.lima'],['Ana Souza','ana.souza']];
+function addPessoa(){
+  gaveta(topoG('<span class="pill blue">MOR</span>','Adicionar pessoa')+`
+    <label class="campo" style="margin-bottom:10px">${ic('search')}<input data-qp placeholder="Buscar no Keycloak" aria-label="Buscar pessoa"></label>
+    <div class="box"><div data-rp></div></div>
+    <p class="obs">${ic('users')}Entra como Membro; ajuste na tabela antes de salvar.</p>
+    <div class="acoes dir"><button class="btn g" data-fechar>Fechar</button></div>`,(g,fechar)=>{
+    const q=g.querySelector('[data-qp]'),r=g.querySelector('[data-rp]');
+    const des=()=>{const f=q.value.toLowerCase();r.innerHTML=KEYCLOAK.filter(p=>(p[0]+p[1]).toLowerCase().includes(f)).map(([n,u])=>{const ja=dados.papeis.some(p=>p.u===u);
+      return `<button class="res${ja?' ja':''}" data-u="${u}" ${ja?'disabled':''}><span class="av sm">${ini(n)}</span>${n}<span class="mono" style="color:var(--di)">${u}</span><span class="dir">${ja?'já tem papel':ic('plus')+'Adicionar'}</span></button>`}).join('')||'<div class="empty" style="border:0">Ninguém encontrado</div>';
+      r.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const p=KEYCLOAK.find(k=>k[1]===b.dataset.u);dados.papeis.push({n:p[0],u:p[1],p:['membro']});fechar();detalhe()})};
+    q.oninput=des;des();
+  });
+}
+
+/* editar aplicação (só MOR) */
+$('[data-editar]').onclick=()=>{const a=atual;gaveta(topoG('<span class="pill blue">MOR</span>','Editar aplicação')+`
+  <label class="fld"><span>Nome</span><input class="inp" data-n value="${a.nome}"></label>
+  <div class="lado"><label class="fld"><span>Sigla</span><input class="inp mono" data-s value="${a.sigla}" style="text-transform:uppercase"></label>
+    <label class="fld"><span>Ativa</span><span style="height:38px;display:flex;align-items:center"><input type="checkbox" class="tg" data-at ${a.ativa?'checked':''} aria-label="Aplicação ativa" title="Inativa não aceita entrega nova; as abertas seguem até o fim"></span></label></div>
+  <label class="fld"><span>Grupo do GitLab</span><input class="inp mono" value="${a.grupo}" readonly title="O grupo não muda depois de criada"></label>
+  ${rodapeG(true,'Salvar')}`,(g,fechar)=>{
+  g.querySelector('[data-salvar]').onclick=()=>{a.nome=g.querySelector('[data-n]').value.trim()||a.nome;a.sigla=g.querySelector('[data-s]').value.trim().toUpperCase()||a.sigla;a.ativa=g.querySelector('[data-at]').checked;fechar();location.hash='app='+a.sigla;rota()}})};
+
+const sino=$('.sino'),avisos=$('#avisos');
+const mostrar=x=>{avisos.hidden=!x;sino.setAttribute('aria-expanded',x)};
+sino.onclick=e=>{e.stopPropagation();mostrar(avisos.hidden)};
+document.addEventListener('click',e=>{if(!avisos.hidden&&!avisos.contains(e.target))mostrar(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')mostrar(false)});
+
+addEventListener('hashchange',()=>{aba='projetos';rota()});
+rota();
+</script>
+</body></html>

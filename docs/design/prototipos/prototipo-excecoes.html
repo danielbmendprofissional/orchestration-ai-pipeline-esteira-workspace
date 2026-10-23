@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Exceções (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+[hidden]{display:none!important}
+.topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 18px}
+.topo h1{margin-right:auto}
+.filtrobar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.campo{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--mu);flex:0 1 260px;min-width:0}
+.campo:focus-within{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.campo input{border:0;background:none;color:var(--tx);font:inherit;outline:none;width:100%}
+.inp,.sel{padding:8px 11px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx);font:inherit;outline:none}
+.inp:focus,.sel:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.inp.erro{border-color:var(--bad-ln);box-shadow:0 0 0 3px #F8514922}
+textarea.inp{resize:vertical;min-height:84px;width:100%}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:16px}
+.fld>span{color:var(--tx2);font-weight:600}
+.fld small{color:var(--di);font-size:12px}.fld small.erro{color:var(--bad-tx)}
+.dic{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
+.obs{color:var(--mu);font-size:12.5px;margin-top:14px}.obs .i{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+
+/* lista enxuta */
+.lista{border:1px solid var(--ln);border-radius:12px;background:var(--s1);box-shadow:inset 0 1px 0 var(--hl);overflow:hidden}
+.cab,.exc-l{display:grid;grid-template-columns:20px minmax(240px,1.6fr) minmax(120px,.8fr) 84px 170px 150px 28px 20px;gap:16px;align-items:center;padding:0 20px}
+.cab{height:38px;color:var(--di);font-size:12px;border-bottom:1px solid var(--ln);background:var(--s2)}
+.exc-l{width:100%;min-height:62px;padding-top:10px;padding-bottom:10px;border:0;border-bottom:1px solid var(--ln);background:none;text-align:left;color:inherit;font-size:13px}
+.exc-l:last-child{border-bottom:0}.exc-l:hover{background:var(--s2)}
+.exc-l.encerrada{color:var(--mu)}
+.exc-l>.pill{justify-self:start}
+.demo{flex-wrap:wrap;justify-content:flex-end;max-width:100%}.demo select{min-width:0;max-width:100%}
+.exc-l.novo{background:#0A4EE40D}
+.tit{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub2{color:var(--di);font-size:12.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ech{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;border:1px solid var(--ln2);color:var(--tx2);margin-right:3px}
+.ech.off{border-style:dashed;color:var(--di);text-decoration:line-through}
+.val{font-size:12.5px;color:var(--tx2)}.val.run{color:var(--run-tx)}.val.bad{color:var(--bad-tx)}.val.mu{color:var(--di)}
+.pagl{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--mu);font-size:13px}
+.nums{display:flex;gap:4px}
+.nums button{min-width:32px;height:32px;border-radius:8px;border:1px solid var(--ln2);background:var(--s1);color:var(--tx2)}
+.nums button.on{border-color:var(--blue2);background:var(--blue-bg);color:#fff}
+.nums button:disabled{opacity:.4;cursor:not-allowed}
+
+/* gaveta */
+.gaveta .kv{margin-bottom:6px}
+.ondes{border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.onde{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--ln);color:inherit;text-decoration:none;font-size:13px}
+.onde:last-child{border-bottom:0}.onde:hover{background:var(--s2)}
+.onde>.i{color:var(--mu)}.onde .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acoes.dir{justify-content:flex-end;flex-wrap:wrap}.acoes .esq{margin-right:auto}
+.motivo-box{border-left:2px solid var(--ln2);padding:2px 0 2px 14px;color:var(--tx2);font-size:13.5px;line-height:1.6}
+.auto{display:flex;gap:10px;margin-top:12px;border-left:2px solid var(--run);padding:2px 0 2px 14px;font-size:13px;color:var(--tx2)}
+.decisao{margin-top:20px}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.opc{display:flex;gap:10px;border:1px solid var(--ln2);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:13px}
+.opc:has(input:checked){border-color:var(--blue2);background:var(--blue-bg)}
+.opc:has(input:focus-visible){outline:2px solid var(--blue-tx);outline-offset:2px}
+.opc input{accent-color:var(--blue2);margin-top:2px}
+.opc small{display:block;color:var(--mu);font-size:12px;margin-top:2px}
+.ambs-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ambs-g label{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--ln2);border-radius:9px;padding:9px 11px;font-size:12.5px;font-weight:600;color:var(--tx2);cursor:pointer}
+.ambs-g label:has(input:disabled){opacity:.5;cursor:not-allowed}
+.ambs-g input{width:16px;height:16px;accent-color:var(--blue2)}
+.prazo{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.prazo .inp{width:170px}
+.prazo .f{padding:5px 10px;font-size:12px}
+
+@media (max-width:1100px){.cab{display:none}.exc-l{grid-template-columns:20px 1fr;row-gap:6px}.exc-l>:nth-child(n+3){grid-column:2}.exc-l>:last-child{display:none}}
+@media (max-width:520px){.tipos{grid-template-columns:1fr}.ambs-g{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body data-pagina="excecoes">
+<nav data-menu></nav>
+<main>
+  <div class="crumb" data-crumb></div>
+  <div class="topo">
+    <h1>Exceções</h1>
+    <div class="acoes-topo">
+      <div class="sino-wrap">
+        <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
+        <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
+          <div class="av-h">Aguardando você</div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><button class="btn g" data-abre="SEC-2291">Revisar</button></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="filtrobar">
+    <label class="campo"><svg class="i"><use href="#i-search"/></svg><input type="search" placeholder="Buscar por achado, regra, CVE ou código" data-busca aria-label="Buscar exceção"></label>
+    <select class="sel" data-app aria-label="Aplicação"><option value="">Todas as aplicações</option></select>
+    <button class="f" data-st="pend">Aguardando aprovação <span class="n" data-c="pend"></span></button>
+    <button class="f" data-st="ativas">Ativas <span class="n" data-c="ativas"></span></button>
+    <button class="f" data-st="vencendo">Vencendo <span class="n" data-c="vencendo"></span></button>
+    <button class="f" data-st="vencidas">Vencidas <span class="n" data-c="vencidas"></span></button>
+    <button class="f" data-st="encerradas">Encerradas <span class="n" data-c="encerradas"></span></button>
+    <button class="f" data-st="todas">Todas <span class="n" data-c="todas"></span></button>
+  </div>
+  <div class="lista">
+    <div class="cab"><span></span><span>Achado</span><span>Aplicação</span><span>Severidade</span><span>Vale em</span><span>Validade</span><span title="Quem pediu">Pediu</span><span></span></div>
+    <div data-lista></div>
+  </div>
+  <div class="pagl"><span data-pag-info></span><div class="nums" data-nums></div></div>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+const HOJE=new Date(2026,9,23),DIA=864e5;
+const data=s=>{const [d,m,a]=s.split('/');return new Date(+a,m-1,+d)},fmtD=d=>d.toLocaleDateString('pt-BR'),dias=s=>Math.round((data(s)-HOJE)/DIA);
+const somaDias=n=>fmtD(new Date(HOJE.getTime()+n*DIA)),isoDe=s=>{const [d,m,a]=s.split('/');return `${a}-${m}-${d}`},deIso=s=>{const [a,m,d]=s.split('-');return `${d}/${m}/${a}`};
+
+/* quem está vendo (cenário de demonstração) */
+const QUEM={mor:{nome:'Daniel',ini:'DB',rot:'MOR',apps:null},aprovador:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico',apps:['Valuto','Cobrança Pix']},membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro',apps:['Valuto','Portal do Cliente','Gestão de Contratos']}};
+let quem='mor';
+const eu=()=>QUEM[quem].nome,podeDecidir=()=>quem!=='membro';
+
+const TIPOS={fp:['Falso positivo',180,'Explique por que o achado não é real neste código.'],ra:['Risco aceito',90,'Explique a mitigação e até quando corrige.']};
+const SEV={critica:['Crítica','bad'],alta:['Alta','run'],media:['Média',''],baixa:['Baixa','']};
+const AMBS=['dev','qa','hml','prd'],AMB_N={dev:'DEV',qa:'QA',hml:'HML',prd:'PRD'};
+/* st: pend · ativa · vencida · repr (reprovada) · revo (revogada) · canc (cancelada por quem pediu) */
+let EXC=[
+ {id:'SEC-2311',t:'Path traversal no upload de comprovante',f:'Opengrep',r:'csharp.lang.security.path-traversal',s:'alta',app:'Valuto',tipo:'fp',amb:['qa','hml','prd'],ate:'21/01/2027',st:'pend',ped:['Daniel','23/10/2026'],m:'O nome do arquivo é gerado pelo servidor (GUID) antes de montar o caminho; o valor vindo do cliente nunca entra no path.',onde:[['valuto-api','ComprovanteService.cs:57','v4.0.0-rc2','QA']]},
+ {id:'SEC-2310',t:'CVE crítica no Npgsql',f:'Trivy',r:'CVE-2026-40112',s:'critica',app:'Valuto',tipo:'ra',amb:['qa','hml'],ate:'20/11/2026',st:'pend',ped:['Bruno Lima','23/10/2026'],m:'A correção só sai no Npgsql 10.0.3 (previsto para 05/11). A falha está no COPY binário, que a valuto-api não usa. Fica fora de produção até atualizar.',onde:[['valuto-api','Npgsql 10.0.1','v3.8.0-rc1','QA']]},
+ {id:'SEC-2291',t:'SQL montado com interpolação',f:'Opengrep',r:'csharp.lang.security.sqli',s:'alta',app:'Valuto',tipo:'fp',amb:['qa','hml','prd'],ate:'27/10/2026',st:'ativa',ped:['Daniel','28/04/2026'],apr:['Daniel','28/04/2026','Único aprovador técnico disponível na época.'],m:'O parâmetro vem de um enum interno (tipo de extrato), nunca do usuário. A consulta não aceita texto livre.',onde:[['valuto-api','ExtratoRepository.cs:88','v4.0.0-rc2','QA'],['valuto-api','ExtratoRepository.cs:88','v3.4.1','PRD']]},
+ {id:'SEC-2305',t:'Imagem base com libssl3 desatualizada',f:'Trivy',r:'CVE-2026-28802',s:'alta',app:'Cobrança Pix',tipo:'ra',amb:['qa','hml'],ate:'15/12/2026',st:'ativa',ped:['Carla Mendes','16/09/2026'],apr:['Bruno Lima','17/09/2026'],m:'A imagem base nova quebra o driver do HSM; a troca está na entrega "Gateway v2". Até lá, só QA e HML.',onde:[['cpx-gateway','aspnet:10.0 · libssl3','v1.9.0-rc1','HML']]},
+ {id:'SEC-2302',t:'TLS 1.0 habilitado no ingress',f:'ZAP',r:'10026',s:'alta',app:'Cobrança Pix',tipo:'ra',amb:['hml'],ate:'30/11/2026',st:'ativa',ped:['Carla Mendes','01/10/2026'],apr:['Bruno Lima','01/10/2026'],m:'O homologador do banco parceiro ainda usa TLS 1.0. Só HML; produção já está em TLS 1.2+.',onde:[['cpx-web','ingress hml','v2.4.0-rc1','HML']]},
+ {id:'SEC-2299',t:'CVE alta no QuestPDF',f:'Trivy',r:'CVE-2026-31877',s:'alta',app:'Valuto',tipo:'ra',amb:['qa','hml','prd'],ate:'10/01/2027',st:'ativa',ped:['Ana Souza','12/10/2026'],apr:['Carla Mendes','13/10/2026'],m:'Só afeta fontes enviadas pelo usuário; o extrato usa fontes embutidas. Atualização marcada para a entrega de dezembro.',onde:[['valuto-api','QuestPDF 2026.9.1','v4.0.0-rc2','QA']]},
+ {id:'SEC-2298',t:'Chave de API no repositório',f:'Gitleaks',r:'generic-api-key',s:'alta',app:'Portal do Cliente',tipo:'fp',amb:['qa','hml','prd'],ate:'20/04/2027',st:'ativa',ped:['Ana Souza','22/10/2026'],apr:['Carla Mendes','22/10/2026'],m:'É a chave de exemplo da documentação do provedor (sandbox pública), no README.',onde:[['portal-web','README.md:41','v1.11.0-rc2','QA']]},
+ {id:'SEC-2294',t:'JWT sem validação de audience',f:'agente security',r:'auth.jwt.audience',s:'alta',app:'Portal do Cliente',tipo:'fp',amb:['qa','hml','prd'],ate:'02/04/2027',st:'ativa',ped:['Diego Rocha','04/10/2026'],apr:['Carla Mendes','05/10/2026'],m:'A audience é validada no BFF (ADR-0004); a API só recebe chamadas internas com token já validado.',onde:[['portal-api','AuthSetup.cs:23','v2.3.0-rc1','QA']]},
+ {id:'SEC-2287',t:'Deserialização insegura',f:'Opengrep',r:'csharp.lang.security.insecure-deserialization',s:'critica',app:'Gestão de Contratos',tipo:'ra',amb:['qa'],ate:'20/10/2026',st:'ativa',ped:['Diego Rocha','21/09/2026'],apr:['Daniel','21/09/2026'],m:'Só no importador legado, desligado por feature flag. Correção prevista para outubro.',onde:[['contratos-api','ImportadorLegado.cs:112','v3.2.0-rc1','QA']]},
+ {id:'SEC-2284',t:'Senha em log de debug',f:'Opengrep',r:'generic.logging.secret',s:'critica',app:'Folha de Pagamento',tipo:'ra',amb:['qa','hml'],ate:'13/10/2026',st:'ativa',ped:['Fábio Nunes','14/09/2026'],apr:['Daniel','14/09/2026'],m:'Log de debug desligado em QA e HML; remoção na próxima versão.',onde:[['folha-api','LoginHandler.cs:30','v5.1.0-rc1','HML']]},
+ {id:'SEC-2280',t:'XSS refletido na busca',f:'ZAP',r:'40012',s:'alta',app:'Portal do Cliente',tipo:'ra',amb:['qa','hml','prd'],ate:'01/01/2027',st:'repr',ped:['Gabi Torres','02/10/2026'],apr:['Carla Mendes','02/10/2026','Tem correção simples (escapar o termo); corrigir em vez de aceitar.'],m:'Busca pouco usada; correção na próxima sprint.',onde:[['portal-web','/busca?q=','v1.10.0-rc1','QA']]},
+ {id:'SEC-2276',t:'Container rodando como root',f:'Checkov',r:'CKV_K8S_20',s:'alta',app:'Valuto',tipo:'ra',amb:['qa','hml'],ate:'30/12/2026',st:'revo',ped:['Ana Souza','01/07/2026'],apr:['Bruno Lima','01/07/2026'],rev:['Bruno Lima','10/09/2026','Corrigido na v3.4.0 (runAsNonRoot).'],m:'Imagem antiga do worker precisava de root para o cron.',onde:[['valuto-batch','deploy/k8s/base/job.yaml','v1.2.0','QA']]}
+];
+// entrega de cada candidata, para o link "onde o achado aparece"
+const ENTREGA={'v4.0.0-rc2':'Extrato em PDF','v3.4.1':'Correção de juros','v3.8.0-rc1':'Busca de transações','v1.9.0-rc1':'Gateway v2','v2.4.0-rc1':'Pix por QR code','v2.3.0-rc1':'Notificações por e-mail','v1.11.0-rc2':'Tema escuro','v1.10.0-rc1':'Notificações por e-mail','v3.2.0-rc1':'Aditivos em lote','v5.1.0-rc1':'Login único','v1.2.0':'Conciliação noturna'};
+const visiveis=()=>EXC.filter(e=>!QUEM[quem].apps||QUEM[quem].apps.includes(e.app));
+const estado=e=>{
+  if(e.st==='pend')return['pend','run','wait','Aguardando aprovação'];
+  if(e.st==='repr')return['encerradas','none','x','Reprovada'];
+  if(e.st==='revo')return['encerradas','none','x','Revogada'];
+  if(e.st==='canc')return['encerradas','none','x','Cancelada'];
+  const d=dias(e.ate);if(d<0)return['vencidas','bad','fail','Vencida · bloqueia de novo'];
+  if(d<=14)return['vencendo','run','alert',`Vence em ${d} dia${d===1?'':'s'}`];
+  return['ativas','ok','ok','Ativa'];
+};
+const grupo=(e,f)=>{const g=estado(e)[0];return f==='todas'||g===f||(f==='ativas'&&g==='vencendo')};
+const validade=e=>{const [g]=estado(e),d=dias(e.ate);
+  if(g==='pend')return[`pedida até ${e.ate}`,'mu'];if(g==='encerradas')return['—','mu'];
+  if(g==='vencidas')return[`venceu há ${-d} dia${d===-1?'':'s'}`,'bad'];if(g==='vencendo')return[`vence em ${d} dia${d===1?'':'s'}`,'run'];return[`até ${e.ate}`,''];
+};
+const chips=e=>AMBS.map(x=>`<span class="ech${e.amb.includes(x)?'':' off'}" title="${AMB_N[x]}: ${e.amb.includes(x)?'não bloqueia':'continua bloqueando'}">${AMB_N[x]}</span>`).join('');
+const ini=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+const sevPill=s=>`<span class="pill ${SEV[s][1]}">${SEV[s][0]}</span>`;
+
+/* ---------- lista ---------- */
+let filtro='pend',pagina=0,destaque='';
+function crumb(){
+  $('[data-crumb]').innerHTML=`${ic('shield')}Exceções · dados fictícios
+   <label class="demo">Ver como <select data-quem>${Object.entries(QUEM).map(([k,q])=>`<option value="${k}" ${k===quem?'selected':''}>${q.nome} · ${q.rot}</option>`).join('')}</select>
+   <button class="btn g sm" data-simular title="Na Esteira real o pedido nasce do achado, na tela da Entrega">Simular pedido</button></label>`;
+  $('[data-quem]').onchange=e=>{quem=e.target.value;$('.me').innerHTML=`<span class="av">${QUEM[quem].ini}</span><div>${QUEM[quem].nome}<small>${quem==='mor'?'MOR':'sem papel global'}</small></div>`;apps();lista()};
+  $('[data-simular]').onclick=()=>pedir(ACHADO_DEMO);
+}
+function apps(){const s=$('[data-app]'),v=s.value,l=[...new Set(visiveis().map(e=>e.app))].sort();s.innerHTML='<option value="">Todas as aplicações</option>'+l.map(a=>`<option ${a===v?'selected':''}>${a}</option>`).join('')}
+function lista(){
+  const app=$('[data-app]').value,q=$('[data-busca]').value.toLowerCase();
+  const filtra=f=>visiveis().filter(e=>grupo(e,f)&&(!app||e.app===app)&&(e.id+e.t+e.r+e.f).toLowerCase().includes(q));
+  document.querySelectorAll('[data-c]').forEach(c=>c.textContent=filtra(c.dataset.c).length);
+  document.querySelectorAll('[data-st]').forEach(b=>b.classList.toggle('on',b.dataset.st===filtro));
+  const l=filtra(filtro).sort((a,b)=>data(a.ate)-data(b.ate)),POR=8,paginas=Math.max(1,Math.ceil(l.length/POR));pagina=Math.min(Math.max(pagina,0),paginas-1);
+  $('[data-lista]').innerHTML=l.length?l.slice(pagina*POR,pagina*POR+POR).map(e=>{const [g,cls,icone,rot]=estado(e),[vt,vc]=validade(e);
+    return `<button class="exc-l${g==='encerradas'?' encerrada':''}${e.id===destaque?' novo':''}" data-id="${e.id}" title="${rot} · ${TIPOS[e.tipo][0]}\n${e.m}">
+      <span class="stat ${cls}" aria-label="${rot}">${ic(icone)}</span>
+      <div style="min-width:0"><div class="tit">${e.t}</div><div class="sub2"><span class="mono">${e.id}</span> · ${e.f} · <span class="mono">${e.r}</span></div></div>
+      <span>${e.app}</span>${sevPill(e.s)}<span>${chips(e)}</span>
+      <span class="val ${vc}">${vt}</span>
+      <span class="av sm" title="Pedida por ${e.ped[0]} em ${e.ped[1]}">${ini(e.ped[0])}</span>${ic('chev')}</button>`}).join('')
+    :`<div class="empty" style="margin:18px;border:0">${ic('shield','lg')}<b style="color:var(--tx)">Nenhuma exceção ${({pend:'aguardando aprovação',ativas:'ativa',vencendo:'vencendo',vencidas:'vencida',encerradas:'encerrada',todas:''})[filtro]}</b><span>Exceções nascem de um achado, na tela da Entrega.</span></div>`;
+  $('[data-pag-info]').textContent=l.length?`${pagina*POR+1}–${Math.min(l.length,pagina*POR+POR)} de ${l.length}`:'';
+  $('[data-nums]').innerHTML=paginas>1?`<button data-p="${pagina-1}" ${pagina===0?'disabled':''} aria-label="Página anterior">‹</button>`+Array.from({length:paginas},(_,i)=>`<button data-p="${i}" class="${i===pagina?'on':''}">${i+1}</button>`).join('')+`<button data-p="${pagina+1}" ${pagina>=paginas-1?'disabled':''} aria-label="Próxima página">›</button>`:'';
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pagina=+b.dataset.p;lista()});
+  document.querySelectorAll('.exc-l').forEach(b=>b.onclick=()=>detalhe(b.dataset.id));
+}
+document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{filtro=b.dataset.st;pagina=0;lista()});
+$('[data-app]').onchange=()=>{pagina=0;lista()};$('[data-busca]').oninput=()=>{pagina=0;lista()};
+
+/* ---------- gaveta ---------- */
+function gaveta(html,ligar){
+  const veu=document.createElement('div');veu.className='veu';
+  const g=document.createElement('aside');g.className='gaveta';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');g.innerHTML=html;
+  const fechar=()=>{veu.remove();g.remove();document.removeEventListener('keydown',esc)};
+  const esc=e=>{if(e.key==='Escape')fechar()};
+  veu.onclick=fechar;g.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fechar);document.addEventListener('keydown',esc);
+  document.body.append(veu,g);ligar?.(g,fechar);g.querySelector('[data-fechar]').focus();
+}
+const topoG=(sup,titulo)=>`<div class="dh"><div>${sup}<h2>${titulo}</h2></div><button class="x" data-fechar aria-label="Fechar">${ic('x')}</button></div>`;
+
+/* detalhe + decisão */
+function detalhe(id){
+  const e=EXC.find(x=>x.id===id),[g,cls,icone,rot]=estado(e),[vt,vc]=validade(e),minha=e.ped[0]===eu();
+  const auto=e.apr&&e.apr[0]===e.ped[0];
+  gaveta(topoG(`<span class="pill ${cls==='none'?'':cls}">${ic(icone)}${rot}</span> <span class="mono" style="color:var(--mu);margin-left:6px">${e.id}</span>`,e.t)+`
+    <dl class="kv">
+      <dt>Achado</dt><dd>${sevPill(e.s)}${e.f} · <span class="mono">${e.r}</span></dd>
+      <dt>Aplicação</dt><dd>${e.app}</dd>
+      <dt>Tipo</dt><dd>${TIPOS[e.tipo][0]}</dd>
+      <dt>Vale em</dt><dd>${chips(e)}</dd>
+      <dt>Validade</dt><dd><span class="val ${vc}">${g==='encerradas'?`até ${e.ate}`:vt}</span></dd>
+      <dt>Pedida por</dt><dd><span class="av sm">${ini(e.ped[0])}</span>${e.ped[0]} · ${e.ped[1]}</dd>
+      ${e.apr?`<dt>${e.st==='repr'?'Reprovada por':'Aprovada por'}</dt><dd><span class="av sm">${ini(e.apr[0])}</span>${e.apr[0]} · ${e.apr[1]}${auto?' <span class="pill run">autoaprovação</span>':''}</dd>`:''}
+      ${e.rev?`<dt>Revogada por</dt><dd><span class="av sm">${ini(e.rev[0])}</span>${e.rev[0]} · ${e.rev[1]}</dd>`:''}
+    </dl>
+    <h3 class="sub">Motivo</h3><div class="motivo-box">${e.m}</div>
+    ${auto&&e.apr[2]?`<div class="auto">${ic('alert')}<div><b>Motivo da autoaprovação</b><br>${e.apr[2]}</div></div>`:''}
+    ${e.st==='repr'?`<div class="auto">${ic('x')}<div><b>Motivo da reprovação</b><br>${e.apr[2]}</div></div>`:''}
+    ${e.rev?`<div class="auto">${ic('x')}<div><b>Motivo da revogação</b><br>${e.rev[2]}</div></div>`:''}
+    <h3 class="sub">${ic('server')}Onde o achado aparece</h3>
+    <div class="ondes">${e.onde.map(o=>{const ent=ENTREGA[o[2]]||'Entrega';return `<a class="onde" href="prototipo-entrega.html" title="Abrir a entrega ${ent} na etapa ${o[3]}">
+      <div style="flex:1;min-width:0"><div class="mono">${o[0]} <span style="color:var(--mu)">· ${o[1]}</span></div><div class="sub2">${ent} · <span class="mono">${o[2]}</span></div></div>
+      <span class="pill">${o[3]}</span>${ic('chev')}</a>`}).join('')}</div>
+    <a class="link-aud" href="prototipo-auditoria.html#obj=${e.id}">${ic('clock')}Histórico desta exceção: ver na auditoria${ic('chev')}</a>
+    <div data-decisao class="decisao"></div>
+    <div class="acoes dir" data-acoes></div>`,(gv,fechar)=>{
+    const A=gv.querySelector('[data-acoes]'),D=gv.querySelector('[data-decisao]');
+    const fecharB=`<button class="btn g" data-fechar>Fechar</button>`;
+    // pede um motivo antes de confirmar (reprovar, revogar, autoaprovar)
+    const pedeMotivo=(rotulo,ph,confirma,cls,aplica)=>{
+      D.innerHTML=`<label class="fld"><span>${rotulo}</span><textarea class="inp" data-mot placeholder="${ph}"></textarea></label>`;
+      A.innerHTML=`<button class="btn g" data-volta>Voltar</button><button class="btn ${cls}" data-conf disabled title="Escreva o motivo">${confirma}</button>`;
+      const t=D.querySelector('[data-mot]'),c=A.querySelector('[data-conf]');t.focus();
+      t.oninput=()=>{const ok=t.value.trim().length>=10;c.disabled=!ok;c.title=ok?'':'Escreva o motivo (mín. 10 caracteres)'};
+      A.querySelector('[data-volta]').onclick=botoes;c.onclick=()=>{aplica(t.value.trim());destaque=e.id;fechar();lista()};
+    };
+    const botoes=()=>{D.innerHTML='';
+      if(g==='pend'){
+        if(minha&&quem!=='mor'){A.innerHTML=`<button class="btn d esq" data-canc>${ic('x')}Cancelar pedido</button>${fecharB}<button class="btn p" disabled title="Quem pediu não aprova; outra pessoa aprova">${ic('check')}Aprovar</button>`}
+        else if(podeDecidir()){A.innerHTML=`${minha?`<button class="btn d esq" data-canc>${ic('x')}Cancelar pedido</button>`:''}<button class="btn g" data-rep>${ic('x')}Reprovar</button><button class="btn p" data-apr title="${minha?'Você pediu: vira autoaprovação, com motivo':''}">${ic('check')}Aprovar${minha?' (autoaprovação)':''}</button>`}
+        else A.innerHTML=`${fecharB}<button class="btn p" disabled title="Só aprovador técnico ou MOR aprova">${ic('check')}Aprovar</button>`;
+      }else if(g==='ativas'||g==='vencendo'){
+        A.innerHTML=`${podeDecidir()?`<button class="btn d esq" data-rev>${ic('x')}Revogar</button>`:''}${fecharB}<button class="btn p" data-ren title="Pedido novo, aprovado de novo">${ic('clock')}Renovar</button>`;
+      }else if(g==='vencidas'){A.innerHTML=`${fecharB}<button class="btn p" data-ren title="Pedido novo, aprovado de novo">${ic('clock')}Renovar</button>`}
+      else A.innerHTML=fecharB;
+      A.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fechar);
+      A.querySelector('[data-apr]')?.addEventListener('click',()=>{
+        if(minha)pedeMotivo('Motivo da autoaprovação','ex.: único aprovador técnico disponível','Confirmar autoaprovação','p',m=>{e.st='ativa';e.apr=[eu(),fmtD(HOJE),m]});
+        else{e.st='ativa';e.apr=[eu(),fmtD(HOJE)];destaque=e.id;fechar();lista()}});
+      A.querySelector('[data-rep]')?.addEventListener('click',()=>pedeMotivo('Motivo da reprovação','ex.: tem correção simples; corrigir em vez de aceitar','Confirmar reprovação','d',m=>{e.st='repr';e.apr=[eu(),fmtD(HOJE),m]}));
+      A.querySelector('[data-rev]')?.addEventListener('click',()=>pedeMotivo('Motivo da revogação','ex.: corrigido na v4.1.0','Confirmar revogação','d',m=>{e.st='revo';e.rev=[eu(),fmtD(HOJE),m]}));
+      A.querySelector('[data-canc]')?.addEventListener('click',()=>{e.st='canc';destaque=e.id;fechar();lista()});
+      A.querySelector('[data-ren]')?.addEventListener('click',()=>{fechar();pedir({t:e.t,f:e.f,r:e.r,s:e.s,app:e.app,onde:e.onde},e)});
+    };
+    botoes();
+  });
+}
+
+/* pedido de exceção: nasce do achado (tela da Entrega) ou da renovação */
+const ACHADO_DEMO={t:'Upload sem validação de tipo de arquivo',f:'Opengrep',r:'csharp.web.unrestricted-upload',s:'alta',app:'Valuto',onde:[['valuto-api','AnexoController.cs:34','v4.0.0-rc2','QA']]};
+function pedir(a,renova){
+  const tipo0=renova?renova.tipo:'fp';
+  gaveta(topoG(`<span class="pill">${ic('shield')}${renova?`renovação de <span class="mono">${renova.id}</span>`:'novo pedido'}</span>`,'Pedir exceção')+`
+    <dl class="kv"><dt>Achado</dt><dd>${sevPill(a.s)}${a.t}</dd><dt>Regra</dt><dd>${a.f} · <span class="mono">${a.r}</span></dd><dt>Aplicação</dt><dd>${a.app}</dd><dt>Onde</dt><dd class="mono">${a.onde[0][0]} · ${a.onde[0][1]}</dd></dl>
+    <div class="fld" style="margin-top:14px"><span>Tipo</span></div>
+    <div class="tipos" role="radiogroup" aria-label="Tipo">${Object.entries(TIPOS).map(([k,[n,max]])=>`<label class="opc"><input type="radio" name="tipo" value="${k}" ${k===tipo0?'checked':''}><span><b>${n}</b><small>até ${max} dias</small></span></label>`).join('')}</div>
+    <div class="fld"><span>Vale em</span><div class="ambs-g">${AMBS.map(x=>x==='dev'?`<label title="Em DEV a política desta aplicação só avisa: não há o que liberar">DEV<input type="checkbox" disabled></label>`:`<label>${AMB_N[x]}<input type="checkbox" data-amb="${x}"></label>`).join('')}</div><small>Onde não marcar, o achado continua bloqueando.</small></div>
+    <div class="fld"><span>Validade</span><div class="prazo"><input type="date" class="inp" data-ate aria-label="Válida até"><span data-atalhos></span></div><small data-ate-msg></small></div>
+    <label class="fld"><span>Motivo</span><textarea class="inp" data-m placeholder=""></textarea><small data-m-msg></small></label>
+    <p class="obs">${ic('alert')}Até ser aprovada por outra pessoa, o achado continua bloqueando.</p>
+    <div class="acoes dir"><button class="btn g" data-fechar>Cancelar</button><button class="btn p" data-enviar disabled>${ic('shield')}Enviar pedido</button></div>`,(g,fechar)=>{
+    const ate=g.querySelector('[data-ate]'),m=g.querySelector('[data-m]'),bt=g.querySelector('[data-enviar]');
+    const tipo=()=>g.querySelector('[name=tipo]:checked').value;
+    const ajustaTipo=(primeira)=>{const [n,max,ph]=TIPOS[tipo()];m.placeholder=ph;ate.min=isoDe(somaDias(1));ate.max=isoDe(somaDias(max));
+      if(!primeira||!renova){g.querySelectorAll('[data-amb]').forEach(c=>c.checked=renova&&primeira?renova.amb.includes(c.dataset.amb):tipo()==='fp'||c.dataset.amb!=='prd');ate.value=isoDe(somaDias(tipo()==='fp'?90:30))}
+      if(renova&&primeira){g.querySelectorAll('[data-amb]').forEach(c=>c.checked=renova.amb.includes(c.dataset.amb));ate.value=isoDe(somaDias(Math.min(90,max)))}
+      g.querySelector('[data-atalhos]').innerHTML=[30,90,180].filter(d=>d<=max).map(d=>`<button class="f" data-d="${d}">${d} dias</button>`).join(' ');
+      g.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ate.value=isoDe(somaDias(+b.dataset.d));valida()});valida()};
+    const valida=()=>{const [n,max]=TIPOS[tipo()],amb=[...g.querySelectorAll('[data-amb]:checked')],d=ate.value?dias(deIso(ate.value)):NaN;
+      const dataErr=!ate.value?'Escolha a data':d<1?'Precisa ser depois de hoje':d>max?`${n}: no máximo ${max} dias (até ${somaDias(max)})`:'';
+      const am=g.querySelector('[data-ate-msg]');am.className=dataErr?'erro':'';am.textContent=dataErr||`vence em ${d} dias; depois disso o achado volta a bloquear`;ate.classList.toggle('erro',!!dataErr);
+      const mm=g.querySelector('[data-m-msg]'),mlen=m.value.trim().length;mm.textContent=mlen<20?`${20-mlen} caracteres a mais, no mínimo`:'';
+      const falta=[!amb.length&&'marque ao menos um ambiente',dataErr&&'ajuste a validade',mlen<20&&'escreva o motivo'].filter(Boolean);
+      bt.disabled=!!falta.length;bt.title=falta.length?'Falta: '+falta.join('; '):''};
+    g.querySelectorAll('[name=tipo]').forEach(r=>r.onchange=()=>ajustaTipo(false));
+    g.querySelectorAll('[data-amb]').forEach(c=>c.onchange=valida);ate.oninput=valida;m.oninput=valida;
+    ajustaTipo(true);
+    bt.onclick=()=>{const id='SEC-'+(2312+EXC.filter(x=>+x.id.slice(4)>2311).length);
+      EXC.unshift({id,t:a.t,f:a.f,r:a.r,s:a.s,app:a.app,tipo:tipo(),amb:[...g.querySelectorAll('[data-amb]:checked')].map(c=>c.dataset.amb),ate:deIso(ate.value),st:'pend',ped:[eu(),fmtD(HOJE)],m:m.value.trim(),onde:a.onde});
+      destaque=id;filtro='pend';pagina=0;fechar();lista()};
+  });
+}
+
+/* sino */
+const sino=$('.sino'),avisos=$('#avisos');
+const mostrar=x=>{avisos.hidden=!x;sino.setAttribute('aria-expanded',x)};
+sino.onclick=e=>{e.stopPropagation();mostrar(avisos.hidden)};
+document.addEventListener('click',e=>{if(!avisos.hidden&&!avisos.contains(e.target))mostrar(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')mostrar(false)});
+document.querySelectorAll('[data-abre]').forEach(b=>b.onclick=()=>{mostrar(false);detalhe(b.dataset.abre)});
+
+crumb();apps();lista();
+/* vindo da tela da Entrega: #pedir=<achado> abre o pedido já preenchido */
+function porHash(){
+  document.querySelectorAll('.veu,.gaveta').forEach(n=>n.remove());
+  const ver=/ver=(SEC-\d+)/.exec(location.hash);if(ver){filtro='todas';lista();detalhe(ver[1])}
+  const m=/pedir=([^&]+)/.exec(location.hash);if(m){try{pedir(JSON.parse(decodeURIComponent(m[1])))}catch{pedir(ACHADO_DEMO)}}
+}
+addEventListener('hashchange',porHash);porHash();
+</script>
+</body></html>
