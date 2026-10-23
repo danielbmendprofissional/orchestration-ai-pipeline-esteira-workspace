@@ -23,7 +23,7 @@ As skills em `.claude/skills/` têm `disable-model-invocation: true` — nenhuma
 
 **Exceção obrigatória — peças internas:** skill que outra skill chama pelo Skill tool (`grill-with-docs` → `grilling` + `domain-modeling`; `implement` → `tdd` + `code-review`; `improve-codebase-architecture` → `codebase-design`…) **não** pode ter a flag, senão o comando composto quebra. É o mesmo desenho do repositório de origem (mattpocock/skills: só os comandos de entrada têm a flag). A lista sai de um grep, não de memória — `ai-ops/agents/infra/local-environment-config/docs/enviroment/security-skills.md`, passo 3.
 
-**Override de skill de fora:** as skills não são versionadas (reinstaladas pelo `skills-lock.json`), então ajuste nelas se perde — a correção mora aqui. **`/to-spec` segue `docs/agents/spec-format.md`**, não o template dele (formato, gate de "pronto para especificar", issue-mãe sem `ready-for-agent`).
+**Override de skill de fora:** as skills não são versionadas (reinstaladas pelo `skills-lock.json`), então ajuste nelas se perde — a correção mora aqui. **`/to-spec` segue `docs/agents/spec-format.md`**, não o template nem o processo dele: acha a fatia no mapa, confere o gate, pesquisa ADRs e código e só pergunta o que falta.
 
 ### Issue tracker
 
