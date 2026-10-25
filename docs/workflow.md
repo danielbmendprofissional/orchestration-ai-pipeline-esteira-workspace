@@ -17,6 +17,7 @@ merge request → dev (branch protegida) → validação humana → merge
 fechar a fatia                      (automático no merge: job fechar-fatia do CI; rede de segurança no próximo /implement-task, /to-spec ou /fatia)
 
 /proximo [fatia]                    (tutor, a qualquer hora: em que pé está, seu próximo passo, de onde vem cada fatia)
+/situacao                          (git de tudo: branch de cada repositório/área e o que fazer — commitar, mergear, alinhar, apagar — antes da próxima fatia)
 /mapa                              (confere o mapa de fatias contra protótipos, ADRs e mudanças: lacunas, fatias grandes demais; rode ao fim do discovery e quando o /proximo avisar)
         ↓
 quando todas as specs da rodada estiverem em dev: você corta a tag vX.Y.Z-rcN e promove dev → qa
