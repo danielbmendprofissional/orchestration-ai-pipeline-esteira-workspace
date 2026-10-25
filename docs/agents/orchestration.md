@@ -24,11 +24,11 @@ O modelo não é decidido aqui: cada subagente declara um **apelido** (`sonnet`,
 |---|---|
 | `data`, `backend`, `front`, `ui` | executores no modo pago/free (no modo Claude o pai implementa direto), cada um com TDD da própria fatia |
 | `tests` | só se a task junta duas ou mais camadas |
-| `security` | só em auth, sessão, segredo, permissão ou dependência nova |
-| `review` | por task no modo pago/free (somente leitura: escopo, spec, integridade dos testes, segurança básica); no modo Claude quem revisa é o `/code-review` no fim da fatia, chamado pelo próprio `/implement-task` |
+| `security` | em task de auth, sessão, segredo, permissão ou dependência nova; com `risco: alto` na spec, também uma vez sobre o diff da fatia |
+| `review` | por task no modo pago/free (somente leitura: spec, padrões, segurança básica — o escopo mecânico já saiu do `check-escopo.mjs`); no modo Claude quem revisa é o `/code-review` no fim da fatia, chamado pelo próprio `/implement-task` |
 | `qa` | fora do `/implement-task`: valida o ambiente `qa` publicado (`docs/agents/esteira-deploy.md`) |
 
-**Modo Claude:** o agente-pai implementa cada task direto (TDD), sem subagente executor nem `review` por task — o `/code-review` no fim da fatia revisa tudo. **Modo pago/free:** o agente-pai monta um `$TASK` autocontido por task (trecho da spec, o que **não** tocar, arquivos esperados, 2–4 arquivos de contexto), delega ao executor e ao `review`. Nos dois: testes da task com filtro durante o trabalho, **suite completa uma vez por task, pelo pai, antes do commit** (a de integração sobe containers — é o maior custo de tempo); escopo conferido com `git diff --stat`. Subagente não comita nem faz push; o hook `.claude/hooks/block-dangerous-git.sh` vale pra todos.
+**Modo Claude:** o agente-pai implementa cada task direto (TDD), sem subagente executor nem `review` por task — o `/code-review` no fim da fatia revisa tudo. **Modo pago/free:** o agente-pai monta um `$TASK` autocontido por task (trecho da spec, o que **não** tocar, arquivos esperados, 2–4 arquivos de contexto), delega ao executor e ao `review`. Nos dois: testes da task com filtro durante o trabalho, **suite completa uma vez por fatia, pelo pai, antes do review** (a de integração sobe containers — é o maior custo de tempo; o CI da MR cobre o resto); escopo conferido por `.claude/scripts/check-escopo.mjs` (arquivo fora do escopo, "Não toque", teste apagado, `skip`/`only`, asserção a menos — sem LLM). Subagente não comita nem faz push; o hook `.claude/hooks/block-dangerous-git.sh` vale pra todos.
 
 ## Nomes — tudo ligado pelo código da fatia
 
@@ -48,15 +48,19 @@ Os comandos aceitam o código: `/implement-task B2`, `/implement-task B2.5`, `/c
 
 Uma sessão por fatia, na **raiz do workspace** (enxerga `<projeto>-api/` e `<projeto>-frontend/`).
 
+**Estado do GitLab sempre sincronizado:** todo comando que confere algo contra `dev`/`main` ("está mergeada?", "filha feita?", "bloqueada?") roda `git -C <repo> fetch origin` antes, em cada repositório envolvido. A cópia local (`origin/dev`) só muda no fetch — sem ele, uma MR que você acabou de mergear parece não existir.
+
 | # | Humano | LLM (Claude Code) |
 |---|---|---|
-| 1 | `/to-spec B2` → aprova a spec | escreve a spec, abre a mãe `B2 — …`, linka no mapa |
-| 2 | `/to-tickets B2` → aprova a quebra | cria as filhas `B2.1 — …`, `B2.2 — …`, com `Blocked by:` |
-| 3 | `/implement-task B2` | cabeçalho (fatia, filhas, branch, fora do escopo) → filhas com TDD, um commit cada, nota em cada filha → `/code-review` → corrige os achados sozinho (até 2 rodadas) → push → MR pra `dev` → nota na mãe → relatório + notificação |
+| 1 | `/fatia B2` → **aprova a spec** (única leitura antes do código) | escreve a spec (com `risco` e "Toca em") e para; com o ok abre a mãe `B2 — …`, linka no mapa |
+| 2 | nada (só `risco: alto`: lê os tickets) | cria as filhas `B2.1 — …`, `B2.2 — …` (`Blocked by:` e `Cobre:`) e confere a cobertura por script |
+| 3 | nada (o `/fatia` segue sozinho; ou `/implement-task B2` à parte) | `em-execucao` na mãe → filhas com TDD, um commit cada (executor no painel) → suite completa uma vez → `/code-review` → corrige os achados sozinho (até 2 rodadas) → push → MR pra `dev` → relatório + notificação |
 | 4 | na MR: lê, testa a branch, **aprova e mergeia** — ou comenta na MR e roda `/implement-task B2` de novo | lê os comentários não resolvidos, corrige, revisa, faz push, responde cada comentário |
-| 5 | nada | no próximo `/implement-task` ou `/to-spec`: fecha a fatia mergeada (abaixo) |
+| 5 | nada | no merge, o CI fecha a mãe e as filhas e tira `em-execucao` (job `fechar-fatia`); sem o job, o próximo `/implement-task`/`/to-spec` fecha (abaixo) |
 
-**Acompanhar sem o terminal:** a descrição da mãe ganha um checklist "Execução" (uma linha por filha com o sha do commit, mais Review e MR), atualizado a cada mudança de estado. A lista de issues do GitLab mostra a contagem ("3 of 7"), então várias fatias rodando aparecem numa tela só. A filha que está sendo feita tem a label `em-andamento`.
+Perdeu o fio? `/proximo` (ou `/proximo B3`) diz em que pé está, qual o seu próximo passo e de onde vem cada fatia (linha do mapa, ADR, spec). Os comandos soltos `/to-spec`, `/to-tickets` e `/implement-task` continuam valendo; `/fatia` só os encadeia.
+
+**Acompanhar sem o terminal:** a mãe de uma fatia em execução tem o label `em-execucao` (o board de issues por label mostra todas as fatias em andamento numa tela) e a descrição dela ganha o painel "Execução": **área** onde roda, **modo** da sessão e uma linha por filha com o sha do commit e **quem executou** (`pai (Claude)`, `backend (omni-pago)`…), mais Suite, Review e MR. O painel é atualizado em lote (início, filha comitada, suite, review, MR, parada) — não há label nem nota por filha. A lista de issues mostra a contagem ("3 of 7"). O mesmo executor vai no trailer `Executed-by:` de cada commit e na descrição da MR. O fluxo registra *o que o processo mandou executar* (modo da sessão + apelido do subagente); o modelo que o OmniRoute de fato serviu só aparece no log dele.
 
 O LLM **para e devolve pra você** só quando: working tree sujo num repositório da fatia, filha bloqueada, review FAIL depois de 2 rodadas de correção, ou spec ambígua. O relatório diz `PAROU: precisa de você` e a decisão exata que falta, e o mesmo texto vai como nota na mãe. Resolveu → `/implement-task B2` de novo: ele retoma de onde parou (filha feita = commit com `workspace#<n>)` alcançável pela branch).
 
@@ -71,9 +75,9 @@ Descrição da MR:
 ```markdown
 Fatia **B2** · spec `specs/feature/base/02-…md` · mãe <grupo>/<projeto>-workspace#2
 
-| Task | Issue | Commit |
-|---|---|---|
-| B2.1 — … | workspace#4 | <sha> |
+| Task | Issue | Commit | Executor |
+|---|---|---|---|
+| B2.1 — … | workspace#4 | <sha> | pai (Claude) |
 
 **Review:** PASS na rodada <n>. Achados de julgamento não corrigidos: <lista com o motivo, ou "nenhum">.
 **Suposições:** <as que o humano deve conferir>.
@@ -86,11 +90,18 @@ O gate `verify-code-review` do template-ci (só bash, nenhuma IA) aceita a prova
 
 ## Fechar a fatia
 
-Roda no começo de todo `/implement-task` e `/to-spec`, sem o humano pedir. Para cada issue-mãe aberta: se a MR `<fatia> — …` de **cada** repositório que ela tocou está mergeada em `dev` (`glab mr list -R <grupo>/<repo> --merged --search "<fatia> —"`):
+**No merge (automático):** o job `fechar-fatia` do template-ci (`review/fechar-fatia.yml`) roda no push em `dev` de cada repositório de código. Acha a MR mergeada pelo código da fatia (branch `feature/b2-…` ou título `B2 — …`); se **todas** as MRs da fatia nos repositórios do projeto já estão mergeadas, ele: nota na mãe com os links, fecha as filhas e a mãe, tira `em-execucao`. Liga com `FECHAR_FATIA_ENABLED: "true"` + `WORKSPACE_PROJECT` + `SLICE_REPOS` e usa o mesmo `GITLAB_TOKEN` do gate de review (escopo `api`, e acesso ao workspace). A linha do `specs/README.md` o job não toca (é commit no workspace).
+
+**Rede de segurança (sem o job, ou se ele falhou):** roda no começo de todo `/implement-task`, `/to-spec` e `/fatia`, sem o humano pedir. Para cada issue-mãe aberta: se a MR `<fatia> — …` de **cada** repositório que ela tocou está mergeada em `dev` (`glab mr list -R <grupo>/<repo> --merged --search "<fatia> —"`):
 1. nota na mãe com os links das MRs mergeadas;
-2. `glab issue close` em cada filha e na mãe;
+2. `glab issue close` em cada filha e na mãe, e tira `em-execucao`;
 3. a linha da fatia no `specs/README.md` passa a "feito" no próximo commit de docs do workspace (o do `/to-spec` seguinte), nunca num commit avulso na `main`. Fatia com artefato que outras specs vão citar (`DESIGN.md`, contrato novo, ADR): o mesmo commit aponta pra ele no `CLAUDE.md` do componente.
 
 ## Execução paralela
 
-Specs sem dependência entre si rodam em sessões paralelas, uma por painel do Alethe, cada uma na sua branch e no modo que você escolher.
+Fatias que não se tocam rodam em paralelo, **um painel do Alethe por fatia**, cada uma com a sua branch, a sua área e o modo que você escolher. Você governa por duas telas: o **board de issues do workspace por label** (`em-execucao`: uma coluna com todas as mães em andamento, cada uma com o painel de progresso e o executor) e o `/proximo` num painel livre.
+
+1. **Quais podem rodar juntas:** "Depende de" feito e "Toca em" sem cruzamento (colunas do `specs/README.md`; `/proximo` lista). Sem a coluna, não há garantia — rode uma de cada vez.
+2. **Uma área por fatia** (os repositórios de código são aninhados no workspace; um `git switch` num painel quebraria o outro): `node .claude/scripts/worktree-fatia.mjs B2 <slug>` cria `<workspace>.wt/b2/` — worktree do workspace + worktree de cada repositório de código na branch `feature/b2-<slug>` + junction das skills. Abra o painel nessa pasta (`claude`, `claude-pago` ou `claude-free`) e rode `/fatia B2` ou `/implement-task B2`. Ao fim: `node .claude/scripts/worktree-fatia.mjs --remove B2`.
+3. **Trava:** o `/implement-task` põe `em-execucao` na mãe e grava a área no painel. Outro painel que tente a mesma fatia para; sem argumento, cada painel pega a próxima fatia **livre** (sem `em-execucao`, sem cruzar o "Toca em" das que estão rodando). Na raiz do workspace com outra fatia em execução, ele manda criar a área isolada.
+4. **Governança igual:** cada fatia tem a sua spec aprovada, o seu review e a sua MR; nada se mistura. Cada painel termina com a notificação e o relatório (inclusive `PAROU: precisa de você`). Comece com 2 painéis.

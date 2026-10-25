@@ -1,6 +1,6 @@
 # Relatório de ambiente — esteira
 
-Última atualização: 2026-10-21, rodada Etapa 2 (existente — recriação do ambiente).
+Última atualização: 2026-10-25, rodada Etapa 2 (existente — item 4 de `docs/mudancas-infra.md`, ticket #13; recriação do ambiente em 2026-10-21).
 
 > **2026-10-24:** o `pi.dev` foi removido (ADR-0017). As menções a `.pi/` e `pi` abaixo são o registro da rodada de 2026-10-21; hoje a execução é o `/implement-task` do Claude Code (`.claude/agents/`, `.claude/commands/`).
 
@@ -13,6 +13,8 @@
 
 ## O que foi feito
 
+- **Realm `esteira`: role `mor` e usuários de teste (2026-10-25, `mudancas-infra.md` item 4, fatia B3)** — `projects.json` (`ai-infra`, não commitado): `keycloak.realmRoles: ["mor"]`, `dev` com `roles: ["mor"]` e novo `dev-sem-papel` sem role. `apply` criou a role `mor` e o usuário `dev-sem-papel`; `verify` "✔ tudo conferido". Segredo do client não foi trocado (user-secrets "já em dia", 16 chaves, nenhuma nova). `dev-sem-papel` usa a mesma senha de `PROJECT_ESTEIRA_KEYCLOAK_DEV_PASSWORD`.
+  - **Garantidos por código, sem prova automática** (o `verify` não os confere): PKCE `S256` e client confidencial (`kcClientRep`), `redirectUris`/`postLogoutRedirectUris` (vêm do manifesto), `aud` = `esteira-api` (mapper `audience` criado pelo `apply`), `revokeRefreshToken: true` (`keycloak/realm-defaults.json`, reaplicado a cada `apply`), `realm_access.roles` no access token (scope `roles` padrão do Keycloak), ACL Redis `~esteira:* +@all -@dangerous -scan` (cobre `GET`/`SET`/`DEL`/`SADD`/`SREM`/`SMEMBERS`/`EXPIRE`/`SET NX`). O `verify` só prova: realm publicado, segredo do client, password grant desligado e escrita do Redis em `esteira:*`.
 - **Infra compartilhada** — `esteira` já estava no manifesto `ai-infra/configs/infra/projects.json` (Postgres, RabbitMQ, Redis, Keycloak BFF, `metrics: host.docker.internal:5105`); `verify` verde. Nada mudou no manifesto.
 - **User-secrets da API** — `node infra-config.mjs secrets esteira --csproj=...\esteira-api\src\Esteira.Api\Esteira.Api.csproj`: 16 chaves do contrato gravadas no user-secrets `f4cc2692-4c37-4deb-88e6-51a51f7ed735`. O código **ainda lê os nomes antigos** (`EsteiraConnection`, `Autenticacao:*`, vhost `/`) — a troca é a spec de adequação.
 - **`.mcp.json`** — já igual ao template (GitLab, `disabled: true`, `${GITLAB_TOKEN}`). Sem mudança.
@@ -30,7 +32,7 @@
 | Postgres | `localhost:5432`, banco `esteira` (pgAdmin `http://localhost:15432`, grupo `esteira`) | `esteira_owner` (migrations) / `esteira_app` (runtime) | `ai-infra/container/.env`, `PROJECT_ESTEIRA_PG_OWNER_PASSWORD` / `PROJECT_ESTEIRA_PG_APP_PASSWORD` |
 | RabbitMQ | `localhost:5672`, vhost `esteira` (UI `http://localhost:15672` com o admin) | `esteira` | `.env`, `PROJECT_ESTEIRA_RABBITMQ_PASSWORD` |
 | Redis | `localhost:6379`, prefixo `esteira:` (provisionado; o código hoje usa `IMemoryCache`) | ACL user `esteira` | `.env`, `PROJECT_ESTEIRA_REDIS_PASSWORD` |
-| Keycloak | `http://localhost:8080/admin` → realm `esteira`, client `esteira-api` (BFF, callback `http://localhost:4200/api/v1/auth/callback`), usuário de teste `dev` | — | `.env`, `PROJECT_ESTEIRA_KEYCLOAK_CLIENT_SECRET` / `PROJECT_ESTEIRA_KEYCLOAK_DEV_PASSWORD` |
+| Keycloak | `http://localhost:8080/admin` → realm `esteira`, client `esteira-api` (BFF, callback `http://localhost:4200/api/v1/auth/callback`), usuários de teste `dev` (role `mor`) e `dev-sem-papel` (sem role) | — | `.env`, `PROJECT_ESTEIRA_KEYCLOAK_CLIENT_SECRET` / `PROJECT_ESTEIRA_KEYCLOAK_DEV_PASSWORD` |
 | Logs/métricas | Grafana `http://localhost:3000`, pasta `infra`, filtro Projeto = `esteira`; Prometheus alvo `projects (esteira)` em `host.docker.internal:5105` | admin do Grafana | `.env`, `GF_SECURITY_ADMIN_PASSWORD` |
 
 (Tudo isso também está pronto pro app em `ai-infra/container/generated/projects/esteira.secrets.json`, já carregado nos user-secrets da API.)

@@ -12,7 +12,7 @@ As skills falam em termos de cinco papéis canônicos de triagem. Este arquivo m
 
 **`ready-for-agent` não quer dizer "pode começar agora".** Quer dizer "especificada e aprovada pra agente": todas as filhas de uma spec aprovada recebem a label de uma vez. Quem decide a ordem é o `Blocked by:` — um bloqueador conta como resolvido quando está fechado **ou** já comitado na branch de feature da mesma spec (todas as filhas de uma spec vão na mesma branch e só fecham juntas, depois do merge da MR — `docs/agents/orchestration.md`, "Fechar a fatia"). Tirar a label das bloqueadas travaria o `/implement-task` no meio da spec.
 
-**`em-andamento`** (não é papel de triagem): a filha que o `/implement-task` está fazendo agora. Entra quando ele começa a filha e sai no commit dela ou quando ele para. Destaca a task ativa nos Child items da mãe. O andamento da fatia inteira fica no checklist "Execução" da descrição da mãe (`.claude/commands/implement-task.md`, "Painel na mãe").
+**`em-execucao`** (não é papel de triagem): na issue-**mãe**, enquanto o `/implement-task` executa a fatia. Entra no início, fica até o merge da MR (quem tira é o job `fechar-fatia` do CI ou o "Fechar a fatia") e também funciona de trava entre painéis em paralelo. O board de issues por esse label mostra tudo que está em andamento; o andamento detalhado (filhas, executor, suite, review, MR) fica no painel "Execução" da descrição da mãe (`.claude/commands/implement-task.md`, "Painel na mãe"). O label `em-andamento` por filha foi aposentado.
 
 Quando uma skill mencionar um papel (ex: "aplicar a label de triagem AFK-ready"), use a string correspondente desta tabela.
 

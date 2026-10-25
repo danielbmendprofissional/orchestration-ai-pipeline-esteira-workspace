@@ -13,7 +13,7 @@ O humano pode chamar só `/to-spec` ou `/to-spec <ID ou nome da fatia>` (uma ou 
 
 ## 2. Gate — pronto para especificar
 
-Confira com `git`, não pela memória: cada fatia de "Depende de" está mergeada em `dev` em cada repositório que tocou, e o que o `## Contexto necessário` vai citar existe na branch principal do workspace. Se não estiver, diga o que falta e pare — spec sobre base que não está em `dev` vira retrabalho.
+Confira com `git`, não pela memória, e só depois de `git -C <repo> fetch origin` em cada repositório (e no workspace): `origin/dev` local é a última sincronização, não o GitLab de agora. Cada fatia de "Depende de" está mergeada em `dev` em cada repositório que tocou, e o que o `## Contexto necessário` vai citar existe na branch principal do workspace. Se não estiver, diga o que falta e pare — spec sobre base que não está em `dev` vira retrabalho.
 
 ## 3. Juntar o contexto
 
@@ -30,9 +30,13 @@ Liste as decisões que a spec precisa e que nem ADR, nem padrão, nem código, n
 
 ## 5. Mostrar antes de publicar
 
-Escreva o arquivo, mostre ao humano a Ideia (o que fica fora) e a lista de critérios/checklist, e só depois de aprovado abra a issue-mãe (título `<fatia> — <nome>`, ex.: `B2 — Result pattern + Problem Details`) e atualize o mapa com o link da spec e o `#<mãe>`.
+Escreva o arquivo, mostre ao humano a Ideia (o que fica fora), a lista de critérios/checklist e o `risco`, e **pare**: a spec é o único documento que o humano aprova. Nada além do arquivo existe até o ok — nem issue, nem ticket —, então ajuste de spec não gera retrabalho. Grave a linha `base:` (`node .claude/scripts/check-spec-drift.mjs --stamp <spec>`): o sha de `origin/dev` de cada repositório e de `origin/main` do workspace em que a spec foi escrita. Só depois de aprovado abra a issue-mãe (título `<fatia> — <nome>`, ex.: `B2 — Result pattern + Problem Details`), atualize o mapa com o link da spec e o `#<mãe>` e **crie os tickets na sequência, sem pedir outra aprovação** ("Tickets de uma spec" em `issue-tracker.md`): cada filha declara `Cobre: <critérios>` e `.claude/scripts/check-tickets.mjs` confere que nenhum critério ficou sem filha. Só `risco: alto` mostra os tickets ao humano.
 
 Antes do passo 1, feche as fatias já mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"); a linha delas vira "feito" neste mesmo commit de docs.
+
+## Spec que já existe: conferir o desvio
+
+Spec escrita em outro momento envelhece: o código ou as ADRs mudam em `dev` depois dela. Antes de executar ou reaproveitar uma spec, rode `node .claude/scripts/check-spec-drift.mjs [<spec>]` (sem argumento: todas as pendentes do mapa). Ele compara a linha `base:` com `origin/dev` e aponta commits novos, arquivos e tipos citados que **mudaram ou sumiram**; spec sem `base:` conta como velha. `⚠ desatualizada` → **revalide, não reescreva do zero**: releia os arquivos apontados, atualize as referências da spec, mostre ao humano o que mudou (antes → depois) e peça o ok; com o ok, `--stamp` renova a base. `✔ em dia` → siga. O script mede só o código e as ADRs; decisão de produto que mudou continua sendo a leitura do humano ao aprovar.
 
 ## Arquivo
 
@@ -40,6 +44,9 @@ Antes do passo 1, feche as fatias já mergeadas (`docs/agents/orchestration.md`,
 
 ```markdown
 # NN — Nome da fatia
+
+risco: baixo | alto   <!-- alto = toca auth, sessão, segredo, permissão, migração de banco ou dependência nova -->
+base: workspace@<sha> · <projeto>-api@<sha> · <projeto>-frontend@<sha> · AAAA-MM-DD   <!-- gerada por `check-spec-drift.mjs --stamp`, nunca à mão -->
 
 ## Contexto necessário
 - cada .md que o executor tem que ler (CONTEXT-MAP.md com a seção, ADRs, DESIGN.md e protótipos se tem tela, PENDENCIAS)
@@ -62,6 +69,9 @@ por camada: o que cobre cada critério e onde (unitário, integração, API, fro
 ```
 
 - Seção que não se aplica fica escrita `N/A`, nunca omitida.
+- **`risco`** é decidido por quem escreve a spec e confirmado quando o humano aprova. `alto` → o `/fatia` mostra os tickets antes de executar e o `/implement-task` roda o `security` sobre a fatia inteira; `baixo` → só spec e MR passam pelo humano.
+- **Mapa (`specs/README.md`):** além de "Depende de", cada linha tem **"Toca em"** — módulos/pastas que a fatia altera (ex.: `api:Application/Auth`, `front:shell`). Duas fatias só rodam em paralelo se "Depende de" não as liga e "Toca em" não cruza.
+- **Status:** a **primeira** coluna do mapa, sempre antes do `#`, pra ficar visível de relance (`feito` ou `—`). Mapa novo nasce com ela ali; mapa que a tenha em outro lugar, mova. Quem mantém é o `/fatia`, reconciliando com o git (MRs de todos os repositórios da fatia mergeadas em `dev`) no commit de docs da próxima spec; nunca se edita à mão nem em commit avulso. O texto livre "Em dev: …" não existe mais — o status é a coluna.
 - Caminho de arquivo e nome de tipo são permitidos (o executor precisa deles); trecho de código só quando fixa uma decisão melhor que texto.
 - Cada critério EARS é testável e vira pelo menos um teste. Critério vago ("deve ser bonito") volta pro grill.
 - Fatia de fundação/infra/limpeza troca `Critérios (EARS)` por `## Checklist` com `- [ ]`.

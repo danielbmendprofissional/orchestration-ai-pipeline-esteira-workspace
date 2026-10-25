@@ -7,15 +7,17 @@ Pipeline padrão deste projeto base, construído em cima das skills de Matt Poco
         ↓
 /wayfinder                          (só se o trabalho for grande demais p/ 1 sessão — cria map + tickets filhos)
         ↓
-/to-spec                            (spec-driven: conversa → spec formal, publicada no tracker)
-        ↓
-/to-tickets                         (spec → fatias/tickets, cada um com dependências bloqueantes declaradas)
-        ↓
-/implement-task <fatia>              (test-driven: task a task com TDD, um commit por task → /code-review → corrige os achados → push → MR pra dev; .claude/commands/implement-task.md)
+/fatia <fatia>                      (encadeia tudo abaixo; a ÚNICA parada antes do código é a aprovação da spec)
+   ├ /to-spec                       (spec-driven: conversa → spec formal; para e pede o ok)
+   ├ /to-tickets                    (automático após o ok: spec → fatias/tickets com Blocked by e Cobre:; script confere a cobertura; só risco alto mostra)
+   └ /implement-task <fatia>        (test-driven: task a task com TDD, um commit por task → suite → /code-review → corrige os achados → push → MR pra dev; .claude/commands/implement-task.md)
         ↓
 merge request → dev (branch protegida) → validação humana → merge
         ↓
-fechar a fatia                      (automático no próximo /implement-task ou /to-spec)
+fechar a fatia                      (automático no merge: job fechar-fatia do CI; rede de segurança no próximo /implement-task, /to-spec ou /fatia)
+
+/proximo [fatia]                    (tutor, a qualquer hora: em que pé está, seu próximo passo, de onde vem cada fatia)
+/mapa                              (confere o mapa de fatias contra protótipos, ADRs e mudanças: lacunas, fatias grandes demais; rode ao fim do discovery e quando o /proximo avisar)
         ↓
 quando todas as specs da rodada estiverem em dev: você corta a tag vX.Y.Z-rcN e promove dev → qa
         ↓
@@ -44,7 +46,7 @@ O agente sempre trabalha em `feature-x` e abre a MR pra `dev` — nunca pra `qa`
 
 **Fechar a fatia.** Mergeada em `dev`: o próximo `/implement-task` ou `/to-spec` fecha mãe e filhas no GitLab e marca a fatia como feita em `specs/README.md` (`docs/agents/orchestration.md`, "Fechar a fatia"); se ela criou um artefato que outras specs vão citar (`DESIGN.md`, contrato novo, ADR), aponta pra ele no `CLAUDE.md` do componente. Fundação (bootstrap, design system) não tem issue: aí é você quem pede pra marcar no mapa — é o que deixa a próxima `/to-spec` partir de uma base que existe.
 
-**Quem faz o quê em cada passo** (comando humano × ação do LLM × onde o humano decide): tabela "Ciclo de uma fatia" em `docs/agents/orchestration.md`. Na prática, por fatia, o humano roda `/to-spec B2`, `/to-tickets B2`, `/implement-task B2` e aprova o merge da MR; o `/implement-task` já roda o `/code-review`, corrige os achados e abre a MR.
+**Quem faz o quê em cada passo** (comando humano × ação do LLM × onde o humano decide): tabela "Ciclo de uma fatia" em `docs/agents/orchestration.md`. Na prática, por fatia, o humano roda `/fatia B2`, aprova a spec e, depois, aprova o merge da MR; o resto (tickets, TDD, `/code-review`, correção dos achados, MR, fechamento no merge) é do fluxo. Perdeu o fio: `/proximo`. Várias fatias que não se tocam: um painel do Alethe por fatia, cada um numa área isolada (`.claude/scripts/worktree-fatia.mjs`), acompanhadas pelo board de issues por label `em-execucao` (`docs/agents/orchestration.md`, "Execução paralela").
 
 ## Skills de apoio (usar quando a situação pedir, fora da sequência linear)
 

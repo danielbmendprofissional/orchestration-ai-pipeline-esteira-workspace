@@ -11,5 +11,6 @@
         ]
       }
     ]
-  }
+  },
+  "permissions": {"allow": ["Bash(git -C *)", "Bash(git fetch *)", "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)", "Bash(glab issue *)", "Bash(glab mr *)", "Bash(glab label *)", "Bash(glab api *)", "Bash(dotnet test *)", "Bash(dotnet build *)", "Bash(npx vitest *)", "Bash(npm test *)", "Bash(npm run *)", "Bash(node .claude/scripts/*)"]}
 }

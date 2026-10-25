@@ -13,7 +13,7 @@ Estrategia:
 1. `git diff` pra ver tudo que mudou nesta spec/task.
 2. Ler os arquivos modificados.
 3. Conferir contra o `$TASK` (o trecho da spec que e desta task) e contra os padroes do repo (`docs/adr/`, `CONTEXT-MAP.md`, `CLAUDE.md` do repositorio).
-3a. **Escopo:** cada arquivo alterado está dentro do "Faça"/"Arquivos esperados" do `$TASK`? Algo de "Não toque" foi mexido? Teste existente foi apagado? Qualquer um → Crítico.
+3a. **Escopo** (o agente-pai já rodou `.claude/scripts/check-escopo.mjs`; reconfira só o que script não pega — arquivo dentro da pasta certa mas que pertence a outra filha): cada arquivo alterado está dentro do "Faça"/"Arquivos esperados" do `$TASK`? Algo de "Não toque" foi mexido? Teste existente foi apagado? Qualquer um → Crítico.
 3b. **Segurança básica** (o subagent `security` só entra em task de auth/sessão/segredo/dependência): entrada externa validada no backend; endpoint tocado com autenticação/autorização; nenhum segredo ou dado sensível em código, log ou mensagem de erro; dependência nova justificada.
 4. Conferir especificamente o `git diff`/`git log` dos arquivos de teste: alguma asserção foi afrouxada, removida, comentada ou pulada (`skip`/`xit`/`it.todo`) entre o commit em que o teste nasceu vermelho e o commit em que passou a passar, sem isso estar coberto pela spec? Isso é sempre Crítico — teste alterado pra facilitar a própria implementação passar não é uma implementação concluída, é um teste que parou de testar o que devia.
 
