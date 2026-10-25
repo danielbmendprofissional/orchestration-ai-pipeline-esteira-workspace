@@ -11,13 +11,11 @@ Pipeline padrão deste projeto base, construído em cima das skills de Matt Poco
         ↓
 /to-tickets                         (spec → fatias/tickets, cada um com dependências bloqueantes declaradas)
         ↓
-/implement-task                     (test-driven: executa a spec task a task, delegando a subagentes com TDD — red → green → refactor; .claude/commands/implement-task.md)
+/implement-task <fatia>              (test-driven: task a task com TDD, um commit por task → /code-review → corrige os achados → push → MR pra dev; .claude/commands/implement-task.md)
         ↓
-/code-review                        (avalia o diff em dois eixos: padrão do repo + conformidade com a spec)
+merge request → dev (branch protegida) → validação humana → merge
         ↓
-commit (mensagens claras, um commit por unidade lógica)
-        ↓
-merge request → dev (branch protegida) → validação humana
+fechar a fatia                      (automático no próximo /implement-task ou /to-spec)
         ↓
 quando todas as specs da rodada estiverem em dev: você corta a tag vX.Y.Z-rcN e promove dev → qa
         ↓
@@ -44,7 +42,9 @@ O agente sempre trabalha em `feature-x` e abre a MR pra `dev` — nunca pra `qa`
 
 **Commit → Merge Request → dev.** Commit granular, MR contra `dev` (branch protegida), merge só após validação humana. Dali em diante, a esteira de deploy assume: promoção `dev → qa` é automática, `qa → hml` abre MR esperando aprovação humana, `hml → main` espera segunda aprovação humana — ver `docs/agents/esteira-deploy.md` para o fluxo completo, incluindo hotfix e rollback. Ver `docs/agents/issue-tracker.md` para os comandos `glab mr ...`.
 
-**Fechar a fatia.** Mergeada em `dev`: marcar a fatia como feita em `specs/README.md` e, se ela criou um artefato que outras specs vão citar (`DESIGN.md`, contrato novo, ADR), apontar pra ele no `CLAUDE.md` do componente. Vale também pra fundação (bootstrap, design system), que não tem spec — é o que deixa a próxima `/to-spec` partir de uma base que existe.
+**Fechar a fatia.** Mergeada em `dev`: o próximo `/implement-task` ou `/to-spec` fecha mãe e filhas no GitLab e marca a fatia como feita em `specs/README.md` (`docs/agents/orchestration.md`, "Fechar a fatia"); se ela criou um artefato que outras specs vão citar (`DESIGN.md`, contrato novo, ADR), aponta pra ele no `CLAUDE.md` do componente. Fundação (bootstrap, design system) não tem issue: aí é você quem pede pra marcar no mapa — é o que deixa a próxima `/to-spec` partir de uma base que existe.
+
+**Quem faz o quê em cada passo** (comando humano × ação do LLM × onde o humano decide): tabela "Ciclo de uma fatia" em `docs/agents/orchestration.md`. Na prática, por fatia, o humano roda `/to-spec B2`, `/to-tickets B2`, `/implement-task B2` e aprova o merge da MR; o `/implement-task` já roda o `/code-review`, corrige os achados e abre a MR.
 
 ## Skills de apoio (usar quando a situação pedir, fora da sequência linear)
 

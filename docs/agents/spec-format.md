@@ -30,7 +30,9 @@ Liste as decisões que a spec precisa e que nem ADR, nem padrão, nem código, n
 
 ## 5. Mostrar antes de publicar
 
-Escreva o arquivo, mostre ao humano a Ideia (o que fica fora) e a lista de critérios/checklist, e só depois de aprovado abra a issue-mãe e atualize o mapa.
+Escreva o arquivo, mostre ao humano a Ideia (o que fica fora) e a lista de critérios/checklist, e só depois de aprovado abra a issue-mãe (título `<fatia> — <nome>`, ex.: `B2 — Result pattern + Problem Details`) e atualize o mapa com o link da spec e o `#<mãe>`.
+
+Antes do passo 1, feche as fatias já mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"); a linha delas vira "feito" neste mesmo commit de docs.
 
 ## Arquivo
 

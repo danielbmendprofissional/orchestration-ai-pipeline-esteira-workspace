@@ -41,7 +41,7 @@ GitLab Free não tem issue de grupo nem épico (Premium) — toda issue pertence
 (Labels simples — `area::backend` é label com escopo, recurso Premium.)
 
 - Ler/criar: `glab issue list -R <grupo>/<projeto>-workspace --label backend`.
-- Fechar a partir da MR de outro repositório: `Closes <grupo>/<projeto>-workspace#42` na descrição da MR (referência entre projetos funciona no Free).
+- Citar a issue na MR de outro repositório: `<grupo>/<projeto>-workspace#42` na descrição (referência entre projetos funciona no Free). `Closes` não serve aqui: a MR vai pra `dev` e o GitLab só fecha no merge pro branch padrão. Quem fecha é "Fechar a fatia" (`docs/agents/orchestration.md`).
 - A lista de issues **do grupo** no GitLab mostra tudo junto.
 
 ## Feature que toca API e frontend
