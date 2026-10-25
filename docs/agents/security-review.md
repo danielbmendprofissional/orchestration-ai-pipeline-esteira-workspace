@@ -4,11 +4,11 @@ Este repo já tem segurança em duas camadas que não se sobrepõem por acaso �
 
 ## As camadas
 
-**1. `.pi/agents/security.md` — automática, todo ticket, barata.** Roda dentro de `/implement-task`, sem supervisão humana, checklist mecânico (entrada validada, auth, segredo hardcoded, CVE de dependência nova). Modelo do combo `omniroute/pi-quality` via `pi.dev` — **não tem acesso a nenhuma skill do Claude Code**, são runtimes diferentes. Nenhuma skill deste arquivo pode ser chamada por ele.
+**1. `.claude/agents/security.md` — automática, todo ticket, barata.** Roda dentro de `/implement-task`, sem supervisão humana, checklist mecânico (entrada validada, auth, segredo hardcoded, CVE de dependência nova). Subagente do Claude Code: checklist mecânico e barato por task; as skills abaixo são a camada mais profunda, rodadas sob demanda na sessão.
 
 **2. Skills de auditoria do Claude Code — sob demanda, mais profundas.** Instalação e comandos exatos são setup de projeto, fora deste repo. Dois grupos:
 
-- **Núcleo, roda contra qualquer projeto:** `security-review` e `skill-scanner` (`getsentry/skills`); `owasp-audit`, `api-audit`, `dependency-audit`, `secrets-audit`, `crypto-audit` (`briiirussell/cybersecurity-skills`). Aprofundam exatamente o que o `.pi/agents/security.md` já checa de forma barata — mesmo padrão do `avoid-ai-design` ser "segunda rede de segurança" depois do `impeccable` (`docs/design/principios.md`).
+- **Núcleo, roda contra qualquer projeto:** `security-review` e `skill-scanner` (`getsentry/skills`); `owasp-audit`, `api-audit`, `dependency-audit`, `secrets-audit`, `crypto-audit` (`briiirussell/cybersecurity-skills`). Aprofundam exatamente o que o `.claude/agents/security.md` já checa de forma barata — mesmo padrão do `avoid-ai-design` ser "segunda rede de segurança" depois do `impeccable` (`docs/design/principios.md`).
 - **Situacional, só quando o projeto real tiver aquele escopo regulatório:** `privacy-engineering`, `hipaa-audit`, `pci-audit`, `csf-mapping`, `ai-risk-management` (`briiirussell/cybersecurity-skills`). Decisão de nascimento de projeto, não regra fixa do `ai-base` — a maioria dos projetos não precisa de nenhuma delas.
 
 **Onde entram no `/code-review` (`docs/workflow.md`):** se a task tocar superfície sensível (auth, dado de usuário, dependência nova, segredo), rodar `security-review`/`owasp-audit`/`dependency-audit`/`secrets-audit` como segunda camada antes de abrir a MR — mesma lógica condicional do `avoid-ai-design` pra UI.
@@ -24,8 +24,8 @@ Isso acontece fora do fluxo normal de spec — você (via Claude Code) roda uma 
 **Achado isolado, correção óbvia, sem ambiguidade de escopo** (ex: segredo hardcoded num arquivo específico, dependência com CVE conhecido e patch direto disponível, uma validação faltando num endpoint):
 
 1. Abrir uma issue no GitLab descrevendo o achado (arquivo, o que está errado, o que a skill recomendou), já com a label `ready-for-agent` — você já triou o achado ao rodar a auditoria, não precisa passar pelo `/triage`.
-2. Despachar `pi` chamando o subagent `security` **sozinho, em modo `single`** (não a chain inteira de `/implement-task` — não tem `data`/`backend`/`front`/`ui` pra rodar aqui, é uma correção pontual de segurança), apontando pra issue.
-3. Mesmo sendo um achado pequeno, não pular o resto do gate: depois do `security` corrigir, rodar `tests` (confirma que nada quebrou) e pelo menos uma passada de `review` antes de virar branch/MR — a correção de segurança segue o mesmo padrão de qualidade de qualquer outra mudança, só que sem precisar da chain de `data`/`backend`/`front`/`ui` que não se aplicam aqui.
+2. Na sessão do Claude Code, delegar ao subagent `security` **sozinho** (não o `/implement-task` inteiro — não tem `data`/`backend`/`front`/`ui` pra rodar aqui, é uma correção pontual de segurança), apontando pra issue.
+3. Mesmo sendo um achado pequeno, não pular o resto do gate: depois do `security` corrigir, rodar `tests` (confirma que nada quebrou) e pelo menos uma passada de `review` antes de virar branch/MR — a correção de segurança segue o mesmo padrão de qualidade de qualquer outra mudança, só que sem `data`/`backend`/`front`/`ui`, que não se aplicam aqui.
 4. Branch de feature normal, `/code-review` (rodando a mesma skill de novo pra confirmar que o achado sumiu — fecha o loop), commit, MR pra `dev`, esteira normal (`docs/agents/esteira-deploy.md`).
 
 **Achado que precisa de decisão de arquitetura ou toca múltiplos módulos** (ex: "não validamos expiração de JWT em nenhum endpoint", "todo o módulo Financial expõe dado de outro usuário por falta de filtro de tenant"):

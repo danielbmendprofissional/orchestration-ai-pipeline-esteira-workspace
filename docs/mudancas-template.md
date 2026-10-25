@@ -65,7 +65,7 @@ Hoje, mesclar `main` em `dev` depois de um hotfix cai no caminho **ROLLBACK** do
 
 Disparo é por **candidata nova**, não por ambiente — cobre a correção nascida em `hml` (`rc2` cortada lá).
 
-- **code-review**: roda em toda candidata nova, de qualquer origem (`dev`, `qa` ou `hml`), sobre o diff entre a candidata anterior do mesmo core (ou a última final publicada, se for `rc1`) e a nova. Resultado vai no `esteira-gate`. O gate local em `feature/*` (`.pi/code-review-ok.json`) continua como filtro antes da MR.
+- **code-review**: roda em toda candidata nova, de qualquer origem (`dev`, `qa` ou `hml`), sobre o diff entre a candidata anterior do mesmo core (ou a última final publicada, se for `rc1`) e a nova. Resultado vai no `esteira-gate`. O gate local em `feature/*` (`.code-review-ok.json`) continua como filtro antes da MR.
 - **security**: roda junto com as ferramentas do stage `security`, em toda pipeline. Achados entram no `consolidated.json` como as ferramentas.
 - **qa**: roda depois do **primeiro deploy de cada candidata nova** (`qa` no caminho normal; `hml` quando a candidata nasceu em `hml`). Precisa da app no ar. Resultado vai no `esteira-resultado`; sem resultado positivo a Esteira não avança.
 
@@ -93,7 +93,7 @@ Disparo é por **candidata nova**, não por ambiente — cobre a correção nasc
 
 ## 8. Imagem `tools/agent-runner` (ADR-0012)
 
-- Nova imagem no template rodando `pi` com as definições de agente do projeto (`.pi/agents/review.md`, `security.md`, `tests.md`), modelo via OmniRoute (chave em variável mascarada do grupo).
+- Nova imagem no template rodando o Claude Code CLI (`claude -p`) com as definições de agente do projeto (`.claude/agents/review.md`, `security.md`, `tests.md`), modelo via OmniRoute (`ANTHROPIC_BASE_URL` + key em variável mascarada do grupo; nunca a assinatura) — ADR-0017.
 - Jobs: `agent-code-review` e `agent-security` antes do `esteira-gate` (toda candidata nova / toda pipeline); `agent-qa` depois do primeiro deploy da candidata, por Destino, antes do `esteira-resultado`.
 - Saída em JSON no formato de Análise (formato na spec E2). Respeitar o teto de custo por execução que a Esteira devolve no `esteira-abrir`.
 - Substitui o princípio "nenhuma IA roda no CI" do README; o gate local em `feature/*` continua.

@@ -15,6 +15,6 @@ variables:
   DOTNET_TESTS: ""
   # EF_PROJECT / EF_STARTUP_PROJECT: liga as migrations
   HEALTH_PATH: /health
-  # feature/* → verify-code-review (.pi/code-review-ok.json) → MR automática pra dev.
+  # feature/* → verify-code-review (.code-review-ok.json) → MR automática pra dev.
   # Exige GITLAB_TOKEN (project access token, escopo api) nas variáveis do projeto.
   REVIEW_GATE_ENABLED: "true"

@@ -27,12 +27,9 @@ done
 # (feature-x -> MR -> dev -> qa -> hml -> main; master fica como fallback
 # genérico pra repos que ainda não adotaram o fluxo completo).
 #
-# Este hook só roda em sessão Claude Code (ver .claude/settings.json) — não
-# vale pro `pi`, que é quem de fato promove dev->qa com merge+push direto
-# (ver docs/agents/esteira-deploy.md). Claude Code nunca deveria estar
-# fazendo esses pushes de qualquer forma, então o bloqueio abaixo continua
-# certo pro papel dele: discovery/spec/review, MR pra 'dev', nunca push
-# direto em branch protegida.
+# Vale pra toda sessão Claude Code, inclusive os subagentes do /implement-task.
+# Promoção dev->qa (merge da tag + push) é do humano — ver
+# docs/agents/esteira-deploy.md. Agente só sobe feature/* e abre MR pra dev.
 #
 # Hotfix (branch/xxx a partir de main, MR, aprovação humana — ver
 # docs/agents/esteira-deploy.md) também não esbarra aqui: o agente só empurra

@@ -14,9 +14,9 @@ A esteira é **por repositório de código** (`<projeto>-api`, `<projeto>-fronte
 
 ## Fluxo normal
 
-1. Cada agente-pai termina sua spec e sobe pra `dev` (MR normal, ver `docs/workflow.md`).
-2. Quando todas as specs da rodada estiverem em `dev`, o último agente-pai a terminar cria a tag (`vX.Y.Z-rc1`, ou o próximo `rcN` do ciclo).
-3. Promoção `dev → qa` é merge direto, sem Merge Request:
+1. Cada spec termina com MR pra `dev` (`/implement-task` → `/code-review`, ver `docs/workflow.md`).
+2. Quando todas as specs da rodada estiverem em `dev`, você corta a tag (`vX.Y.Z-rc1`, ou o próximo `rcN` do ciclo) — pode pedir pro Claude Code montar o comando.
+3. Promoção `dev → qa` é merge direto, sem Merge Request, **feita por você** (o hook bloqueia push de agente em branch protegida; a Esteira assume isso pelo bot quando estiver no ar):
    ```
    git checkout qa
    git pull
@@ -24,7 +24,7 @@ A esteira é **por repositório de código** (`<projeto>-api`, `<projeto>-fronte
    git push origin qa
    ```
 4. O agente de QA testa o ambiente `qa` publicado.
-5. Se achar bug: volta pra `dev`. O agente-pai dono da spec com o bug corrige em `dev`, cria a próxima tag `vX.Y.Z-rc(N+1)` (mesmo `X.Y.Z`, só incrementa `rc`), repete o passo 3.
+5. Se achar bug: volta pra `dev`. A correção vira task (`/implement-task` na mesma spec ou spec nova), entra em `dev` por MR, cria a próxima tag `vX.Y.Z-rc(N+1)` (mesmo `X.Y.Z`, só incrementa `rc`), repete o passo 3.
 6. **Regra crítica:** a branch `qa` nunca pode ter commit acima do commit da tag — exceto commit estrutural de merge conflict resolvido pelo próprio git. Qualquer outro commit acima quebra a pipeline.
 7. Quando QA passar, abrir Merge Request `qa → hml`. Esperar aprovação humana (pode aprovar ou mandar de volta pra `dev`). Funciona porque a tag está na ponta do `qa` (regra do passo 6). Se o `qa` tiver andado além da tag, usar `release/vX.Y.Z-rcN` criada a partir da tag como origem da MR.
 8. Depois do `hml` publicado (deploy feito), esperar segunda aprovação humana antes de seguir.

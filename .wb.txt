@@ -1,0 +1,6 @@
+src\Esteira.Api\Esteira.Api.csproj]
+src\Esteira.Application\Esteira.Application.csproj]
+src\Esteira.Data\Esteira.Data.csproj]
+src\Esteira.Domain\Esteira.Domain.csproj]
+src\Esteira.Infra.Cache\Esteira.Infra.Cache.csproj]
+test\Esteira.Domain.Tests\Esteira.Domain.Tests.csproj]

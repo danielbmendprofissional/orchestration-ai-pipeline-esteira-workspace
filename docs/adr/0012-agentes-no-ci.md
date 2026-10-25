@@ -1,6 +1,6 @@
 # ADR-0012 — Agentes de code-review, security e qa rodam no CI
 
-Status: Aceito · 2026-10-22 · Muda o princípio do template-ci "nenhuma IA roda no CI"
+Status: Aceito · 2026-10-22 · Muda o princípio do template-ci "nenhuma IA roda no CI" · Runner alterado pela ADR-0017 (Claude Code CLI no lugar do `pi`)
 
 Os agentes rodam na pipeline de cada Candidata (code-review e security antes do gate; qa depois do primeiro deploy) numa imagem `tools/agent-runner` do template, que executa `pi` com as definições de agente do projeto e usa modelo via **OmniRoute** (chave em variável mascarada do grupo no GitLab). A saída é JSON no formato de Análise (veredito + achados com severidade) e entra na Esteira pelo `esteira-gate`/`esteira-resultado` como qualquer ferramenta. Cada Aplicação tem um **teto de custo por execução** configurado na Esteira.
 

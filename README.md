@@ -2,11 +2,11 @@
 
 Workspace da **Esteira** — plataforma que controla o fluxo de deploy de cada aplicação por etapas (abertura, versão das tarefas, GMUD, banco de dados, aprovação técnica, DEV, QA, HML, aprovação de negócio, PRD) e recebe os deploys e as análises de segurança das pipelines.
 
-Nasceu do `ai-base` (regras, `.claude/`, `.pi/`, `docs/`). Padrão de workspace: `docs/agents/workspace.md`.
+Nasceu do `ai-base` (regras, `.claude/`, `docs/`). Padrão de workspace: `docs/agents/workspace.md`.
 
 ```
 GitLab: orchestration-ai/ai-pipeline/esteira/     Local: ai-pipeline/esteira/   ← clone deste repositório
-  ├── esteira-workspace  regras + specs + issues          ├── CLAUDE.md, .claude/, .pi/, docs/, specs/, CONTEXT-MAP.md
+  ├── esteira-workspace  regras + specs + issues          ├── CLAUDE.md, .claude/, docs/, specs/, CONTEXT-MAP.md
   ├── esteira-api        .NET 10  (template-ci)           ├── esteira-api/       (.git próprio — ignorado aqui)
   └── esteira-frontend   Angular  (template-ci)           └── esteira-frontend/  (.git próprio — ignorado aqui)
 ```

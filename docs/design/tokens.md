@@ -7,7 +7,7 @@ Formato neutro (JSON), pra não prender a um framework — o mapeamento real aco
 - **Angular (default deste template)**: os valores viram **os dois ao mesmo tempo, batendo entre si** — o `@theme` do Tailwind 4 em `src/styles.css` (utilitários) e, no mesmo arquivo, as variáveis que os componentes spartan/ui leem (`--primary`, `--background`…) apontando pros mesmos tokens — ver `component-library.md`. Nunca mapear só um dos dois e deixar o outro no default de fábrica.
 - **React (landing page isolada)**: `tailwind.config` ou tema do shadcn/ui, como antes.
 
-O `ui` (`.pi/agents/ui.md`) deve sempre consumir tokens a partir do tema já mapeado (`src/styles.css` ou `DESIGN.md` do projeto), nunca inventar um valor de cor/espaçamento ad-hoc no meio de uma task.
+O `ui` (`.claude/agents/ui.md`) deve sempre consumir tokens a partir do tema já mapeado (`src/styles.css` ou `DESIGN.md` do projeto), nunca inventar um valor de cor/espaçamento ad-hoc no meio de uma task.
 
 ## Cor
 
