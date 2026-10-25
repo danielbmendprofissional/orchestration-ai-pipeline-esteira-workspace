@@ -1,6 +1,6 @@
 # Princípios de design deste projeto
 
-Code-first, sem Figma como etapa obrigatória (Figma free-tier fica disponível como ferramenta pontual — ver seção final — mas nunca é gate do fluxo). O design acontece dentro do fluxo TDD+SDD (`docs/workflow.md`), na task de `ui` (`.pi/agents/ui.md`).
+Code-first, sem Figma como etapa obrigatória (Figma free-tier fica disponível como ferramenta pontual — ver seção final — mas nunca é gate do fluxo). O design acontece dentro do fluxo TDD+SDD (`docs/workflow.md`), na task de `ui` (`.claude/agents/ui.md`).
 
 ## A cadeia de ferramentas, na ordem em que roda
 

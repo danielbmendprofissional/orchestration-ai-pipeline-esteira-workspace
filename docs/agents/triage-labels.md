@@ -10,6 +10,8 @@ As skills falam em termos de cinco papéis canônicos de triagem. Este arquivo m
 | `ready-for-human`           | `ready-for-human`      | Requer implementação humana |
 | `wontfix`                   | `wontfix`              | Não será atacada |
 
+**`ready-for-agent` não quer dizer "pode começar agora".** Quer dizer "especificada e aprovada pra agente": todas as filhas de uma spec aprovada recebem a label de uma vez. Quem decide a ordem é o `Blocked by:` — um bloqueador conta como resolvido quando está fechado **ou** já comitado na branch de feature da mesma spec (todas as filhas de uma spec vão na mesma branch e só fecham juntas, no merge da MR). Tirar a label das bloqueadas travaria o `/implement-task` no meio da spec.
+
 Quando uma skill mencionar um papel (ex: "aplicar a label de triagem AFK-ready"), use a string correspondente desta tabela.
 
 Editar a coluna da direita se o vocabulário do GitLab mudar.

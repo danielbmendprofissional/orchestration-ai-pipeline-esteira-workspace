@@ -36,6 +36,21 @@ Nesse modelo, `/to-spec` não substitui o arquivo por uma issue: abre uma **issu
 
 Se o projeto não tiver esse modelo de arquivo, `/to-spec` publica a spec inteira como issue, como descrito no resto deste documento.
 
+## Tickets de uma spec (`/to-tickets`)
+
+Onde a skill diz "make each ticket its sub-issue": no GitLab, ticket de spec é **Task filha da issue-mãe** (Child items, funciona no Free). Pra cada ticket, em ordem de dependência:
+
+1. Criar como task: MCP `create_issue` com `issue_type: "task"` (ou `glab issue create ... --type task`), labels de área + `ready-for-agent`, descrição começando com `Part of #<mãe>` e `Blocked by: #<n>, #<n>` (ou `Blocked by: —`).
+2. Ligar à mãe pela GraphQL (não há REST pra hierarquia):
+   ```bash
+   glab api graphql -f query='query { project(fullPath:"<grupo>/<projeto>-workspace") { workItems(iids:["<mãe>","<filha>"]) { nodes { id iid } } } }'
+   glab api graphql -f query='mutation { workItemUpdate(input:{id:"<gid da filha>", hierarchyWidget:{parentId:"<gid da mãe>"}}) { errors } }'
+   ```
+   Se a filha nasceu como Issue, converter antes: `workItemConvert(input:{id:"<gid>", workItemTypeId:"<gid do tipo Task>"})` (o gid do tipo sai de `project { workItemTypes { nodes { id name } } }`).
+3. Conferir: `workItems(iids:["<mãe>"]) { nodes { widgets { ... on WorkItemWidgetHierarchy { children { nodes { iid } } } } } }` lista todas as filhas.
+
+Bloqueio continua como texto (`Blocked by:`): o vínculo nativo "blocks" é Premium.
+
 ## Operações de wayfinding
 
 Usadas por `/wayfinder`. O **map** é uma issue única com issues **filhas** como tickets.

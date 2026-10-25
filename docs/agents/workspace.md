@@ -4,7 +4,7 @@ Padrão de todo projeto nascido do `ai-base`. Um **grupo** no GitLab por projeto
 
 ```
 GitLab: grupo valuto/                       Local: valuto/              ← clone do valuto-workspace
-  ├── valuto-workspace   regras + issues            ├── CLAUDE.md, .claude/, .pi/, docs/, CONTEXT-MAP.md
+  ├── valuto-workspace   regras + issues            ├── CLAUDE.md, .claude/, docs/, CONTEXT-MAP.md
   ├── valuto-api         .NET   (template-ci)       ├── valuto-api/        (.git próprio — ignorado pelo workspace)
   └── valuto-frontend    Angular (template-ci)      └── valuto-frontend/   (.git próprio — ignorado pelo workspace)
 ```
@@ -13,13 +13,13 @@ GitLab: grupo valuto/                       Local: valuto/              ← clon
 
 | Repositório | Conteúdo | Pipeline |
 |---|---|---|
-| `<projeto>-workspace` | Este template (`CLAUDE.md`, `.claude/`, `.pi/`, `docs/`, `CONTEXT-MAP.md`, ADRs transversais) e **todas as issues** do projeto | Nenhuma |
+| `<projeto>-workspace` | Este template (`CLAUDE.md`, `.claude/` (subagentes, comando `/implement-task`, hook), `docs/`, `CONTEXT-MAP.md`, ADRs transversais) e **todas as issues** do projeto | Nenhuma |
 | `<projeto>-api` | Código .NET, `CONTEXT.md` do backend, `deploy/k8s/`, `.gitlab-ci.yml` (`templates/api.gitlab-ci.yml`) | template-ci, `APP_TECHNOLOGY: dotnet` |
 | `<projeto>-frontend` | Código Angular, `nginx/`, `deploy/k8s/`, `.gitlab-ci.yml` (`templates/frontend.gitlab-ci.yml`) | template-ci, `APP_TECHNOLOGY: angular` |
 
 Componente novo (ex: `<projeto>-worker`) segue o mesmo padrão: repositório próprio no grupo, pasta própria no workspace, linha nova no `.gitignore` do workspace e no `CONTEXT-MAP.md`.
 
-O Claude Code e o `pi` sempre abrem na **raiz do workspace** — enxergam todos os componentes e carregam as regras daqui. `CLAUDE.md` aninhado em `<projeto>-api/` ou `<projeto>-frontend/` (stack daquele componente) empilha automaticamente quando o trabalho entra na pasta.
+O Claude Code sempre abre na **raiz do workspace** — enxergam todos os componentes e carregam as regras daqui. `CLAUDE.md` aninhado em `<projeto>-api/` ou `<projeto>-frontend/` (stack daquele componente) empilha automaticamente quando o trabalho entra na pasta.
 
 ## Git: sempre no repositório certo
 
@@ -60,4 +60,4 @@ Por repositório: cada um tem seu `dev → qa → hml → main`, suas tags `vX.Y
 
 ## Code review
 
-`/code-review` grava a prova `.pi/code-review-ok.json` **dentro de cada repositório de código alterado** (`<projeto>-api/.pi/code-review-ok.json`), com o sha do commit daquele repositório — o CI de cada um confere a sua. O `.pi/` da raiz do workspace é configuração dos subagents, não prova de review.
+`/code-review` grava a prova `.code-review-ok.json` **na raiz de cada repositório de código alterado** (`<projeto>-api/.code-review-ok.json`), com o sha do commit revisado daquele repositório — o CI de cada um confere a sua (`docs/agents/orchestration.md`).

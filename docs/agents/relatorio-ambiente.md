@@ -2,6 +2,8 @@
 
 Última atualização: 2026-10-21, rodada Etapa 2 (existente — recriação do ambiente).
 
+> **2026-10-24:** o `pi.dev` foi removido (ADR-0017). As menções a `.pi/` e `pi` abaixo são o registro da rodada de 2026-10-21; hoje a execução é o `/implement-task` do Claude Code (`.claude/agents/`, `.claude/commands/`).
+
 ## Recriação
 
 - Data: 2026-10-21 · Base do template: ai-base@bfe1b43 · Origem: ai-base-antigo · Layout: workspace (mantido — `esteira-workspace` + `esteira-api` + `esteira-frontend`, cada um com `.git` próprio)
