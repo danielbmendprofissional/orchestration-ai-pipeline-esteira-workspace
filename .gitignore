@@ -12,3 +12,40 @@ Claude outputs
 
 # Referências locais (telas e código de outros sistemas): nunca versionar
 docs/referencias/
+
+# ============================================================
+# Proteção contra vazamento (bloco padrão do ecossistema)
+# ============================================================
+# Segredos e credenciais
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+*.crt
+id_rsa*
+id_ed25519*
+kubeconfig
+.kube/
+*credentials*
+*.secrets.json
+*secrets*.yaml
+*secrets*.yml
+*.tfstate
+*.tfstate.*
+
+# Config local do Claude Code / MCP com valores reais (não versionar)
+.claude/settings.local.json
+.claude/*.local.*
+.mcp.local.json
+
+# Dumps e bancos locais
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
