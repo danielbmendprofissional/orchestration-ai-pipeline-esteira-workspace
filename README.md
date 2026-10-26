@@ -21,7 +21,7 @@ GitLab: orchestration-ai/ai-pipeline/esteira/     Local: ai-pipeline/esteira/   
 ## Clonar do zero
 
 ```powershell
-cd C:\Users\danib\source\repos\orquestracao-ai\ai-pipeline
+cd <raiz-do-workspace>\ai-pipeline
 git clone git@gitlab.com:orchestration-ai/ai-pipeline/esteira/esteira-workspace.git esteira
 cd esteira
 git clone git@gitlab.com:orchestration-ai/ai-pipeline/esteira/esteira-api.git
