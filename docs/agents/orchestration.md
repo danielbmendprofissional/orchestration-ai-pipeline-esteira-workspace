@@ -30,6 +30,20 @@ O modelo não é decidido aqui: cada subagente declara um **apelido** (`sonnet`,
 
 **Modo Claude:** o agente-pai implementa cada task direto (TDD), sem subagente executor nem `review` por task — o `/code-review` no fim da fatia revisa tudo. **Modo pago/free:** o agente-pai monta um `$TASK` autocontido por task (trecho da spec, o que **não** tocar, arquivos esperados, 2–4 arquivos de contexto), delega ao executor e ao `review`. Nos dois: testes da task com filtro durante o trabalho, **suite completa uma vez por fatia, pelo pai, antes do review** (a de integração sobe containers — é o maior custo de tempo; o CI da MR cobre o resto); escopo conferido por `.claude/scripts/check-escopo.mjs` (arquivo fora do escopo, "Não toque", teste apagado, `skip`/`only`, asserção a menos — sem LLM). Subagente não comita nem faz push; o hook `.claude/hooks/block-dangerous-git.sh` vale pra todos.
 
+## Marca da fatia nos testes
+
+Todo teste escrito numa fatia leva o **código da fatia** do mapa (`B2`; nunca o da filha). É a evidência que liga spec → teste e permite conferir por script, sem confiar no status escrito à mão, se uma fatia está implementada.
+
+| Stack | Marca | Rodar só a fatia |
+|---|---|---|
+| .NET (xUnit v3) | `[Trait("Fatia", "B2")]` na classe de teste (no método só se a classe mistura fatias) | `dotnet test --project <projeto de teste> -- --filter-trait "Fatia=B2"` |
+| Vitest | `describe('[B2] Nome', …)` — o código entre colchetes abre o nome | `npx vitest run -t "\[B2\]"` |
+| Playwright | `test('…', { tag: '@B2' }, …)` | `npx playwright test --grep @B2` |
+
+- **Uma marca por classe.** Se outra fatia muda de verdade o comportamento que a classe testa, acrescente a segunda marca (`Trait` repetido); não troque a primeira.
+- **Quem marca:** quem escreve o teste, no mesmo passo do vermelho — pai no modo Claude, executor no pago/free (o `$TASK` pede). o `check-escopo.mjs` dá FALHA em teste novo sem marca.
+- Fundação sem linha no mapa (a fatia `00`) usa o código dela. Teste legado de antes do processo fica sem marca até uma fatia adotá-lo.
+
 ## Nomes — tudo ligado pelo código da fatia
 
 O código da fatia no mapa (`specs/README.md`: `B2`, `A1`…) liga issue, branch, commit e MR. Com ele você acha tudo no GitLab e no git sem decorar número de issue.

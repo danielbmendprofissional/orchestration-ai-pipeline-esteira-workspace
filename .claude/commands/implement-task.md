@@ -76,6 +76,8 @@ Escopo da task: o trecho da spec que é dela (os critérios do `Cobre:` da filha
 
 Escreveu código de produção antes de ver o teste vermelho? **Desfaça esse código** (só o que você criou nesta task), volte ao passo 1. Teste escrito depois do código não conta — ele nunca provou que testa algo. No relatório da task, cite cada teste e a falha vermelha que você viu antes do verde.
 
+**Marca da fatia em todo teste novo** (`docs/agents/orchestration.md`, "Marca da fatia nos testes"): o código da fatia (`B2`, não `B2.5`) na classe ou no `describe`. Teste novo sem a marca dá FALHA no `check-escopo`. No modo pago/free, a marca vai no `$TASK` ("marque os testes com a fatia B2").
+
 Demais regras — as mesmas dos executores em `.claude/agents/`: só o escopo da task, nada de "Não toque".
 
 Percebeu falta ou erro em repositório compartilhado (`ai-base`, `ai-infra`, `ai-ops`, `template-ci`)? Não contorne nem edite lá: **pare nesse ponto**, proponha ao humano (`docs/agents/melhoria-orquestracao.md`) dizendo se bloqueia a fatia, e só abra a issue com o sim. Não bloqueia → siga e registre no relatório.
@@ -91,8 +93,9 @@ Percebeu falta ou erro em repositório compartilhado (`ai-base`, `ai-infra`, `ai
 ## 3. Suite, segurança e review (automático, quando não sobra filha)
 
 1. **Suite completa** em cada repositório da fatia, uma vez. Vermelha → corrija (TDD, commit `fix:` na filha dona do arquivo) e rode de novo. Painel: `- [x] Suite completa — verde`.
-2. `risco: alto` → subagente `security` sobre `git -C <repo> diff origin/dev...<branch>`; achado crítico vira correção como no FAIL abaixo.
-3. **Review** — só se houver commit novo desde a última prova (`.code-review-ok.json`). Rode a skill `code-review` (Skill tool) **sem perguntar o ponto fixo**: em cada repositório da fatia, ponto fixo `origin/dev`, diff `git -C <repo> diff origin/dev...<branch>`, spec = o arquivo da fatia. Painel: `- [ ] Review — rodada <n> · pai (<modelo>)` enquanto roda, `FAIL, corrigindo <k> achados` no FAIL, `- [x] Review — PASS na rodada <n>` no PASS.
+2. **Marcas:** `node .claude/scripts/status-specs.mjs B2 --pre-entrega` (zero token; sem a flag `--sem-gitlab` ele também confere issue e MR). `FALHA` = nenhum teste leva a marca da fatia → marque os testes (ou, se a spec não tem teste exigível, diga no relatório) antes da review. Depois do merge, `node .claude/scripts/status-specs.mjs B2` mostra `IMPLEMENTADA`/`INCONSISTENTE`; sem argumento, a tabela de todas as fatias.
+3. `risco: alto` → subagente `security` sobre `git -C <repo> diff origin/dev...<branch>`; achado crítico vira correção como no FAIL abaixo.
+4. **Review** — só se houver commit novo desde a última prova (`.code-review-ok.json`). Rode a skill `code-review` (Skill tool) **sem perguntar o ponto fixo**: em cada repositório da fatia, ponto fixo `origin/dev`, diff `git -C <repo> diff origin/dev...<branch>`, spec = o arquivo da fatia. Painel: `- [ ] Review — rodada <n> · pai (<modelo>)` enquanto roda, `FAIL, corrigindo <k> achados` no FAIL, `- [x] Review — PASS na rodada <n>` no PASS.
 
 - **PASS** → passo 4.
 - **FAIL** → corrija você mesmo, sem devolver ao humano: cada achado vai pra filha dona do arquivo/commit, com TDD quando é comportamento, commit `fix: <achado> (B2.N · workspace#<filha>)`; rode o review de novo. **No máximo 2 rodadas de correção.** Achado de padrão marcado como julgamento (smell) que você decide não corrigir → vai na descrição da MR com o motivo.

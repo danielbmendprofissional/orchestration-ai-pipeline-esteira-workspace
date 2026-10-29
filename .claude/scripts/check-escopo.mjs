@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Checagem mecânica do diff de uma task (zero token). Substitui o que o `review` fazia por grep:
-// arquivo fora do escopo, "Não toque" mexido, teste apagado, asserção removida, skip/only adicionado.
+// arquivo fora do escopo, "Não toque" mexido, teste apagado, asserção removida, skip/only adicionado,
+// teste novo sem a marca da fatia.
 //
 //   node .claude/scripts/check-escopo.mjs <repo> <base-ref> [--allow "glob glob"] [--deny "glob glob"]
 //
@@ -30,6 +31,8 @@ const matches = (file, globs) => globs.some((g) => toRe(g).test(file));
 const isTest = (f) =>
   /(^|\/)(tests?|__tests__|spec)(\/|$)/i.test(f) || /(Tests?|Spec)\.[a-z]+$/.test(f) || /\.(spec|test)\.[a-z]+$/i.test(f);
 const SKIP = /Skip\s*=|\[Ignore|@Disabled|\b(xit|xdescribe|xtest|fit|fdescribe)\(|\.(skip|only|todo)\(/;
+const DECLARA_TESTE = /\[(Fact|Theory)\b|\b(it|test)\(|\bdescribe\(/;
+const MARCA_FATIA = /Trait\(\s*"Fatia"|describe\(\s*['"`]\[[^\]]+\]|tag:\s*['"`]@/;
 const ASSERT = /Assert\.|\.Should|Should\(|\bexpect\(|\bassert\b|Verify\(/;
 
 const status = git('diff', '--name-status', '--no-renames', base)
@@ -56,6 +59,8 @@ for (const { s, f } of changed) {
   const removed = diff.split('\n').filter((l) => l.startsWith('-') && !l.startsWith('---'));
   const skips = added.filter((l) => SKIP.test(l));
   if (skips.length) fail(`${f}: teste desativado/focado (${skips.map((l) => l.replace(/^\+/, '').trim()).join(' | ').slice(0, 120)})`);
+  if ((s === 'A' || isNew) && added.some((l) => DECLARA_TESTE.test(l)) && !added.some((l) => MARCA_FATIA.test(l)))
+    fail(`${f}: teste novo sem a marca da fatia (docs/agents/orchestration.md, "Marca da fatia nos testes")`);
   const net = removed.filter((l) => ASSERT.test(l)).length - added.filter((l) => ASSERT.test(l)).length;
   if (net > 0) warn(`${f}: ${net} asserção(ões) a menos que antes — confira se a spec cobre`);
 }

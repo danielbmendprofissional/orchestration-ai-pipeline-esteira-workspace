@@ -74,6 +74,7 @@ por camada: o que cobre cada critério e onde (unitário, integração, API, fro
 - **Status:** a **primeira** coluna do mapa, sempre antes do `#`, pra ficar visível de relance (`feito` ou `—`). Mapa novo nasce com ela ali; mapa que a tenha em outro lugar, mova. Quem mantém é o `/fatia`, reconciliando com o git (MRs de todos os repositórios da fatia mergeadas em `dev`) no commit de docs da próxima spec; nunca se edita à mão nem em commit avulso. O texto livre "Em dev: …" não existe mais — o status é a coluna.
 - Caminho de arquivo e nome de tipo são permitidos (o executor precisa deles); trecho de código só quando fixa uma decisão melhor que texto.
 - Cada critério EARS é testável e vira pelo menos um teste. Critério vago ("deve ser bonito") volta pro grill.
+- Todo teste da fatia leva a **marca da fatia** (código do mapa, ex.: `B2`) — é o que liga a spec ao teste e deixa conferir, por script, se ela está de fato implementada. Formato por stack em `docs/agents/orchestration.md`, "Marca da fatia nos testes".
 - Fatia de fundação/infra/limpeza troca `Critérios (EARS)` por `## Checklist` com `- [ ]`.
 
 ## Issue-mãe
