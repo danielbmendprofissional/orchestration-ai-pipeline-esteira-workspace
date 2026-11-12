@@ -8,7 +8,7 @@ Vale para qualquer agent (a sessão do projeto, o `/implement-task`, o agent `lo
 |---|---|
 | `orchestration-ai/ai-base` | processo, comandos, agentes, scripts, `docs/agents/`, templates do workspace |
 | `orchestration-ai/ai-infra` | manifesto, `infra-config.mjs` (inclusive o `verify`), compose, OmniRoute |
-| `orchestration-ai/ai-ops` | agents de ambiente, guias humanos (`COMO-CRIAR-UM-PROJETO.md`, glossário) |
+| `orchestration-ai/ai-ops` | agents de ambiente, guias técnicos humanos (`runbook`, `comandos-para-rodar`) |
 | `orchestration-ai/ai-pipeline/template-ci` | jobs e regras da pipeline |
 
 Melhoria do **produto** (ex.: um item que falta no mapa de fatias) não é isto: vai para o mapa do projeto (`/mapa`).
