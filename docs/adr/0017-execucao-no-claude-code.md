@@ -1,6 +1,6 @@
 # ADR-0017 — Execução no Claude Code; pi.dev removido
 
-Status: Aceito · 2026-10-24 · Substitui o `pi` da ADR-0001 (quem abre na raiz do workspace) e o runner da ADR-0012
+Status: Aceito · 2026-10-24 · Substitui o `pi` da ADR-0001 (quem abre na raiz do workspace) e o runner da ADR-0012 · A promoção `dev → qa` por merge de tag (última consequência) deixou de existir com a ADR-0018: `dev` e `qa` são automáticos
 
 A primeira execução de spec pelo `pi.dev` (B2, 2026-10-24) mostrou que a fragilidade estava na ferramenta, não no processo: o modelo pago fez a #4 certa, mas a extensão de subagentes perdeu um processo filho e travou a sessão sem aviso. A execução passa a ser o Claude Code: `/implement-task` (`.claude/commands/`) com subagentes de `.claude/agents/`. O modelo é escolha de custo, não de ferramenta — `claude` (assinatura), `claude-pago`/`claude-free` (mesmo Claude Code, combos do OmniRoute) — ver `docs/agents/orchestration.md`.
 
