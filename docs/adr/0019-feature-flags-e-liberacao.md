@@ -1,6 +1,6 @@
 # ADR-0019 — Feature flags, Liberação e cancelamento de feature
 
-Status: Aceito · 2026-11-12
+Status: Aceito · 2026-11-12 · **ADR-0021:** a Esteira controla (ativar e desativar por Ambiente, via job do GitLab) e rastreia o estado dos flags, no lugar de só registrar a aprovação
 
 Com `main` única (ADR-0018), o que ainda não deve chegar ao usuário entra na `main` atrás de um **feature flag** configurado por Ambiente. **Deploy não é Liberação**: o artefato chega a produção com a feature desligada, e ligar o flag é outro ato, decidido pelo negócio.
 
@@ -8,7 +8,7 @@ Com `main` única (ADR-0018), o que ainda não deve chegar ao usuário entra na 
 
 - **Obrigatório** para toda mudança de comportamento que o usuário percebe: tela nova, regra de negócio nova ou alterada, endpoint novo consumido pelo front. **Ficam de fora:** refatoração, correção de bug, infra e migração expand-only. É um critério que o agente `review` consegue checar.
 - **Nome:** `Features:<Fatia>...` (ex.: `Features:B2`), com o código da fatia (ADR-0020). Uma busca por `Features:B2` lista tudo o que a fatia espalhou. No .NET a variável de ambiente é `Features__B2`. No front, a configuração em runtime da ADR-0006.
-- **Nasce desligado em produção**, vida curta, removido depois de liberado para todos. Flag esquecido é dívida.
+- **Nasce desligado em produção**, vida curta, removido depois de liberado para todos. Flag esquecido é dívida. **Flag ausente conta como desligado, no código** (ADR-0021): uma feature nunca entra no ar por omissão; o agente `review` confere. O estado do flag pertence ao Ambiente, não à imagem.
 - **Banco:** migração incompatível com a versão anterior segue **expand/contract**. O `contract` nunca sai no mesmo deploy da feature nem com o flag ligado.
 - **Liberação:** a aprovação de negócio (AAN) é da Liberação, não do deploy. Hoje o flag é configuração do Ambiente alterada por um humano. A Esteira **registra a aprovação** e não rastreia o estado do flag (pendência).
 

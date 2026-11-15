@@ -1,5 +1,5 @@
 # ADR-0013 — Contrato da pipeline versionado e separado do contrato do front
 
-Status: Aceito · 2026-10-22
+Status: Aceito · 2026-10-22 · Em aberto (ADR-0021): o `esteira-abrir` passa a anexar o Artefato a um Fluxo já aberto e surgem modos novos (review, rollback, rótulo de versão); decidir se isso continua v1 ou vira v2
 
 A API tem dois clientes com ritmos diferentes: o front muda junto com ela; as pipelines fixam uma versão do template por meses. As rotas da pipeline ficam em **`/api/pipeline/v1/...`**, com documento OpenAPI próprio e versão explícita, autenticadas por `id_token` do GitLab (ADR-0008). A Esteira aceita a versão atual e a anterior ao mesmo tempo; mudança incompatível vira `v2`. As rotas do front ficam em `/api/v1/...`, autenticadas por sessão (ADR-0004).

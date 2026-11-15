@@ -152,7 +152,7 @@ Itens que **eu** (a sessão do projeto) vou tratar ou que viram specs, sem passa
 5. **Runner alcançando o k3d local:** o GitLab Agent é uma conexão de saída do cluster para o GitLab; confirmar se isso resolve o deploy a partir de um runner (e onde o runner roda) sem expor a máquina.
 6. **Memória da máquina:** não foi medida. Dois clusters k3d + operators + review + ZAP é pesado. Definir um limite de namespaces `review-*` simultâneos (hoje, na prática, 1 a 3).
 7. **Contrato `/api/pipeline/v1`:** o campo `fatia` e a troca de "candidata" por "artefato" cabem em `v1` retrocompatível ou exigem `v2` (ADR-0013 aceita a atual e a anterior ao mesmo tempo)?
-8. **Tag `vX.Y.Z`:** a regra X (feature grande) / Y (alteração dentro de feature) / Z (só hotfix, sempre 0 fora disso) de `esteira-deploy.md` continua? Agora que a versão é só um rótulo na ida a produção, **quem escolhe X/Y** e quando (na abertura do Fluxo ou na aprovação)?
+8. ~~Tag `vX.Y.Z`~~ **Resolvida (ADR-0021):** versão **`X.Y.Z` sem "v"** a cada publicação em produção. Z automático (hotfix soma 1). O tipo (minor por padrão, major por marcação) é declarado por quem aprova o review; na ida a produção vale o maior tipo dos Fluxos incluídos, e o aprovador de produção pode corrigir antes de confirmar. A regra antiga de `esteira-deploy.md` (Z sempre 0 fora de hotfix) deixa de valer.
 
 ---
 
@@ -168,7 +168,7 @@ Só depois de o `template-ci` novo existir (seção 2) e do `ai-base` atualizado
 6. Rebasear ou recriar as `feature/*` abertas sobre a `main`.
 7. **Tags históricas** `vX.Y.Z-rcN` e `vX.Y.Z`: manter como histórico. O pipeline novo as ignora (nenhuma promove mais nada).
 8. Ajustar variáveis de CI (`DEV_REAL_BRANCH`, `QA_REAL_BRANCH`, `HOMOLOG_REAL_BRANCH`, `MASTER_REAL_BRANCH`) removendo as que não existem mais.
-9. Rodar um merge de teste e confirmar: build na `main` gera o artefato por SHA; `dev` e `qa` recebem o deploy; `hml` e produção esperam a aprovação na Esteira.
+9. Rodar um merge de teste e confirmar: build na `main` gera o artefato por SHA; `qa` recebe o deploy (não há `dev`, ADR-0021); `hml` e produção esperam a aprovação na Esteira.
 
 ---
 
@@ -182,11 +182,11 @@ Só depois de o `template-ci` novo existir (seção 2) e do `ai-base` atualizado
 
 ## 10. Contrato de leitura da Esteira (novo)
 
-Decisão da sessão: **os comandos e agentes continuam como estão** (markdown, git, issues, bloco `<!-- execucao -->`). A Esteira é a camada visual do humano e **só lê** (nunca escreve nesses artefatos). O formato lido é um contrato estável: **`docs/contrato-leitura-esteira.md`** (v1, rascunho para aprovação).
+Decisão da sessão: **os comandos e agentes continuam como estão** (markdown, git, issues, bloco `<!-- execucao -->`). A Esteira é a camada visual do humano e **só lê** esses artefatos (nunca os escreve); as decisões de processo ela executa no GitLab por Ação do bot (ADR-0021). O formato lido é um contrato estável: **`docs/contrato-leitura-esteira.md`** (v1, rascunho para aprovação).
 
 O que isso pede do `ai-base` (nenhuma mudança de comportamento, só vínculo):
 
-1. Cada comando que **escreve** um formato do contrato aponta para ele: `/implement-task` (bloco de execução, commit de task), `/fatia` e `/to-tickets` (título da mãe e das filhas, `Blocked by:`, `Cobre:`, mapa), `check-spec-drift --stamp` (linha `base:`). Regra: mudou formato, muda o contrato **e** as fixtures na mesma MR.
+1. Cada comando que **escreve** um formato do contrato aponta para ele: `/implement-task` (bloco de execução, commit de task), `/fatia` e `/to-tickets` (título da mãe e das filhas, `Blocked by:`, `Cobre:`, mapa), `check-spec-drift --stamp` (linha `base:`). Regra: mudou formato, muda o contrato **e** as fixtures na mesma MR; quando o formato mora no `ai-base`, a mudança vira issue lá e a MR do contrato e das fixtures, na Esteira, fica ligada a ela.
 2. `docs/agents/orchestration.md` ("Nomes", "Marca da fatia nos testes"), `docs/agents/spec-format.md` e `docs/agents/issue-tracker.md` passam a citar o contrato como a lista do que não pode mudar sem versão.
 3. Confirmar, com `/fatia` e `/proximo`, **quais valores a coluna `Status` do mapa pode ter** (só `feito` e `—` apareceram).
 4. Avaliar (sem urgência) o campo opcional `**Contrato:** v1` no cabeçalho do bloco de execução; é aditivo e não quebra quem lê o bloco hoje.
@@ -201,3 +201,17 @@ O que isso pede do `ai-base` (nenhuma mudança de comportamento, só vínculo):
 - **Review sem hospedagem externa** só existe na sua máquina: a evidência de que a feature foi vista rodando não fica no GitLab. A Esteira registra a Análise (DAST, smoke), mas não "o humano abriu e olhou".
 - **Custo assumido de aprendizado** (ADR-0020): cluster, operators, cert-manager e Agent para validar features. Se pesar, o plano B barato é `docker run` local do artefato descartável.
 - **Convivência zero:** se o `template-ci` novo atrasar, os repositórios ficam parados no modelo antigo; não há ponte.
+
+## 11. Decorrências da ADR-0021 (2026-11-14)
+
+Para o `template-ci`, `ai-base` e `ai-ops`/`ai-infra` (cada uma vira issue no repositório certo, com o sim do humano):
+
+- **`template-ci`:** job de abrir review disparado pela Esteira (`review-<fatia>`); `fechar-fatia` também quando a MR é fechada pela reprovação; job de alterar flag; job de promoção e de rollback disparados pelo bot; `esteira-abrir` que **anexa** o Artefato a um Fluxo já aberto e recusa sem Fluxo; DAST ativo no `qa`, passivo em `hml` e produção, nenhum no review; smoke e ZAP em produção só alertam; aplicar a versão `X.Y.Z` (sem "v") na ida a produção.
+- **`ai-base`:** `/implement-task` reabre a MR fechada pela reprovação em vez de abrir outra; `main` protegida para merge só do bot (hook e docs); `esteira-deploy.md`, `workflow.md` e `workspace.md` reescritos no modelo novo, sem `dev`.
+- **`ai-base` — preview isolado por Fatia (decidido em 2026-11-14):** toda Fatia **de front** passa a registrar na própria spec o **módulo e a rota** em que está sendo trabalhada (campo novo no `spec-format.md`, por exemplo `preview:` com a rota de entrada). A coluna `Toca em (estimado)` do mapa **não serve**: é estimativa, e o preview precisa de valor exato. O agente `ui` (dentro do `/implement-task`) cria, como parte da Fatia, a **sessão falsa** (já logado) e os **dados falsos** da tela, tipados pelos tipos gerados do OpenAPI (ADR-0005), de modo que dado fora do contrato quebre o build. Fatia **de API** não tem preview: o `review` confere o contrato (diff do OpenAPI) e os testes; app real só em `risco: alto`. Efeito no contrato de leitura: a linha `preview:` da spec é um campo **aditivo** (acrescentar é livre).
+- **`template-ci` — preview estático por MR:** build do front em modo preview (sessão e dados falsos), publicado como site estático com um endereço por MR (por exemplo GitLab Pages com `path_prefix` por branch), sem cluster, API nem banco. Destruição obrigatória no merge ou fechamento da MR e prazo máximo (`auto_stop_in`); o GitLab não destrói sozinho, o destroy é script nosso. Substitui o review com API e front reais da ADR-0020 para Fatias de front.
+- **Esteira — verificação de flag alterado fora da Esteira (a definir):** rotina de fundo que compara o estado real de cada flag em cada Ambiente com o que a Esteira registrou. Ponto crítico: flag ligado em produção para uma Fatia que nunca teve Liberação. Comportamento acordado em 2026-11-14: roda a cada poucos minutos e depois de cada deploy; divergência comum aparece no Painel como "flag alterado fora da Esteira" (com quem alterou, se o cluster informar); a grave (ligado em produção sem Fluxo e Liberação) ganha destaque e alerta; **nunca reverte sozinha**, oferece **restaurar** para o registrado ou **aceitar** (registra nome e motivo). Em aberto: como a Esteira lê o estado real (job do GitLab só de leitura ou outro caminho).
+- **GitLab (config do grupo):** escopo do bot para comentar, fechar, reabrir e mergear MR; `main` com merge permitido só ao bot; webhook de merge e fechamento de MR para registrar "merge fora da Esteira".
+- **Decidido depois (2026-11-14, ADR-0022):** review sob demanda (botão) e leve; aprovar a MR só mergeia; Fluxo aberto por seleção de Fatias aprovadas do mesmo Projeto, que gera o Artefato; pipeline da `main` só com CI e health check; `template-ci` precisa de um modo "Fluxo" que builda o Artefato sobre um SHA escolhido pela Esteira.
+- **Decidido depois (2026-11-14):** ocupação (`qa` sem fila, `hml` e produção um por vez, com fila e "substituir" no `hml`) e flag ausente = desligado; a tela de aprovação mostra os flags do Artefato.
+- **Ainda em aberto (não tratar como decidido):** como a Esteira descobre os flags de um Artefato (busca por `Features:<Fatia>` ou declaração na spec); Fatia × Entrega; mecanismo técnico do flag (item 1 da seção 6); `/api/pipeline` v1 ou v2 (item 7); o botão de aprovar para os repositórios da própria Esteira (modo fallback, merge manual).

@@ -1,6 +1,6 @@
 # ADR-0016 — Banco: um schema `esteira`, roles da infra
 
-Status: Aceito · 2026-10-22 · Schema e roles seguem valendo. **A frase "ai-infra = só dev local; hml/prd no Kubernetes da AWS" foi revista pela ADR-0020** (todos os ambientes em Kubernetes local; produção é um Destino `local` ou `aws`)
+Status: Aceito · 2026-10-22 · Schema e roles seguem valendo. **A frase "ai-infra = só dev local; hml/prd no Kubernetes da AWS" foi revista pela ADR-0020** (todos os ambientes em Kubernetes local; produção é um Destino `local` ou `aws`) · O corpo ainda diz "hml/prd no Kubernetes da AWS": vigente é a ADR-0020
 
 Todas as tabelas da Esteira — inclusive o outbox/inbox do MassTransit e o `__EFMigrationsHistory` — ficam no schema **`esteira`**, nunca no `public`. As roles são as que a infra compartilhada já entrega no modo padrão (`postgres.roles: "infra"`): `esteira_owner` cria o schema e roda as migrations; `esteira_app` só faz SELECT/INSERT/UPDATE/DELETE em runtime, sem DDL. Os privilégios do `esteira_app` no schema novo vêm do `ALTER DEFAULT PRIVILEGES` que a infra já aplica pra qualquer schema criado pelo owner — nada a pedir à infra.
 

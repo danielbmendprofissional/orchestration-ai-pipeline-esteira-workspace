@@ -6,7 +6,7 @@ A Esteira mostra ao humano o acompanhamento das fatias **lendo** o que os comand
 
 ## Princípios
 
-1. **Duas camadas, uma direção.** Máquina (markdown, git, issues, bloco de execução) é a fonte de verdade. A Esteira **só lê**; nunca edita spec, issue, MR nem o bloco. Ela guarda apenas o que é dela: aprovações, deploys, análises, flags, auditoria.
+1. **Duas camadas, uma direção.** Máquina (markdown, git, issues, bloco de execução) é a fonte de verdade do que os comandos produzem. A Esteira **só lê** spec, issue, bloco de execução e o histórico git; nunca os edita. O que é **decisão de processo** ela executa no GitLab por Ação do bot (comentar, fechar, reabrir e mergear MR, disparar job, aplicar versão), sempre com o nome do humano no texto (ADR-0021). Ela guarda apenas o que é dela: aprovações, deploys, análises, flags, auditoria.
 2. **Sem cópia.** A Esteira guarda o código da fatia e o número da issue, e lê o resto quando precisa. Nada de título ou status da issue duplicado no banco dela.
 3. **O leitor é tolerante.** Linha desconhecida é ignorada. Peça ausente aparece como "não disponível". Formato quebrado nunca derruba a tela.
 4. **O escritor é cuidadoso.** O que está na tabela abaixo é estável. Mudança que só **acrescenta** é livre. Mudança que **altera ou remove** é uma nova versão do contrato.
@@ -85,7 +85,7 @@ O padrão evolui a cada implementação, então parte do histórico está em for
 
 1. **Acrescentar é livre.** Nova coluna no fim do mapa, nova linha de detalhe no bloco, novo campo no cabeçalho: o leitor ignora o que não conhece.
 2. **Alterar ou remover é quebra.** Renomear coluna, mudar o formato de `<fatia>.<N>`, trocar os marcadores `<!-- execucao -->`, mover o bloco, mudar o padrão de branch ou de commit: pede **versão nova do contrato** (v2).
-3. **Quebra e ajuste do leitor andam juntos.** Quem muda o formato atualiza **este documento e as fixtures** (abaixo) na mesma MR. A Esteira aceita v1 e v2 ao mesmo tempo durante a transição (mesmo princípio da ADR-0013 para a pipeline).
+3. **Quebra e ajuste do leitor andam juntos.** Quem muda o formato atualiza **este documento e as fixtures** (abaixo) na mesma MR. A Esteira aceita v1 e v2 ao mesmo tempo durante a transição (mesmo princípio da ADR-0013 para a pipeline). Quando o formato mora no `ai-base` (comandos e docs), a mudança vira issue no `ai-base` e a MR do contrato e das fixtures, na Esteira, fica ligada a ela; o teste de contrato acusa se um dos lados atrasar.
 4. **Cada comando que escreve um desses formatos aponta para este documento.** O comando dono do formato carrega a obrigação de manter o contrato.
 
 ## Como o contrato é verificado

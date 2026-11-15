@@ -1,6 +1,6 @@
 # ADR-0007 — Cadastro de aplicações dentro da Esteira; configuração de CI por pull
 
-Status: Aceito · 2026-10-22 · Discovery fechado (ver ADR-0008). Substitui a versão "Proposto" de 2026-10-21, que escrevia variáveis no GitLab
+Status: Aceito · 2026-10-22 · O cadastro de Ambientes não tem `dev` e precisa dizer onde entra o `review-<fatia>` (ADR-0018, ADR-0020, ADR-0021) · Discovery fechado (ver ADR-0008). Substitui a versão "Proposto" de 2026-10-21, que escrevia variáveis no GitLab
 
 A Esteira tem área própria de cadastro: **Aplicação → Projetos → Ambientes → Destinos**, mais os papéis de cada pessoa na Aplicação. A Aplicação aponta para um **grupo do GitLab**, e a Esteira lista os projetos do grupo para marcar quais são Projetos dela (stack sugerida pelo `APP_TECHNOLOGY`, editável). A configuração não secreta de CI de cada Projeto por Ambiente/Destino mora **só na Esteira** e a pipeline a **puxa** na resposta do `esteira-abrir`. A Esteira **não guarda nem escreve segredo**: segredos, chaves de segurança e variáveis globais continuam como variáveis do GitLab, cadastradas lá.
 

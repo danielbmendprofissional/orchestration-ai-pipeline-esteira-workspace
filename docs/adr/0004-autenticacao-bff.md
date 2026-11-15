@@ -1,6 +1,6 @@
 # ADR-0004 — Autenticação BFF/Token Handler com Keycloak + Redis (igual ao Valuto ADR-004)
 
-Status: Aceito · 2026-10-21 · Substitui JWT Bearer validado direto pela API
+Status: Aceito · 2026-10-21 · Substitui JWT Bearer validado direto pela API · A ADR-0021 amplia as permissões: abrir review, aprovar, reprovar, usar o Atalho, aceitar Exceção em lote e ligar flag
 
 ## Decisão
 

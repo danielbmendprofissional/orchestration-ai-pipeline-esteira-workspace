@@ -1,6 +1,6 @@
 # ADR-0001 — Esteira segue o padrão de workspace do ai-base
 
-Status: Aceito · 2026-10-21
+Status: Aceito · 2026-10-21 · Quem abre na raiz é o Claude Code, não o `pi` (ADR-0017) · "tag, esteira e promoção independentes" vale no modelo trunk-based: cada repositório tem a sua `main`, o seu Artefato por SHA e a sua versão `X.Y.Z` (ADR-0018, ADR-0021)
 
 ## Decisão
 

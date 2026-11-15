@@ -1,6 +1,6 @@
 # ADR-0006 — Configuração do frontend em runtime (`/config.json`)
 
-Status: Aceito · 2026-10-21 · Imposto pelo template-ci (build once / deploy many)
+Status: Aceito · 2026-10-21 · Imposto pelo template-ci (build once / deploy many) · Os flags do front (`Features:<Fatia>`, ADR-0019) viajam por este `APP_RUNTIME_CONFIG` e passam a ser controlados pela Esteira (ADR-0021) · A imagem percorre qa, hml e produção: `dev` não existe mais (ADR-0018)
 
 ## Problema
 

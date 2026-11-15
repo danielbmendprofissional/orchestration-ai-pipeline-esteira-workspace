@@ -1,6 +1,6 @@
 # ADR-0009 — Agregados do modelo novo e ocupação do Ambiente
 
-Status: Aceito · 2026-10-22
+Status: Aceito · 2026-10-22 · A rever com a ADR-0021: "candidatas" lê-se Artefato, a Fatia passa a ser agregado do Painel de Fatias, o Fluxo nasce antes do Artefato, e a regra de ocupação passa a ser: `qa` sem fila (o Artefato novo supera o anterior), `hml` e produção um Fluxo por vez por Projeto, com fila e botão "substituir" no `hml` (detalhe na ADR-0021)
 
 Agregados: **Aplicação** (cadastro, papéis, política), **Entrega** (issues, aprovações da Entrega, dependência entre parceiros), **Fluxo** (etapas e candidatas), **Deploy** (um por Destino; escrita intensa vinda das pipelines) e **Análise** (separada por tamanho). A regra "um Fluxo por vez em cada Ambiente de um Projeto" atravessa Fluxos, então vira uma **ocupação**: o Fluxo reserva o Ambiente do Projeto ao entrar e libera ao sair, garantida por **índice único no banco + concorrência otimista** — nunca por consulta antes de gravar, que perde corrida entre duas requisições.
 
