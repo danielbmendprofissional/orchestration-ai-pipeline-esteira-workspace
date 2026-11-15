@@ -103,4 +103,5 @@ O texto das seções da spec, o texto da descrição da issue fora do bloco de e
 - A coluna `Status` do mapa só mostrou `feito` e `—` nas linhas lidas, e o legado pode ter outros valores. **Não bloqueia:** valor desconhecido é exibido como texto, conforme a regra das fatias antigas. Quem implementar o leitor lista os valores reais que encontrar.
 - O parâmetro de busca de commits por texto na URL do GitLab (link da última linha da tabela de links) não foi verificado. Se não existir, o link cai para a lista de commits da branch.
 - A versão do contrato dentro do bloco de execução (`**Contrato:** v1`) seria um campo **novo e aditivo**. Fica opcional enquanto a v1 é a única.
-- Os formatos acima moram em arquivos do `ai-base` (comandos e docs). Por isso a obrigação do item 4 das regras vira issue no `ai-base`: ver `pendencias-orchestration-ai.md`, seção 10.
+- Os formatos acima moram em arquivos do `ai-base` (comandos e docs). Por isso a obrigação do item 4 das regras vira issue no `ai-base`: ver `pendencias-orchestration-ai.md`, seção 6.
+- **Fatia de limpeza** (ADR-0025): código `<código>-L` (ex.: `B2-L`), com linha no mapa criada pelo `/fatia` a partir da issue "Limpeza da Fatia <código>". Formato novo e aditivo; a Esteira a lê como uma Fatia qualquer.

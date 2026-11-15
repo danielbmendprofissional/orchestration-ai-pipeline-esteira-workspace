@@ -6,6 +6,8 @@ Por regra do `CLAUDE.md` ("Melhoria em repositório compartilhado"), **nada foi 
 
 Fontes das decisões, neste workspace: `docs/adr/0018` a `0024`, `CONTEXT-MAP.md` e `docs/contrato-leitura-esteira.md`. Conceito de origem: `fundamentos-devops` (`0-conteudo/devops-cicd/ci-cd-fundamentos.md`, `estrategias-de-deploy.md`, `seguranca-no-pipeline.md`; `gitlab-pipelines/gitlab-ambientes-e-recursos-extras.md`), repositório público do próprio autor.
 
+> **Atualização 2026-11-15 (ADR-0025).** Esta lista foi revisada depois de uma conversa que fechou nomes e travas novos: estados "Pronta para Entrega" e "Aguardando liberação", Fatia sem flag, Fatia de limpeza `<código>-L`, SHA verde, merge sem squash, reiniciar o pod para aplicar flag, e a Esteira fora do esquema de Entrega. O que mudou para o orchestration-ai está nos pontos marcados "ADR-0025" abaixo e resumido na **seção 12**.
+
 > **Limite desta análise.** O mapa dos arquivos dos repositórios compartilhados foi feito por busca (grep) e leitura parcial, não por leitura integral. Onde está escrito "não li", confirme antes de agir. O `controlar-pipeline.yml` tem mais de 1000 linhas e só as partes com `rc`/branch foram vistas.
 
 ---
@@ -16,9 +18,9 @@ Fontes das decisões, neste workspace: `docs/adr/0018` a `0024`, `CONTEXT-MAP.md
 
 **Fase 1, construir.** O agente monta uma Fatia por vez (`/fatia` → spec aprovada pelo humano → tickets automáticos → `/implement-task`), abre uma MR por repositório tocado, para `main`. O humano só aprova a spec e olha a MR.
 
-**Fase 2, revisar.** A pipeline da MR faz build, testes, scans e o agente de revisão. O humano pode abrir o **review leve** (botão na Fatia): para a parte de front, um **preview estático** com sessão falsa e dados falsos tipados pelo contrato; para a parte de API, o diff do contrato e os testes; app real só em Fatia de `risco: alto`. O humano aprova ou reprova **na Esteira**: reprovar posta o comentário com o nome dele, **fecha a MR**, e a mesma MR é **reaberta** depois da correção; aprovar faz a Esteira **mergear** na `main` com o flag da Fatia **desligado**. A pipeline da `main` a cada merge faz **só CI** (build, testes, scans e um health check efêmero da imagem): sem deploy em ambiente e sem Artefato oficial. A Fatia vira **aprovada**.
+**Fase 2, revisar.** A pipeline da MR faz build, testes, scans e o agente de revisão. O humano pode abrir o **review leve** (botão na Fatia): para a parte de front, um **preview estático** com sessão falsa e dados falsos tipados pelo contrato; para a parte de API, o diff do contrato e os testes; app real só em Fatia de `risco: alto`. O humano aprova ou reprova **na Esteira**: reprovar posta o comentário com o nome dele, **fecha a MR**, e a mesma MR é **reaberta** depois da correção; aprovar faz a Esteira **mergear** na `main` com o flag da Fatia **desligado**. A pipeline da `main` a cada merge faz **só CI** (build, testes, scans e um health check efêmero da imagem): sem deploy em ambiente e sem Artefato oficial. A Fatia vira **Pronta para Entrega** (ainda não validada em qa nem hml).
 
-**Fase 3, Entrega.** O humano abre uma **Entrega** selecionando N Fatias aprovadas (só API, só front ou `api + frontend`) e declara o tipo da mudança de cada Fluxo (minor por padrão, major por marcação). A Esteira cria **um Fluxo por Projeto** tocado (a Fatia `api + frontend` entra nos dois). O Fluxo nasce **antes** do Artefato: a pipeline do Fluxo gera o **Artefato oficial** (imagem imutável, identificada pelo SHA) sobre o SHA mais recente da `main` do Projeto, faz **um deploy** no `qa` com os flags das Fatias do Fluxo **ligados no qa**, e roda o DAST ativo e o agente de qa. O aprovador técnico aprova o qa; o **mesmo Artefato** vai ao `hml` (flags ligados, DAST passivo) e, aprovado, à produção, que o Publicador confirma. Em produção o deploy sobe com **todos os flags desligados** e roda só a verificação de que subiu (rollout e health). Depois vem a **Liberação**, na tela da Entrega: o aprovador de negócio seleciona as Fatias a liberar, os flags ligam e rodam smoke e ZAP passivo, uma vez, para o conjunto. As Fatias não selecionadas ficam **publicadas, não liberadas** num menu, de onde podem ser liberadas depois (sem smoke nem ZAP, por conta e risco de quem libera) ou excluídas.
+**Fase 3, Entrega.** O humano abre uma **Entrega** selecionando N Fatias aprovadas (só API, só front ou `api + frontend`) e declara o tipo da mudança de cada Fluxo (minor por padrão, major por marcação). A Esteira cria **um Fluxo por Projeto** tocado (a Fatia `api + frontend` entra nos dois). O Fluxo nasce **antes** do Artefato: a pipeline do Fluxo gera o **Artefato oficial** (imagem imutável, identificada pelo SHA) sobre o SHA mais recente da `main` do Projeto, faz **um deploy** no `qa` com os flags das Fatias do Fluxo **ligados no qa**, e roda o DAST ativo e o agente de qa. O aprovador técnico aprova o qa; o **mesmo Artefato** vai ao `hml` (flags ligados, DAST passivo) e, aprovado, à produção, que o Publicador confirma. Em produção o deploy sobe com **todos os flags desligados** e roda só a verificação de que subiu (rollout e health). Depois vem a **Liberação**, na tela da Entrega: o aprovador de negócio seleciona as Fatias a liberar, os flags ligam e rodam smoke e ZAP passivo, uma vez, para o conjunto. As Fatias não selecionadas ficam **aguardando liberação** num menu, de onde podem ser liberadas depois (sem smoke nem ZAP, por conta e risco de quem libera) ou excluídas.
 
 **Versão.** `X.Y.Z`, **sem "v"**, a cada publicação em produção. O número só nasce na confirmação em produção, a partir da maior versão já publicada (sem buracos, mesmo depois de rollback); hotfix soma o Z.
 
@@ -38,7 +40,7 @@ Fontes das decisões, neste workspace: `docs/adr/0018` a `0024`, `CONTEXT-MAP.md
 
 **Kubernetes.** Dois clusters k3d: `esteira-nao-prod` (namespaces `qa`, `hml` e, só para Fatia de `risco: alto`, `review-<fatia>`) e `esteira-prd-local` (produção). Produção é um **Destino** (`local` agora, `aws` depois). Motivo declarado: aprender Kubernetes.
 
-**Repositórios da própria Esteira** (`esteira-api`, `esteira-frontend`): mesmo modelo, mas o merge e a promoção são manuais (job `when: manual`), senão uma Esteira quebrada não publicaria a própria correção.
+**Repositórios da própria Esteira** (`esteira-api`, `esteira-frontend`): **fora do esquema** de Entrega, Fluxo e Painel de Fatias (ADR-0025). Merge e promoção são manuais (job `when: manual`), senão uma Esteira quebrada não publicaria a própria correção.
 
 **Princípio de duas camadas.** Comandos e agentes continuam em markdown, git, issues e o bloco `<!-- execucao -->`. A Esteira só **lê** esses artefatos (contrato de leitura, seção 6) e executa no GitLab as decisões de processo, com o nome do humano no texto.
 
@@ -56,10 +58,11 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 - Define `PIPELINE_PROCESS=tag|promotion|hotfix|minor` (o `promotion` perto da linha ~1026). Os modos passam a ser:
   - `mr`: CI da MR (build, testes, scans, agente de revisão) e, sob demanda, o preview.
   - `main`: CI no merge, **sem Artefato oficial e sem deploy** (build, testes, scans e health check efêmero).
-  - `fluxo`: gera o Artefato oficial sobre um **SHA escolhido pela Esteira** e faz o deploy no `qa`.
+  - `fluxo`: gera o Artefato oficial sobre um **SHA escolhido pela Esteira** (o último com pipeline verde, registrado no Fluxo) e faz o deploy no `qa`. **Só roda por trigger do bot** (disparo manual na tela do GitLab não funciona) e o `esteira-abrir` recusa sem Entrega aberta (ADR-0025).
   - `promocao`: play do deploy no `hml` e na produção, depois da aprovação na Esteira.
   - `flag`: altera o estado de um flag num Ambiente (e um modo só de leitura do estado real).
   - `hotfix`, `rollback` (redeploy do SHA anterior só no ambiente afetado) e `rotulo` (aplica `X.Y.Z` na ida a produção).
+  - `liberacao`: liga os flags das Fatias escolhidas em produção e roda smoke (**só leitura**) e ZAP passivo, uma vez, para o conjunto. A liberação feita pelo menu "Aguardando liberação" usa o modo `flag` puro, sem smoke nem ZAP (ADR-0023, ADR-0025).
 - Hotfix: continua só por humano; usa o mesmo pipeline, com o Atalho registrado na Esteira (`esteira-gate`).
 
 ### 2.2 `ci-template.yml` e `common/rules.yml`
@@ -84,7 +87,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 - `fechar-fatia` (fecha a issue-mãe e as filhas ao mergear em `dev`) passa a rodar no merge na `main` e **também quando a MR é fechada pela reprovação**, destruindo o preview e o namespace `review-<fatia>` se existirem.
 
 ### 2.6 **Novos jobs**
-- **Preview estático por MR (parte de front):** build do front em modo preview (sessão falsa e dados falsos), publicado como site estático com um endereço por MR (por exemplo GitLab Pages com `path_prefix` por branch), sem cluster, API nem banco. Disparado pelo botão "Abrir review" da Esteira. **Destruição obrigatória** no merge ou fechamento da MR e prazo máximo (`auto_stop_in`): o GitLab não destrói sozinho, o destroy é script nosso.
+- **Preview estático por MR (parte de front):** build do front em modo preview (sessão falsa e dados falsos), publicado no Kubernetes (namespace `preview` de `esteira-nao-prod`), num nginx mínimo com endereço por Fatia, sem API nem banco (pergunta 7.10). Disparado pelo botão "Abrir review" da Esteira. **Destruição obrigatória** no merge ou fechamento da MR e prazo máximo (`auto_stop_in`): o GitLab não destrói sozinho, o destroy é script nosso.
 - **DAST (OWASP ZAP):** job determinístico, imagem própria (`tools/zap` ou similar, a decidir). **Ativo em `qa`** (bloqueia crítica e alta, salvo Exceção), **passivo em `hml`** (mesma regra) e **passivo em produção, depois da Liberação**, quando o resultado só alerta. Nenhum no review. NetworkPolicy limita o ZAP ao namespace alvo. O agente `security` lê o relatório e produz o JSON de Análise; **quem bloqueia é a Política de segurança da Esteira** (ADR-0020).
 - **Smoke em produção:** só depois da Liberação, junto com o ZAP passivo. Depois do deploy em produção roda apenas a verificação de rollout e health.
 - **Rollback por SHA** (redeploy do digest anterior só no ambiente afetado).
@@ -105,7 +108,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 - **`CLAUDE.md`** (linhas ~63–70): "Convenções de repo", fluxo `feature-x → MR → dev → qa → hml → main`; "MR pra `dev`"; "`dev → qa` é merge direto por tag feito por você"; "as 4 branches são protegidas". Reescrever para `main` única, merge só do bot. Atualizar também o parágrafo `/code-review` ("ponto fixo `origin/dev`").
 - **`docs/agents/esteira-deploy.md`** (documento central): passos 1–10, convenção de tag `vX.Y.Z-rcN`, "regra crítica: `qa` nunca acima da tag", `release/vX.Y.Z-rcN`, hotfix, rollback em cascata. **Reescrever inteiro** conforme o capítulo 1 e as ADRs 0018, 0021, 0022 e 0023.
 - **`docs/workflow.md`** (linhas ~13–48): `/implement-task` termina em MR para `dev`; "fechar a fatia" quando mergeada em `dev`; tag e promoção depois.
-- **`docs/agents/workspace.md`** (linhas ~28, 44, 59): "uma MR por repositório, todas para `dev`"; "sem `Closes` porque o alvo não é a branch padrão" (**passa a haver `Closes`**); "cada repositório tem seu próprio dev→qa→hml→main". Acrescentar que uma Fatia pode ser `api + frontend`, com uma MR em cada repositório.
+- **`docs/agents/workspace.md`** (linhas ~28, 44, 59): "uma MR por repositório, todas para `dev`"; "sem `Closes` porque o alvo não é a branch padrão" (**passa a haver `Closes`**, exceto nas Fatias `api + frontend`: o `fechar-fatia` fecha as issues só depois da última MR, ADR-0025); "cada repositório tem seu próprio dev→qa→hml→main". Acrescentar que uma Fatia pode ser `api + frontend`, com uma MR em cada repositório.
 - **`docs/agents/orchestration.md`** (linhas ~29, 57, 65, 86–109): agente `qa` valida o ambiente `qa`; MR para `dev`; `fetch` antes de conferir `dev`/`main`; gate `verify-code-review`; `fechar-fatia` no push em `dev`.
 - **`docs/agents/padrao-api.md` e `padrao-frontend.md`**: **nova seção sobre feature flags** (ADR-0019): critério "comportamento percebido", nome `Features:<Fatia>...`, nasce desligado em produção, **flag ausente = desligado**, vida curta, remoção, migração expand-only. Para o front, usar a config em runtime. *`padrao-frontend.md` casou no grep por dev/qa/hml; não li o contexto.*
 - **`docs/agents/spec-format.md`**: campos novos por Fatia, todos **aditivos**: `flag:` (nome `Features:<Fatia>`, padrão "sim"; "não" para refatoração, correção, infra e migração expand-only), `preview:` (módulo e rota de entrada, obrigatório para quem toca o front) e o plano de cancelamento/limpeza (a limpeza é uma Fatia, ADR-0019).
@@ -124,7 +127,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 
 ### 3.4 Commands, agents e skills
 - **`/implement-task`** (`.claude/commands/implement-task.md`): `fetch origin`; `diff origin/dev...<branch>`; MR com `target dev`; saída `dev ← feature/b2-<slug>`. Trocar por `main`. Incluir o passo de **flag** (a Fatia declara e a implementação usa) e o **preview** da parte de front. **Passa a reabrir a MR fechada pela reprovação**, em vez de abrir outra.
-- **`/fatia`**: precisa aceitar como ponto de partida a issue **"Limpeza da Fatia <código>"** criada pela Esteira quando o humano exclui uma Fatia (rótulo `ready-for-human`). A spec de limpeza remove o código e o flag da Fatia original, sem mudança de comportamento, com migração só `contract` se houver, e segue o fluxo normal.
+- **`/fatia`**: precisa aceitar como ponto de partida a issue **"Limpeza da Fatia <código>"** criada pela Esteira quando o humano exclui uma Fatia (rótulo `ready-for-human`). O `/fatia` **cria a linha `<código>-L` no mapa** (ex.: `B2-L`), sem flag; a Esteira não escreve no mapa (ADR-0025). A spec de limpeza remove o código e o flag da Fatia original, sem mudança de comportamento, com migração só `contract` se houver, e segue o fluxo normal.
 - **`/proximo`**: compara `feature/*` com `origin/dev` e roda `check-spec-drift` contra `dev`; "mapa vs. MRs mergeadas em dev".
 - **`/situacao`**, `fatia.md`, `mapa.md`: usam os scripts acima; conferir menções diretas. *Não casaram o grep.*
 - **Agente `ui`**: cria, como parte da Fatia, a **sessão falsa** (já logado) e os **dados falsos** da tela de preview, tipados pelos tipos gerados do OpenAPI (ADR-0005), de modo que dado fora do contrato quebre o build.
@@ -146,6 +149,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 - **Novo:** **NetworkPolicy** isolando `qa`, `hml` e `review-*` entre si; política própria para o ZAP alcançar só o namespace alvo.
 - **Novo:** **GitLab Agent** nos dois clusters (o `kubernetes-local.md` já cita o agent; ver pergunta 7.5).
 - **Novo:** rotina de criação e destruição de `review-<fatia>`, usada pelo `template-ci` só no review com app real.
+- **Novo:** namespace `preview` em `esteira-nao-prod`, com NetworkPolicy própria, para o nginx do preview estático por MR, e o job diário que apaga os vencidos (pergunta 7.10).
 - `docs-human/ai-base/{runbook,infra,comandos-para-rodar}.md` e `infra.md` (desenho EC2 + Let's Encrypt para a nuvem): continuam válidos como estágio posterior (Destino `aws`); conferir que não afirmam "um cluster por ambiente" como regra.
 - `smoke-test`, `combos.md`: apareceram no grep, **provavelmente falsos positivos**. Não confirmei.
 
@@ -160,9 +164,10 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 
 - **Bot da Esteira:** escopo para comentar, fechar, reabrir e **mergear** MR, disparar jobs (play), criar o rótulo `X.Y.Z` e criar issues (pedido de limpeza). Um bot por grupo (ADR-0008). O autor técnico no GitLab é sempre o bot; o humano aparece no texto.
 - **`main` de cada repositório de código:** protegida, com **merge permitido só ao bot** (nos repositórios da própria Esteira, o merge continua manual).
+- **Método de merge (ADR-0025):** **merge commit, sem squash**, com "pipeline must succeed" e "todas as threads resolvidas" ativos. O contrato lê um commit por task e o `status-specs.mjs` procura o merge commit; squash apagaria esse rastro.
 - **Tags de versão:** protegidas, criadas só pelo bot.
 - **Webhooks para a `esteira-api`:** pipeline (status ao vivo), MR (merge e fechamento, inclusive para registrar "merge fora da Esteira") e push/alteração de flag, se o cluster informar.
-- **Pages:** conferir que o GitLab da casa permite Pages (ou outro hospedeiro estático) para o preview por MR.
+- **Preview:** o bot e o GitLab Agent precisam de permissão para criar e apagar objetos no namespace `preview`. GitLab Pages não é necessário.
 
 ---
 
@@ -172,25 +177,27 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 
 1. Cada comando que **escreve** um formato do contrato aponta para ele: `/implement-task` (bloco de execução, commit de task), `/fatia` e `/to-tickets` (título da mãe e das filhas, `Blocked by:`, `Cobre:`, mapa), `check-spec-drift --stamp` (linha `base:`). Regra: mudou formato, muda o contrato **e** as fixtures na mesma MR; quando o formato mora no `ai-base`, a mudança vira issue lá e a MR do contrato e das fixtures, na Esteira, fica ligada a ela.
 2. `docs/agents/orchestration.md` ("Nomes", "Marca da fatia nos testes"), `docs/agents/spec-format.md` e `docs/agents/issue-tracker.md` passam a citar o contrato como a lista do que não pode mudar sem versão.
-3. **Formatos novos, todos aditivos** (a acrescentar ao contrato quando forem escritos): `flag:` e `preview:` na spec; a issue de pedido **"Limpeza da Fatia <código>"**; a coluna `Repositório` do mapa com o valor `api + frontend`.
+3. **Formatos novos, todos aditivos** (a acrescentar ao contrato quando forem escritos): `flag:` e `preview:` na spec; a issue de pedido **"Limpeza da Fatia <código>"**; a coluna `Repositório` do mapa com o valor `api + frontend`; o código `<código>-L` da Fatia de limpeza, com linha criada pelo `/fatia` (ADR-0025).
 4. Confirmar, com `/fatia` e `/proximo`, **quais valores a coluna `Status` do mapa pode ter** (só `feito` e `—` apareceram).
 5. Avaliar (sem urgência) o campo opcional `**Contrato:** v1` no cabeçalho do bloco de execução; é aditivo.
 6. **Não tirar** o bloco de execução nem a coluna `Status` do mapa: a Esteira depende deles. Se alguém quiser removê-los um dia, isso vira v2 do contrato.
 
 ---
 
-## 7. Perguntas técnicas abertas para a sessão do orchestration-ai
+## 7. Decisões técnicas para a sessão do orchestration-ai
 
-1. **Alterar flag em produção:** no .NET a configuração por variável de ambiente é lida no start, então ligar um flag exige reiniciar o pod (sem build). Aceitável? Ou usar um provedor de configuração recarregável (ConfigMap montado como arquivo + `reloadOnChange`)? Definir antes da primeira Fatia com flag. No front, o `/config.json` em runtime evita o problema.
-2. **Retenção do registry:** quantas tags de Artefato oficial manter (rollback precisa do anterior) e das descartáveis `<fatia>-<sha7>` (só review com app real), e quem limpa (job agendado ou `fechar-fatia`).
-3. **Dependências do review com app real** (Postgres/Redis/RabbitMQ/Keycloak), usado só em Fatia de `risco: alto`: conjunto compartilhado com isolamento lógico por Fatia ou um por namespace. **Recomendação:** compartilhado com isolamento lógico (banco, vhost, prefixo Redis por Fatia; realm Keycloak compartilhado).
-4. **Imagem do ZAP:** `tools/zap` no template, ou imagem pública fixada por versão e digest?
-5. **Runner alcançando o k3d local:** o GitLab Agent é uma conexão de saída do cluster para o GitLab; confirmar se isso resolve o deploy a partir de um runner (e onde o runner roda) sem expor a máquina.
-6. **Contrato `/api/pipeline`:** o campo `fatia`, a troca de "candidata" por "artefato", o `esteira-abrir` que anexa a uma Entrega já aberta e os modos novos cabem em `v1` retrocompatível ou exigem `v2` (ADR-0013 aceita a atual e a anterior ao mesmo tempo)?
-7. **Memória da máquina:** não foi medida. Dois clusters k3d + operators + ZAP é pesado. Com o review leve, o gasto de `review-*` cai, mas o limite de namespaces simultâneos ainda deve ser definido para o app real.
-8. **Como a Esteira lê o estado real dos flags** (para a verificação de flag alterado fora da Esteira): job do GitLab só de leitura ou outro caminho. Comportamento acordado: roda a cada poucos minutos e depois de cada deploy; divergência comum vira aviso no Painel, a grave (ligado em produção sem Entrega e Liberação) ganha destaque e alerta; nunca reverte sozinha, oferece **restaurar** ou **aceitar** (nome e motivo).
-9. **Botão de aprovar nos repositórios da própria Esteira**, onde o merge é manual: como a aprovação na Esteira convive com o merge no GitLab nesses dois repositórios.
-10. **Preview estático:** confirmar o hospedeiro (Pages ou outro), o prazo máximo e como o destroy é garantido. Dados falsos podem divergir da API real com o tempo; os tipos gerados do OpenAPI quebram o build quando o formato muda, mas não o conteúdo.
+**Todas decididas em 2026-11-15.** Nada nesta seção é pergunta: cada item traz a decisão e, quando há, o que é *verificado ao construir* (isso é teste, não decisão em aberto).
+
+1. **Alterar flag em produção.** **Decidido:** reiniciar o pod (rollout restart), sem build; o job espera o rollout terminar e isso é o sinal de "aplicado". No front vale o mesmo, com o `/config.json` em runtime.
+2. **Retenção do registry. Decidido:** Artefato oficial: as **últimas 5 versões publicadas por Projeto**, mais o que estiver rodando em qualquer Ambiente. Descartáveis `<fatia>-<sha7>`: removidas pelo `fechar-fatia` e, como rede de segurança, por um job agendado diário que apaga as com mais de 7 dias.
+3. **Dependências do review com app real** (Postgres/Redis/RabbitMQ/Keycloak), usado só em Fatia de `risco: alto`: **Decidido:** conjunto compartilhado com isolamento lógico (banco, vhost e prefixo Redis por Fatia; realm Keycloak compartilhado).
+4. **Imagem do ZAP. Decidido:** imagem pública fixada por versão e digest, sem `tools/zap` no template.
+5. **Runner alcançando o k3d local. Decidido:** o runner roda na própria máquina dos clusters (executor Docker) e o deploy passa pelo GitLab Agent, que é conexão de saída do cluster para o GitLab; nada da máquina é exposto. *Verificado no teste ponta a ponta da migração (seção 8, passo 9).*
+6. **Contrato `/api/pipeline`:** o campo `fatia`, a troca de "candidata" por "artefato", o `esteira-abrir` que anexa a uma Entrega já aberta e os modos novos mudam a semântica do contrato. **Decidido:** `/api/pipeline` **v2** (a ADR-0013 aceita v1 e v2 ao mesmo tempo, para os repositórios ainda não migrados).
+7. **Memória da máquina. Decidido:** no máximo **2 namespaces `review-*` simultâneos** (só Fatia de `risco: alto`); o limite é configuração. *A memória real é medida no teste ponta a ponta (seção 8, passo 9) e o limite se ajusta ali.*
+8. **Como a Esteira lê o estado real dos flags. Decidido:** job do GitLab só de leitura (modo `flag` de leitura), disparado pelo bot. Comportamento: roda a cada poucos minutos e depois de cada deploy; divergência comum vira aviso no Painel, a grave (ligado em produção sem Entrega e Liberação) ganha destaque e alerta; nunca reverte sozinha, oferece **restaurar** ou **aceitar** (nome e motivo).
+9. ~~Botão de aprovar nos repositórios da própria Esteira.~~ **Eliminada (ADR-0025):** esses repositórios ficam fora do esquema, com merge e promoção manuais.
+10. **Preview estático. Decidido:** roda no **Kubernetes**, no cluster `esteira-nao-prod`, namespace `preview`. Cada MR com o botão "Abrir review" ganha um **nginx mínimo** (Deployment + Service + Ingress) servindo o front compilado em modo preview, com endereço próprio por Fatia; sem API nem banco. Prazo máximo de **7 dias** (rótulo de validade no objeto); destruído no merge ou fechamento pelo `fechar-fatia`, e um job agendado diário apaga os vencidos. Limite padrão de **5 previews simultâneos** (configuração; cada um é um nginx pequeno). Dados falsos podem divergir da API real; isso é aceito, porque os tipos gerados do OpenAPI quebram o build quando o formato muda (o conteúdo, não). GitLab Pages não é usado.
 
 ---
 
@@ -243,3 +250,36 @@ Itens que a sessão do projeto trata ou que viram specs:
 - **Custo assumido de aprendizado** (ADR-0020): cluster, operators, cert-manager e Agent. Se pesar, o plano B barato é rodar localmente a imagem do app real, e aprovar sem namespace.
 - **Convivência zero:** se o `template-ci` novo atrasar, os repositórios ficam parados no modelo antigo; não há ponte.
 - **Dados falsos do preview podem divergir da API real** (pergunta 7.10).
+- **Hotfix leva código de Fatias Prontas para Entrega nunca validadas em qa**, sempre com o flag desligado. Risco aceito (ADR-0025).
+- **Dependência `Depende de` e o SHA:** a Esteira confere, ao abrir a Entrega, que a Fatia de API de que a de front depende já está na `main` (ADR-0023).
+- **Rollback não volta o banco, e uma migração `contract` invalida o rollback** para qualquer SHA anterior a ela (ADR-0025).
+
+---
+
+## 12. Acréscimos da ADR-0025 por repositório (resumo para as issues)
+
+**`template-ci`**
+- Modo `fluxo` só por trigger do bot; `esteira-abrir` recusa sem Entrega aberta para o Projeto e o SHA.
+- O Fluxo constrói sobre o **SHA registrado** (último com pipeline verde), com lockfiles e imagem base por digest. Para fixar o SHA, o bot cria uma **ref temporária** (tag `fluxo/<id da Entrega>` apontando para o SHA), dispara o pipeline nela e a apaga ao fim do Fluxo.
+- `resource_group` por Ambiente (nunca dois deploys simultâneos); Artefato novo no qa **cancela o teste em andamento** (ex.: DAST ativo) e marca o Fluxo antigo como Superado.
+- Modo `liberacao` (flag + smoke só leitura + ZAP passivo); modo `flag` puro para a liberação pelo menu.
+- Aplicar flag = **rollout restart** do pod, com o job esperando o rollout terminar. A Esteira, e não o cluster, é a fonte da verdade do estado do flag. Job de leitura do estado real só para detectar divergência.
+- Ao superar uma Entrega no qa, a Esteira dispara o desligamento dos flags dela no qa.
+- Aviso ou bloqueio de rollback quando o deploy atual rodou migração `contract`.
+- `fechar-fatia`: em Fatia `api + frontend`, fechar issues só depois da última MR.
+- A versão nova do `template-ci` sai como **major nova**, para os repositórios ainda não migrados continuarem fixados na anterior; a migração de cada repositório (seção 8) inclui trocar a referência do template para a major nova.
+
+**`ai-base`**
+- `/fatia` aceita a issue "Limpeza da Fatia <código>" e **cria a linha `<código>-L` no mapa** (sem flag).
+- Hook, scripts e `status-specs.mjs`: procurar o **merge commit** em `origin/main` (sem squash).
+- Spec: `flag: não` é a marca da Fatia sem flag, que a Esteira trava na seleção.
+
+**GitLab (seção 5)**
+- Merge commit sem squash; "pipeline must succeed"; "threads resolvidas".
+
+**Esteira (próprio projeto, fora do orchestration-ai)**
+- Estados e abas com os nomes novos; aba "Limpeza pendente"; lembrete de dívida (30 dias, configurável por Aplicação, comentário semanal do bot na issue de limpeza).
+- Bloqueio de abertura de Entrega do Projeto quando há Fatia sem flag excluída com limpeza não mergeada (hotfix liberado) e quando a `main` está vermelha.
+- Fatia sem flag pré-selecionada e travada na Abertura; vira Liberada ao chegar a produção.
+- Rollback devolve as Fatias da versão revertida a "Aguardando liberação" ou "Pronta para Entrega", com flag desligado.
+- `esteira-api` e `esteira-frontend` fora do esquema (merge e promoção manuais).

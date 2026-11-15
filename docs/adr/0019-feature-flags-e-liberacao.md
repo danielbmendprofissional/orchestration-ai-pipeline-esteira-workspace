@@ -1,6 +1,6 @@
 # ADR-0019 — Feature flags, Liberação e cancelamento de feature
 
-Status: Aceito · 2026-11-12 · **ADR-0021:** a Esteira controla (ativar e desativar por Ambiente, via job do GitLab) e rastreia o estado dos flags, no lugar de só registrar a aprovação
+Status: Aceito · 2026-11-12 · **ADR-0025:** Fatia sem flag, limpeza `<código>-L`, lembrete de dívida e como o flag é aplicado (reiniciar o pod) · **ADR-0021:** a Esteira controla (ativar e desativar por Ambiente, via job do GitLab) e rastreia o estado dos flags, no lugar de só registrar a aprovação
 
 Com `main` única (ADR-0018), o que ainda não deve chegar ao usuário entra na `main` atrás de um **feature flag** configurado por Ambiente. **Deploy não é Liberação**: o artefato chega a produção com a feature desligada, e ligar o flag é outro ato, decidido pelo negócio.
 
@@ -10,7 +10,7 @@ Com `main` única (ADR-0018), o que ainda não deve chegar ao usuário entra na 
 - **Nome:** `Features:<Fatia>...` (ex.: `Features:B2`), com o código da fatia (ADR-0020). Uma busca por `Features:B2` lista tudo o que a fatia espalhou. No .NET a variável de ambiente é `Features__B2`. No front, a configuração em runtime da ADR-0006.
 - **Nasce desligado em produção**, vida curta, removido depois de liberado para todos. Flag esquecido é dívida. **Flag ausente conta como desligado, no código** (ADR-0021): uma feature nunca entra no ar por omissão; o agente `review` confere. O estado do flag pertence ao Ambiente, não à imagem.
 - **Banco:** migração incompatível com a versão anterior segue **expand/contract**. O `contract` nunca sai no mesmo deploy da feature nem com o flag ligado.
-- **Liberação:** a aprovação de negócio (AAN) é da Liberação, não do deploy. Hoje o flag é configuração do Ambiente alterada por um humano. A Esteira **registra a aprovação** e não rastreia o estado do flag (pendência).
+- **Liberação:** a aprovação de negócio (AAN) é da Liberação, não do deploy. Hoje o flag é configuração do Ambiente alterada por um humano. A Esteira **controla e rastreia o estado do flag** (ADR-0021; o texto original só registrava a aprovação).
 
 ## Cancelamento ("o negócio não quer mais")
 
@@ -32,7 +32,7 @@ O **MR de limpeza é uma fatia** (spec e tickets) como qualquer outra, nunca um 
 
 - **Branch longa por feature** (sem flag): nega o trunk-based, deixa o código sem integrar por semanas e vira merge doloroso.
 - **Flag só para o que é "arriscado"**: cada pessoa julga de um jeito. "Comportamento percebido pelo usuário" é checável.
-- **Esteira rastreando o estado do flag agora**: faz sentido depois (pendência), mas inflaria o escopo desta mudança.
+- **Esteira rastreando o estado do flag agora**: adiado nesta ADR, adotado na ADR-0021.
 
 ## Consequences
 

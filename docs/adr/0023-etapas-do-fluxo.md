@@ -1,16 +1,16 @@
 # ADR-0023 — Etapas do Fluxo: Abertura, QA, HML, PRD e Liberação
 
-Status: Aceito · 2026-11-15 · Substitui a lista de Etapas do `CONTEXT-MAP.md` (ABER → AET-1 → DEV → QA → HML → AAN → AET-2 → PRD) · Refina a ADR-0021 (DAST e verificações depois do deploy)
+Status: Aceito · 2026-11-15 · **ADR-0025:** nomes novos ("Pronta para Entrega", "Aguardando liberação"), Fatia sem flag, limpeza e bloqueio de Entrega · Substitui a lista de Etapas do `CONTEXT-MAP.md` (ABER → AET-1 → DEV → QA → HML → AAN → AET-2 → PRD) · Refina a ADR-0021 (DAST e verificações depois do deploy)
 
 A **Entrega** é o processo que o humano abre; cada **Fluxo** (a faixa de um Projeto dentro dela, ADR-0022) percorre as etapas abaixo. A Abertura é da Entrega; QA, HML e PRD são de cada Fluxo; a Liberação é por Fatia, na tela da Entrega. Cada etapa só começa depois da anterior e tem um ato humano claro.
 
 ## Etapas
 
-1. **Abertura** (Painel de Fatias, aba "Fatias aprovadas"): um humano seleciona N Fatias aprovadas, de qualquer mistura (API, front ou as duas), e declara o **tipo da mudança de cada Fluxo** (minor por padrão, major por marcação). A Esteira abre a Entrega e um Fluxo por Projeto tocado; ainda não há Artefato.
+1. **Abertura** (Painel de Fatias, aba "Prontas para Entrega"): um humano seleciona N Fatias Prontas para Entrega, de qualquer mistura (API, front ou as duas), e declara o **tipo da mudança de cada Fluxo** (minor por padrão, major por marcação). A Esteira abre a Entrega e um Fluxo por Projeto tocado; ainda não há Artefato.
 2. **QA:** a pipeline do Fluxo gera o Artefato sobre o SHA mais recente da `main` e faz um deploy único no `qa`, com os flags das Fatias selecionadas **ligados no `qa`**. Rodam o DAST ativo e o agente de qa. O **aprovador técnico aprova o qa** olhando os resultados.
 3. **HML:** a Esteira faz o deploy do **mesmo Artefato** no `hml`, com os flags ligados, e roda o DAST passivo. O aprovador aprova o `hml` para liberar a ida a produção.
 4. **PRD:** o Publicador confirma. A tela mostra a **versão `X.Y.Z` calculada** e os flags que o Artefato carrega; ele pode corrigir o tipo antes de confirmar. A Esteira faz o deploy em produção com **todos os flags desligados** e aplica a versão. Depois do deploy roda **só a verificação técnica de que subiu** (rollout e health), que informa se é caso de rollback.
-5. **LIB (Liberação):** na tela da Entrega, o aprovador de negócio **seleciona as Fatias que vai liberar**; a Esteira liga os flags delas em produção e roda smoke e ZAP passivo **uma vez, para o conjunto**. Só então a feature chega ao usuário. As Fatias não selecionadas ficam **publicadas, não liberadas** (código em produção, flag desligado) e vão para o menu de **Fatias publicadas não liberadas**. A Entrega termina aqui. Uma Fatia `api + frontend` só pode ser liberada quando os dois Fluxos dela estão em produção.
+5. **LIB (Liberação):** na tela da Entrega, o aprovador de negócio **seleciona as Fatias que vai liberar**; a Esteira liga os flags delas em produção e roda smoke e ZAP passivo **uma vez, para o conjunto**. Só então a feature chega ao usuário. As Fatias não selecionadas ficam **aguardando liberação** (código em produção, flag desligado) e vão para o menu de **Aguardando liberação**. A Entrega termina aqui. Uma Fatia `api + frontend` só pode ser liberada quando os dois Fluxos dela estão em produção.
 
 ## Regras
 
@@ -19,15 +19,15 @@ A **Entrega** é o processo que o humano abre; cada **Fluxo** (a faixa de um Pro
 - **A AET-1 sai:** a aprovação técnica da proposta já acontece na **aprovação da spec**, antes de qualquer código.
 - **A AET-2 deixa de ser etapa:** a aprovação do `hml` e a confirmação do Publicador cobrem esse papel.
 - **A AAN passa a ser a Liberação**, depois do deploy em produção, e não mais antes.
-- **Fatias publicadas não liberadas:** num menu à parte, o aprovador pode **liberar** ou **excluir** em outro momento. Liberar assim **não roda smoke nem ZAP**: esses recursos são do Fluxo, gastá-los por uma Fatia só não compensa, e liberar dessa forma é conta e risco de quem escolhe, registrado com o nome dele. Excluir é o Cancelamento da ADR-0019 (o flag segue desligado e a limpeza é uma Fatia). Estratégias de review e segurança para essas Fatias em produção ficam para depois.
+- **Fatias aguardando liberação** (antes "publicadas, não liberadas"): num menu à parte, o aprovador pode **liberar** ou **excluir** em outro momento. Liberar assim **não roda smoke nem ZAP**: esses recursos são do Fluxo, gastá-los por uma Fatia só não compensa, e liberar dessa forma é conta e risco de quem escolhe, registrado com o nome dele. Excluir é o Cancelamento da ADR-0019 (o flag segue desligado e a limpeza é uma Fatia). Estratégias de review e segurança para essas Fatias em produção ficam para depois.
 
 ## Excluir uma Fatia
 
 A Esteira não escreve spec nem issue-mãe (isso é dos comandos), e a limpeza de uma feature que já está na `main` é uma **Fatia** com spec e tickets, nunca um commit solto (ADR-0019). Então:
 
-1. O humano clica **Excluir** numa Fatia publicada não liberada (ou numa aprovada que não quer mais).
+1. O humano clica **Excluir** numa Fatia aguardando liberação (ou numa pronta para Entrega que não quer mais). Fatia sem flag excluída bloqueia a abertura de Entrega nova do Projeto até a limpeza ser mergeada (ADR-0025).
 2. A Esteira pede um **motivo** e registra o cancelamento com o nome dele. A Fatia fica **Excluída**, e o flag segue desligado.
-3. A Esteira cria no GitLab uma **issue de pedido**, "Limpeza da Fatia <código>", com o motivo e os links, e o rótulo `ready-for-human`.
+3. A Esteira cria no GitLab uma **issue de pedido**, "Limpeza da Fatia <código>", com o motivo e os links, e o rótulo `ready-for-human`. A Fatia de limpeza tem o código `<código>-L`, e o `/fatia` cria a linha dela no mapa (ADR-0025).
 4. O humano roda o `/fatia` nessa issue quando quiser, e a limpeza segue o fluxo normal. Até lá o código fica na `main`, inerte.
 
 ## Dependência entre Projetos
@@ -60,7 +60,7 @@ Uma feature que atravessa Projetos (API e front) é uma **Entrega** com um Fluxo
 
 **Do Fluxo, no topo da tela:** **Em fila** (hml ou produção ocupado por outro Fluxo do mesmo Projeto), **Superado** (um Artefato mais novo tomou o qa antes da aprovação) e **Em rollback** (o Projeto voltou ao Artefato anterior; nada novo entra até a correção).
 
-**Da Entrega:** derivado dos Fluxos, calculado pela Esteira (nunca escolhido à mão). A tela mostra **um estado só**, o mais urgente, nesta ordem: **Em rollback** (algum Fluxo voltou ao Artefato anterior); **Bloqueada ou com falha** (gate de segurança ou erro técnico em algum Fluxo); **Aguardando aprovação** (algum Fluxo espera um humano; a lista mostra de quem é a vez: Você, Técnico, Publicador ou Negócio); **Em andamento**; **Em fila** (todos os Fluxos esperam vaga no hml ou na produção); **Publicada, aguardando Liberação** (todos os Fluxos em produção, Fatias ainda não liberadas); **Concluída** (Liberação feita; as Fatias não selecionadas seguem no menu de publicadas não liberadas); **Cancelada** (reverter ou absorver, ADR-0019); **Superada** (um Artefato mais novo tomou o `qa` antes da aprovação: a Entrega é encerrada e suas Fatias **voltam para "aprovadas"**, com a marca "vinha de uma Entrega superada"). Filtros da lista: **Abertas** (os seis primeiros), **Concluídas** e **Canceladas** (cancelada e superada).
+**Da Entrega:** derivado dos Fluxos, calculado pela Esteira (nunca escolhido à mão). A tela mostra **um estado só**, o mais urgente, nesta ordem: **Em rollback** (algum Fluxo voltou ao Artefato anterior); **Bloqueada ou com falha** (gate de segurança ou erro técnico em algum Fluxo); **Aguardando aprovação** (algum Fluxo espera um humano; a lista mostra de quem é a vez: Você, Técnico, Publicador ou Negócio); **Em andamento**; **Em fila** (todos os Fluxos esperam vaga no hml ou na produção); **Publicada, aguardando Liberação** (todos os Fluxos em produção, Fatias ainda não liberadas); **Concluída** (Liberação feita; as Fatias não selecionadas seguem no menu de publicadas não liberadas); **Cancelada** (reverter ou absorver, ADR-0019); **Superada** (um Artefato mais novo tomou o `qa` antes da aprovação: a Entrega é encerrada e suas Fatias **voltam para "Prontas para Entrega"**, com a marca "vinha de uma Entrega superada"). Filtros da lista: **Abertas** (os seis primeiros), **Concluídas** e **Canceladas** (cancelada e superada).
 
 A tela mostra a barra das cinco etapas com o estado de cada uma e, embaixo, o painel da etapa ativa com os resultados e o botão de aprovar para quem tem o papel.
 

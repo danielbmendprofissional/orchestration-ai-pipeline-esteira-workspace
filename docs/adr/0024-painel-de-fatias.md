@@ -1,6 +1,6 @@
 # ADR-0024 — Painel de Fatias
 
-Status: Aceito · 2026-11-15 · Complementa a ADR-0022 (Fatias aprovadas, Entrega por seleção) e a ADR-0023 (etapas e estados) · Segue o contrato de leitura (`docs/contrato-leitura-esteira.md`): o que vem do mapa, da spec, das issues, do bloco de execução e da MR é lido; o que é da Esteira (review, Entrega, flag) é dela
+Status: Aceito · 2026-11-15 · **ADR-0025:** estados renomeados e lembrete de dívida · Complementa a ADR-0022 (Fatias aprovadas, Entrega por seleção) e a ADR-0023 (etapas e estados) · Segue o contrato de leitura (`docs/contrato-leitura-esteira.md`): o que vem do mapa, da spec, das issues, do bloco de execução e da MR é lido; o que é da Esteira (review, Entrega, flag) é dela
 
 O Painel de Fatias é a tela em que o humano **acompanha a implementação** e **escolhe o que vai para uma Entrega**. Ele existe antes de qualquer Entrega (a Fatia existe antes do Fluxo).
 
@@ -12,9 +12,9 @@ Deduzidos pela Esteira do que ela lê, sem ninguém marcar:
 - **Com spec:** a spec existe e foi aprovada; a execução não começou.
 - **Em execução:** o `/implement-task` roda (label `em-execucao` e bloco de execução com tasks).
 - **Em revisão:** a MR está aberta. Reprovada e fechada, mostra "em correção".
-- **Aprovada:** a MR foi mergeada na `main` com o flag desligado, e ela ainda não está numa Entrega.
+- **Pronta para Entrega** (antes "Aprovada"): a MR foi mergeada na `main` com o flag desligado, e ela ainda não está numa Entrega. Ainda não passou por qa nem hml.
 - **Em Entrega:** foi selecionada numa Entrega aberta (mostra qual).
-- **Publicada, não liberada:** em produção com o flag desligado.
+- **Aguardando liberação** (antes "Publicada, não liberada"): passou por qa e hml, em produção com o flag desligado.
 - **Liberada:** o flag está ligado em produção.
 - **Excluída:** cancelada (reverter ou absorver, ADR-0019).
 
@@ -23,9 +23,10 @@ Fatias no formato anterior ao padrão aparecem com a marca "formato anterior" (r
 ## Abas
 
 - **Em andamento:** de Com spec até Em revisão.
-- **Aprovadas:** as que esperam seleção, com caixa de seleção por linha e o botão **Abrir Entrega** com as selecionadas. As que voltaram de uma Entrega superada têm a marca "vinha de uma Entrega superada".
+- **Prontas para Entrega:** as que esperam seleção (as sem flag vêm marcadas e travadas, ADR-0025), com caixa de seleção por linha e o botão **Abrir Entrega** com as selecionadas. As que voltaram de uma Entrega superada têm a marca "vinha de uma Entrega superada".
 - **Em Entrega:** com o link para a Entrega.
-- **Publicadas não liberadas:** com os botões Liberar e Excluir (ADR-0023).
+- **Aguardando liberação:** com os botões Liberar e Excluir (ADR-0023), contagem de idade e destaque após o prazo (ADR-0025).
+- **Limpeza pendente:** Fatias excluídas com flag, com a idade da pendência (ADR-0025).
 - **Liberadas** e **Todas**.
 
 ## Cada linha
