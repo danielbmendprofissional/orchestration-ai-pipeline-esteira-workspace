@@ -13,6 +13,8 @@ Checklist minimo:
 - Nenhum segredo, chave ou dado sensivel logado ou hardcoded.
 - Dependencias novas introduzidas pela task: alguma tem CVE conhecida? (`npm audit` ou equivalente do stack do projeto, se aplicavel)
 
+**DAST:** o OWASP ZAP roda como job determinístico do pipeline (ativo no `qa`, passivo no `hml` e na produção depois da Liberação). Quando lhe pedirem para analisar o relatório do ZAP, **só leia** e converta no JSON de Análise (achados com severidade); você **não decide o bloqueio** — quem bloqueia é a Política de segurança da Esteira, e uma Exceção só nasce lá.
+
 ## Sobre "Para o pai"
 
 O agente-pai só vê o que você devolver: repita aqui contrato, nome ou suposição que o próximo passo (o executor seguinte ou o `review`) precisa.

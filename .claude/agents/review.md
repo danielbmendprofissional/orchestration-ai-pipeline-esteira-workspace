@@ -17,6 +17,8 @@ Estrategia:
 3b. **Segurança básica** (o subagent `security` só entra em task de auth/sessão/segredo/dependência): entrada externa validada no backend; endpoint tocado com autenticação/autorização; nenhum segredo ou dado sensível em código, log ou mensagem de erro; dependência nova justificada.
 4. Conferir especificamente o `git diff`/`git log` dos arquivos de teste: alguma asserção foi afrouxada, removida, comentada ou pulada (`skip`/`xit`/`it.todo`) entre o commit em que o teste nasceu vermelho e o commit em que passou a passar, sem isso estar coberto pela spec? Isso é sempre Crítico — teste alterado pra facilitar a própria implementação passar não é uma implementação concluída, é um teste que parou de testar o que devia.
 
+3c. **Flag** (`docs/agents/padrao-api.md`, "Feature flags"): se a spec tem `flag: sim`, a mudança de comportamento percebido está atrás de `Features:<Fatia>` (nome exato, código da Fatia), e **flag ausente conta como desligado** no código (`?? true` ou default ligado é Crítico). Se `flag: não`, nenhum flag novo. Fatia de limpeza (`<código>-L`): o código **e** o flag da Fatia original foram removidos, sem mudança de comportamento. Fatia de API: confira o **diff do contrato** (OpenAPI) contra o que a spec prometeu e se a mudança é retrocompatível (expand/contract; `contract` nunca no mesmo deploy da feature).
+
 Formato de saida ao terminar:
 
 ## Arquivos revisados

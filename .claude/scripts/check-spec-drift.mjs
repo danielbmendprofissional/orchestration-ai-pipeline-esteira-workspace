@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Detecta spec que envelheceu: o código (ou as ADRs) mudou em `dev` depois do ponto em que ela foi escrita.
+// Detecta spec que envelheceu: o código (ou as ADRs) mudou em `main` depois do ponto em que ela foi escrita.
 // Zero token. Rode da raiz do workspace.
 //
 //   node .claude/scripts/check-spec-drift.mjs                 # todas as specs do mapa ainda não "feito"
@@ -8,7 +8,7 @@
 //   node .claude/scripts/check-spec-drift.mjs --stamp <spec.md>   # grava/atualiza a linha `base:` na spec
 //
 // A spec registra a base numa linha: `base: workspace@1a2b3c4 · esteira-api@a8bc19f · esteira-frontend@dfb1f2e · 2026-10-25`
-// (sha de origin/main do workspace e de origin/dev de cada repositório de código). Sem essa linha a spec é
+// (sha de origin/main do workspace e de cada repositório de código). Sem essa linha a spec é
 // tratada como velha. Saída 1 se alguma spec estiver desatualizada ou sem base.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -24,7 +24,7 @@ const tryGit = (repo, ...a) => { try { return git(repo, ...a); } catch { return 
 const codeRepos = readdirSync(root, { withFileTypes: true })
   .filter((d) => d.isDirectory() && existsSync(join(root, d.name, '.git')))
   .map((d) => d.name);
-const tip = (repo) => (repo === 'workspace' ? (tryGit(repo, 'rev-parse', '--verify', 'origin/main') ? 'origin/main' : 'HEAD') : 'origin/dev');
+const tip = (repo) => (tryGit(repo, 'rev-parse', '--verify', 'origin/main') ? 'origin/main' : 'HEAD');
 
 for (const r of ['workspace', ...codeRepos]) tryGit(r, 'fetch', 'origin');
 

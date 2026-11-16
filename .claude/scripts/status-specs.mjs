@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Status real das fatias do mapa (zero token): cruza o que o `specs/README.md` diz com a evidência —
-// issue-mãe no GitLab, MR mergeada em `dev` e testes marcados com o código da fatia
+// issue-mãe no GitLab, MR mergeada na `main` e testes marcados com o código da fatia
 // (`docs/agents/orchestration.md`, "Marca da fatia nos testes"). Somente leitura. Rode da raiz do workspace.
 //
 //   node .claude/scripts/status-specs.mjs                 # tabela de todas as fatias do mapa
@@ -59,13 +59,13 @@ const glab = (rota) => {
   try { return JSON.parse(run('glab', ['api', rota])); } catch { return null; }
 };
 const enc = encodeURIComponent;
-// MRs mergeadas em dev, buscadas uma vez por repositório (até 10 páginas de 100) e filtradas localmente por fatia
+// MRs mergeadas na main, buscadas uma vez por repositório (até 10 páginas de 100) e filtradas localmente por fatia
 const mrCache = new Map();
 const mrsMergeadas = (r) => {
   if (mrCache.has(r.nome)) return mrCache.get(r.nome);
   let todas = r.gitlab ? [] : null;
   for (let pagina = 1; todas && pagina <= 10; pagina++) {
-    const lote = glab(`projects/${enc(r.gitlab)}/merge_requests?state=merged&target_branch=dev&per_page=100&page=${pagina}`);
+    const lote = glab(`projects/${enc(r.gitlab)}/merge_requests?state=merged&target_branch=main&per_page=100&page=${pagina}`);
     if (lote === null) { todas = pagina === 1 ? null : todas; break; }
     todas.push(...lote);
     if (lote.length < 100) break;
@@ -77,13 +77,13 @@ const slugs = (cod) => [cod.toLowerCase(), cod.toLowerCase().replace(/\./g, '-')
 const ehDaFatia = (mr, cod) => new RegExp(`^${cod.replace(/\./g, '\\.')}\\b`, 'i').test(mr.title ?? '')
   || slugs(cod).some((s) => (mr.source_branch ?? '').startsWith(`feature/${s}-`));
 
-// merge commit "Merge branch 'feature/<fatia>-…' into 'dev'" em origin/dev: vale quando a MR não está no GitLab (fatia mergeada antes do processo)
+// merge commit "Merge branch 'feature/<fatia>-…' into 'main'" em origin/main (merge commit, sem squash — ADR-0025): vale quando a MR não está no GitLab (fatia mergeada antes do processo)
 const mergeCommitNoGit = (r, cod) => {
-  if (!git(r.path, 'rev-parse', '--verify', 'origin/dev')) return false;
-  return slugs(cod).some((s) => (git(r.path, 'log', 'origin/dev', '--merges', '--format=%s', '--fixed-strings', `--grep=Merge branch 'feature/${s}-`) ?? '').trim() !== '');
+  if (!git(r.path, 'rev-parse', '--verify', 'origin/main')) return false;
+  return slugs(cod).some((s) => (git(r.path, 'log', 'origin/main', '--merges', '--format=%s', '--fixed-strings', `--grep=Merge branch 'feature/${s}-`) ?? '').trim() !== '');
 };
 
-// ---- testes marcados (árvore de trabalho = o que está na branch, comitado ou não; e origin/dev)
+// ---- testes marcados (árvore de trabalho = o que está na branch, comitado ou não; e origin/main)
 const PATHSPEC = ['*Tests.cs', '*Test.cs', '*.spec.ts', '*.test.ts', '*Tests.*'];
 const marcas = (cod) => {
   const c = cod.replace(/\./g, '\\.');
@@ -96,7 +96,7 @@ const marcas = (cod) => {
 const testesMarcados = (cod) => {
   const arquivos = new Set();
   for (const r of repos) {
-    const refs = [null, ...(git(r.path, 'rev-parse', '--verify', 'origin/dev') ? ['origin/dev'] : [])];
+    const refs = [null, ...(git(r.path, 'rev-parse', '--verify', 'origin/main') ? ['origin/main'] : [])];
     for (const ref of refs) {
       const out = tryRun('git', ['-C', r.path, 'grep', '-l', '-E', ...marcas(cod).flatMap((m) => ['-e', m]), ...(ref ? [ref] : []), '--', ...PATHSPEC]);
       for (const l of (out ?? '').split('\n').filter(Boolean)) arquivos.add(`${r.nome}/${l.replace(/^[^:]+:/, '')}`);
@@ -126,7 +126,7 @@ const avaliar = (f) => {
   const exige = exigeTeste(f);
   const issue = f.issue && wsGitlab ? glab(`projects/${enc(wsGitlab)}/issues/${f.issue}`) : null;
   const tocados = reposDaFatia(f);
-  // por repositório: true (MR mergeada ou merge commit da branch da fatia em origin/dev), false, ou null (sem como saber)
+  // por repositório: true (MR mergeada ou merge commit da branch da fatia em origin/main), false, ou null (sem como saber)
   const mrs = tocados.map((r) => {
     const lista = mrsMergeadas(r);
     const naoGit = mergeCommitNoGit(r, f.codigo);
@@ -142,7 +142,7 @@ const avaliar = (f) => {
   let estado;
   if (feito) {
     if (exige && testes === 0) motivos.push('marcada como feito, mas nenhum teste leva a marca da fatia');
-    if (mrOk === false) motivos.push(`marcada como feito, mas sem MR mergeada em ${faltaMr.join(', ') || 'dev'}`);
+    if (mrOk === false) motivos.push(`marcada como feito, mas sem MR mergeada em ${faltaMr.join(', ') || 'main'}`);
     if (fechada === false) motivos.push(`marcada como feito, mas a issue #${f.issue} segue aberta`);
     estado = motivos.length ? 'inconsistente' : 'implementada';
   } else if (mrOk === true || fechada === true) {

@@ -43,7 +43,21 @@ Nomenclatura: arquivos kebab-case; `*.page.ts`, `*.component.ts`, `*-api.service
 
 ## Configuração em runtime
 
-O template-ci compila uma vez e promove a mesma imagem por qa → hml → produção, então **nada de `environment.<ambiente>.ts`**. No boot, `provideAppInitializer` faz `GET /config.json` (antes do `auth.service`) e guarda num signal (`core/config/app-config.service.ts`). No container, o nginx do template-ci responde com a variável `APP_RUNTIME_CONFIG`; em dev, `public/config.json`. Nunca segredo lá (é público).
+O template-ci gera o Artefato uma vez (na pipeline do Fluxo) e o mesmo percorre qa → hml → produção, então **nada de `environment.<ambiente>.ts`**. No boot, `provideAppInitializer` faz `GET /config.json` (antes do `auth.service`) e guarda num signal (`core/config/app-config.service.ts`). No container, o nginx do template-ci responde com a variável `APP_RUNTIME_CONFIG`; em dev, `public/config.json`. Nunca segredo lá (é público).
+
+## Feature flags
+
+Mudança de comportamento que o usuário percebe (tela nova, regra nova ou alterada, endpoint novo consumido pelo front) entra atrás de um flag `Features:<Fatia>` (ex.: `Features:B2`, código da Fatia). Regras completas e o critério em `docs/agents/padrao-api.md`, seção "Feature flags". No front:
+
+- Os flags chegam por `GET /features.json` em runtime (`{"B2":true,...}`, servido pelo nginx do template-ci a partir do ConfigMap do Ambiente, `APP_FEATURES_JSON`), por Ambiente: o estado pertence ao Ambiente, não à imagem. `{}` = tudo desligado. Um serviço (`core/config/feature-flags.service.ts`), carregado no mesmo `provideAppInitializer` do `/config.json`, expõe `isEnabled('B2')`.
+- **Flag ausente conta como desligado.** Nunca `?? true` nem default ligado.
+- Rota e item de menu da feature checam o flag; com ele desligado a tela não existe para o usuário.
+- Só a Esteira liga e desliga (reinicia o pod); o front não altera flag.
+- Fatia que dispensa flag (correção, refatoração, infra, migração expand-only) declara `flag: não` na spec.
+
+## Preview da Fatia
+
+Fatia que toca o front declara `preview:` na spec (módulo e rota de entrada). O agente `ui` cria, como parte da Fatia, a **sessão falsa** (já logado) e os **dados falsos** da tela, **tipados pelos tipos gerados do OpenAPI** (`openapi-typescript`): dado fora do contrato quebra o build. O preview é um build estático servido por um nginx mínimo no cluster, sem API nem banco.
 
 ## Sessão e permissão
 

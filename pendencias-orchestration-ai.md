@@ -8,6 +8,8 @@ Fontes das decisões, neste workspace: `docs/adr/0018` a `0024`, `CONTEXT-MAP.md
 
 > **Atualização 2026-11-15 (ADR-0025).** Esta lista foi revisada depois de uma conversa que fechou nomes e travas novos: estados "Pronta para Entrega" e "Aguardando liberação", Fatia sem flag, Fatia de limpeza `<código>-L`, SHA verde, merge sem squash, reiniciar o pod para aplicar flag, e a Esteira fora do esquema de Entrega. O que mudou para o orchestration-ai está nos pontos marcados "ADR-0025" abaixo e resumido na **seção 12**.
 
+> **Estado da execução (2026-11-16).** Feito, de dentro do orquestração, a pedido do dono: **`ai-base`** (docs, hook, scripts, comandos e agentes; `bash -n`/`node --check` ok), **cópias do workspace da Esteira** (patch aplicado sem rejeição), **`ai-ops`** (docs de Kubernetes, 2 clusters) e **`ai-infra`** (README), e o **`template-ci` v3** (controlador, regras, imagem por modos, deploy com flags, `flag`, `preview`, `limpeza`, ZAP ativo/passivo, MR para `main`, README e docs novos; YAML validado, 27 scripts com `bash -n` e o controlador testado em 16 cenários simulados). **Falta, e não é do orchestration-ai:** criar a tag `v3.0.0` do template (e só então os repositórios trocam o `ref`), implementar o servidor do contrato v2 na `esteira-api`, a configuração do GitLab (seção 5), o roteiro de migração (seção 8), reescrever as specs e protótipos da Esteira (seção 10) e **o primeiro teste ponta a ponta no GitLab real**, que nenhum teste local substitui. O texto das seções 2 a 4 abaixo é o levantamento original: leia-o como "o que mudou", não como pendência aberta.
+
 > **Limite desta análise.** O mapa dos arquivos dos repositórios compartilhados foi feito por busca (grep) e leitura parcial, não por leitura integral. Onde está escrito "não li", confirme antes de agir. O `controlar-pipeline.yml` tem mais de 1000 linhas e só as partes com `rc`/branch foram vistas.
 
 ---
@@ -96,7 +98,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 - Todos os jobs que falam com a Esteira enviam o campo **`fatia`**, e `esteira-abrir` passa a **anexar o Artefato a uma Entrega já aberta** e **recusar** quando não há Entrega (fail-closed). As pipelines de MR e de `main` só fazem CI e não precisam chamar a Esteira para publicar. Contrato `/api/pipeline/v1` (ADR-0013): ver pergunta 7.6.
 
 ### 2.7 Documentação do template
-- `docs/fluxo-de-tags.md`: hoje documenta "dev → qa → hml → main, sem aliases", a regra "a `rc` pode ser cortada em dev, qa ou hml", "tag final só em main" e o back-merge manual. **Reescrever inteiro.**
+- `docs/fluxo-de-tags.md`: **reescrito em 2026-11-16** como `template-ci/docs/pipeline-trunk-based.md` (o antigo foi removido); `docs/mudancas-template.md` atualizado para o v3.
 - `README.md` e `.gitlab-ci.yml` do próprio template (releases por tag `vN.N.N`, build de `tools/*` por tag): conferir o que usa o fluxo antigo. *Não li.*
 - O template já lida com a ausência de `qa` ("primeiro estágio existente"). Verificar se o novo modelo mantém essa tolerância.
 

@@ -6,7 +6,7 @@
 //   node .claude/scripts/worktree-fatia.mjs --remove B2
 //
 // Cria `<workspace>.wt/b2/`: um worktree do workspace (regras, docs, specs, .claude) e, dentro dele,
-// um worktree de cada repositório de código na branch `feature/b2-<slug>` a partir de `origin/dev`.
+// um worktree de cada repositório de código na branch `feature/b2-<slug>` a partir de `origin/main`.
 // `.claude/skills` (não versionada) entra como junction pra não copiar 30 MB por painel.
 // Depois: `cd <caminho impresso> && claude` e `/implement-task B2` lá dentro.
 import { execFileSync } from 'node:child_process';
@@ -58,7 +58,7 @@ for (const r of alvo) {
   git(repo, 'fetch', 'origin');
   const existe = tryGit(repo, 'rev-parse', '--verify', branch);
   if (existe) git(repo, 'worktree', 'add', join(dir, r), branch);
-  else git(repo, 'worktree', 'add', '-b', branch, join(dir, r), 'origin/dev');
+  else git(repo, 'worktree', 'add', '-b', branch, join(dir, r), 'origin/main');
   console.log(`  ${r}: ${branch}`);
 }
 

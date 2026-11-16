@@ -23,20 +23,18 @@ for pattern in "${DANGEROUS_PATTERNS[@]}"; do
   fi
 done
 
-# Push direto pra qualquer branch protegida do fluxo de promoção
-# (feature-x -> MR -> dev -> qa -> hml -> main; master fica como fallback
-# genérico pra repos que ainda não adotaram o fluxo completo).
+# Push direto pra branch protegida.
+# Modelo trunk-based (ADR-0018 da Esteira): só existem main, feature/* e
+# hotfix/*; ambiente não é branch (não há dev/qa/hml). A main só aceita merge
+# do bot da Esteira. master fica como fallback genérico pra repos que ainda não
+# adotaram o fluxo.
 #
 # Vale pra toda sessão Claude Code, inclusive os subagentes do /implement-task.
-# Promoção dev->qa (merge da tag + push) é do humano — ver
-# docs/agents/esteira-deploy.md. Agente só sobe feature/* e abre MR pra dev.
-#
-# Hotfix (branch/xxx a partir de main, MR, aprovação humana — ver
-# docs/agents/esteira-deploy.md) também não esbarra aqui: o agente só empurra
-# a branch `hotfix/xxx`, nunca push direto em `main`.
-PROTECTED_BRANCHES="main|master|dev|qa|hml"
+# Agente só sobe feature/* (ou hotfix/*) e abre MR pra main — ver
+# docs/agents/esteira-deploy.md. Nunca push direto em `main`.
+PROTECTED_BRANCHES="main|master"
 if echo "$COMMAND" | grep -qE "git push[^|&;]*\s(origin\s+)?($PROTECTED_BRANCHES)(\s|$)"; then
-  echo "BLOCKED: '$COMMAND' — push direto em branch protegida. Abra uma feature branch e uma merge request pra 'dev'." >&2
+  echo "BLOCKED: '$COMMAND' — push direto em branch protegida. Abra uma feature branch e uma merge request pra 'main'." >&2
   exit 2
 fi
 

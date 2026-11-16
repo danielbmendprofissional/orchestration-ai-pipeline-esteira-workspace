@@ -25,7 +25,7 @@ O Claude Code sempre abre na **raiz do workspace** — enxergam todos os compone
 
 - Toda operação de git aponta o repositório explicitamente: `git -C <projeto>-api status`, `git -C <projeto>-frontend commit ...`. Nunca rodar git "solto" na raiz achando que pega o código — na raiz só existe o repositório do workspace.
 - Branch de feature com **o mesmo nome** em todo repositório que a issue tocar (`feature/42-cadastro-cliente` na api e no frontend). Só cria a branch onde houver mudança.
-- Uma MR por repositório alterado, todas pra `dev`, cada uma referenciando a mesma issue.
+- Uma MR por repositório alterado, todas pra `main`, cada uma referenciando a mesma issue. Uma Fatia pode ser `api + frontend`: uma MR em cada repositório, a da API mergeada primeiro; a Fatia só fica **Pronta para Entrega** quando as duas estão na `main`.
 - O hook `.claude/hooks/block-dangerous-git.sh` olha o comando, não a pasta — vale igual com `git -C`.
 
 ## Issues: todas no workspace
@@ -41,7 +41,7 @@ GitLab Free não tem issue de grupo nem épico (Premium) — toda issue pertence
 (Labels simples — `area::backend` é label com escopo, recurso Premium.)
 
 - Ler/criar: `glab issue list -R <grupo>/<projeto>-workspace --label backend`.
-- Citar a issue na MR de outro repositório: `<grupo>/<projeto>-workspace#42` na descrição (referência entre projetos funciona no Free). `Closes` não serve aqui: a MR vai pra `dev` e o GitLab só fecha no merge pro branch padrão. Quem fecha é "Fechar a fatia" (`docs/agents/orchestration.md`).
+- Citar a issue na MR de outro repositório: `<grupo>/<projeto>-workspace#42` na descrição (referência entre projetos funciona no Free). Como a MR vai pra `main` (branch padrão), `Closes <grupo>/<projeto>-workspace#42` funciona numa Fatia de um repositório só. **Nas Fatias `api + frontend` não use `Closes`**: ele fecharia a issue-mãe na primeira MR mergeada. Quem fecha, nesse caso, é "Fechar a fatia" (`docs/agents/orchestration.md`), só depois da última MR.
 - A lista de issues **do grupo** no GitLab mostra tudo junto.
 
 ## Feature que toca API e frontend
@@ -52,11 +52,11 @@ Os repositórios são versionados e promovidos de forma independente — no mesm
 2. O frontend que usa a novidade sobe depois.
 3. Remover o que ficou velho (campo, endpoint) é uma task separada, depois que nenhuma versão em uso depende dele.
 
-Mesma regra das migrations do banco (só pra frente, ver `template-ci/docs/fluxo-de-tags.md`).
+Mesma regra das migrations do banco (expand/contract, só pra frente; o `contract` nunca sai no mesmo deploy da feature).
 
-## Tags e esteira
+## Versões e esteira
 
-Por repositório: cada um tem seu `dev → qa → hml → main`, suas tags `vX.Y.Z-rcN` e suas promoções (`docs/agents/esteira-deploy.md`). Rodada que tocou os dois gera tag nos dois — a da API promove antes ou junto, nunca depois da do frontend que depende dela.
+Por repositório: cada um tem só `main`, `feature/*` e `hotfix/*`, e a própria versão `X.Y.Z` (sem "v"), que nasce na confirmação em produção (`docs/agents/esteira-deploy.md`). Uma Entrega que tocou os dois cria um Fluxo em cada repositório; o da API vai antes, e o front só confirma produção (e só liga o flag) com a API de que depende já lá.
 
 ## Code review
 

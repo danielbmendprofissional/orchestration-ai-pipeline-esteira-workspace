@@ -26,7 +26,7 @@ O modelo não é decidido aqui: cada subagente declara um **apelido** (`sonnet`,
 | `tests` | só se a task junta duas ou mais camadas |
 | `security` | em task de auth, sessão, segredo, permissão ou dependência nova; com `risco: alto` na spec, também uma vez sobre o diff da fatia |
 | `review` | por task no modo pago/free (somente leitura: spec, padrões, segurança básica — o escopo mecânico já saiu do `check-escopo.mjs`); no modo Claude quem revisa é o `/code-review` no fim da fatia, chamado pelo próprio `/implement-task` |
-| `qa` | fora do `/implement-task`: valida o ambiente `qa` publicado (`docs/agents/esteira-deploy.md`) |
+| `qa` | fora do `/implement-task`: valida o ambiente `qa` publicado pelo deploy do Fluxo (`docs/agents/esteira-deploy.md`); lê o resultado do DAST |
 
 **Modo Claude:** o agente-pai implementa cada task direto (TDD), sem subagente executor nem `review` por task — o `/code-review` no fim da fatia revisa tudo. **Modo pago/free:** o agente-pai monta um `$TASK` autocontido por task (trecho da spec, o que **não** tocar, arquivos esperados, 2–4 arquivos de contexto), delega ao executor e ao `review`. Nos dois: testes da task com filtro durante o trabalho, **suite completa uma vez por fatia, pelo pai, antes do review** (a de integração sobe containers — é o maior custo de tempo; o CI da MR cobre o resto); escopo conferido por `.claude/scripts/check-escopo.mjs` (arquivo fora do escopo, "Não toque", teste apagado, `skip`/`only`, asserção a menos — sem LLM). Subagente não comita nem faz push; o hook `.claude/hooks/block-dangerous-git.sh` vale pra todos.
 
@@ -54,7 +54,7 @@ O código da fatia no mapa (`specs/README.md`: `B2`, `A1`…) liga issue, branch
 | Issue filha (task) | `<fatia>.<N> — <título>` | `B2.5 — VOs com fábrica Result` · workspace#8 |
 | Branch (em cada repositório tocado) | `feature/<fatia minúscula>-<slug da spec>` | `feature/b2-result-e-problem-details` |
 | Commit | `<tipo>: <o que fez> (<fatia>.<N> · workspace#<filha>)` | `feat: VOs devolvem Result (B2.5 · workspace#8)` |
-| MR (pra `dev`) | `<fatia> — <título da mãe>` | `B2 — Result pattern + Problem Details (ADR-0003)` |
+| MR (pra `main`) | `<fatia> — <título da mãe>` | `B2 — Result pattern + Problem Details (ADR-0003)` |
 
 Os comandos aceitam o código: `/implement-task B2`, `/implement-task B2.5`, `/code-review B2`. O `#n` continua valendo, mas ninguém precisa digitar.
 
@@ -62,15 +62,15 @@ Os comandos aceitam o código: `/implement-task B2`, `/implement-task B2.5`, `/c
 
 Uma sessão por fatia, na **raiz do workspace** (enxerga `<projeto>-api/` e `<projeto>-frontend/`).
 
-**Estado do GitLab sempre sincronizado:** todo comando que confere algo contra `dev`/`main` ("está mergeada?", "filha feita?", "bloqueada?") roda `git -C <repo> fetch origin` antes, em cada repositório envolvido. A cópia local (`origin/dev`) só muda no fetch — sem ele, uma MR que você acabou de mergear parece não existir.
+**Estado do GitLab sempre sincronizado:** todo comando que confere algo contra a `main` ("está mergeada?", "filha feita?", "bloqueada?") roda `git -C <repo> fetch origin` antes, em cada repositório envolvido. A cópia local (`origin/main`) só muda no fetch — sem ele, uma MR que você acabou de mergear parece não existir.
 
 | # | Humano | LLM (Claude Code) |
 |---|---|---|
 | 1 | `/fatia B2` → **aprova a spec** (única leitura antes do código) | escreve a spec (com `risco` e "Toca em") e para; com o ok abre a mãe `B2 — …`, linka no mapa |
 | 2 | nada (só `risco: alto`: lê os tickets) | cria as filhas `B2.1 — …`, `B2.2 — …` (`Blocked by:` e `Cobre:`) e confere a cobertura por script |
-| 3 | nada (o `/fatia` segue sozinho; ou `/implement-task B2` à parte) | `em-execucao` na mãe → filhas com TDD, um commit cada (executor no painel) → suite completa uma vez → `/code-review` → corrige os achados sozinho (até 2 rodadas) → push → MR pra `dev` → relatório + notificação |
-| 4 | na MR: lê, testa a branch, **aprova e mergeia** — ou comenta na MR e roda `/implement-task B2` de novo | lê os comentários não resolvidos, corrige, revisa, faz push, responde cada comentário |
-| 5 | nada | no merge, o CI fecha a mãe e as filhas e tira `em-execucao` (job `fechar-fatia`); sem o job, o próximo `/implement-task`/`/to-spec` fecha (abaixo) |
+| 3 | nada (o `/fatia` segue sozinho; ou `/implement-task B2` à parte) | `em-execucao` na mãe → filhas com TDD, um commit cada (executor no painel) → suite completa uma vez → `/code-review` → corrige os achados sozinho (até 2 rodadas) → push → MR pra `main` → relatório + notificação |
+| 4 | **na Esteira:** abre o review leve (se quiser), lê, **aprova** (a Esteira mergeia) ou **reprova** com comentário (a Esteira fecha a MR e posta o comentário com o seu nome); reprovada: roda `/implement-task B2` de novo | lê os comentários da reprovação, corrige, revisa, faz push, **reabre a mesma MR** e responde cada comentário |
+| 5 | nada | no merge, o CI fecha a mãe e as filhas e tira `em-execucao` (job `fechar-fatia`, que numa Fatia `api + frontend` espera a última MR); sem o job, o próximo `/implement-task`/`/to-spec` fecha (abaixo). A Fatia fica **Pronta para Entrega**; abrir a Entrega é do humano, na Esteira |
 
 Perdeu o fio? `/proximo` (ou `/proximo B3`) diz em que pé está, qual o seu próximo passo e de onde vem cada fatia (linha do mapa, ADR, spec). Os comandos soltos `/to-spec`, `/to-tickets` e `/implement-task` continuam valendo; `/fatia` só os encadeia.
 
@@ -83,7 +83,7 @@ O LLM **para e devolve pra você** só quando: working tree sujo num repositóri
 `/code-review` roda numa sessão interativa (nunca headless/`-p` disparado pelo CI — risco de cobrança fora do plano). A skill é de fora e não sabe da entrega; **com PASS, o Claude Code faz, em cada repositório de código alterado:**
 1. grava `.code-review-ok.json` na raiz do repositório com `{"commit": "<sha revisado>", "data": "<ISO>", "spec": "<caminho>"}` e comita só esse arquivo (`chore: prova de code review (<fatia>)`) — o sha é o do commit revisado, que fica como pai desse;
 2. `git -C <repo> push -u origin <branch>`;
-3. sem o gate do template-ci ligado no repositório (`verify-code-review` no `.gitlab-ci.yml`): abre a MR — `glab mr create -R <grupo>/<repo> --source-branch <branch> --target-branch dev --title "<fatia> — <título da mãe>" --description "<abaixo>"`. Com o gate ligado, quem abre é o CI.
+3. sem o gate do template-ci ligado no repositório (`verify-code-review` no `.gitlab-ci.yml`): abre a MR — `glab mr create -R <grupo>/<repo> --source-branch <branch> --target-branch main --title "<fatia> — <título da mãe>" --description "<abaixo>"`. Com o gate ligado, quem abre é o CI.
 
 Descrição da MR:
 ```markdown
@@ -98,15 +98,17 @@ Fatia **B2** · spec `specs/feature/base/02-…md` · mãe <grupo>/<projeto>-wor
 **Como testar:** `git -C <repo> switch <branch>` · <comando de teste/subida> · <o que olhar, por critério>.
 ```
 
-Sem `Closes`: a MR vai pra `dev`, e o GitLab só fecha issue no merge pro branch padrão. Quem fecha é "Fechar a fatia", abaixo.
+`Closes`: a MR vai pra `main` (branch padrão), então `Closes <grupo>/<projeto>-workspace#<mãe>` funciona numa Fatia de um repositório só. Em Fatia `api + frontend` **não use `Closes`** (fecharia a mãe na primeira MR); quem fecha é "Fechar a fatia", abaixo, depois da última MR.
 
-O gate `verify-code-review` do template-ci (só bash, nenhuma IA) aceita a prova quando o sha gravado é o do push, ou o pai dele com o último commit mexendo só no `.code-review-ok.json`. Bateu: abre a MR pra `dev`. Não bateu: pipeline falha, rode `/implement-task <fatia>` de novo. Promoção `dev → qa/hml/main` é a esteira de deploy (`docs/agents/esteira-deploy.md`).
+Se a MR foi fechada pela reprovação na Esteira, **reabra a mesma MR** (`glab mr reopen`) em vez de abrir outra.
+
+O gate `verify-code-review` do template-ci (só bash, nenhuma IA) aceita a prova quando o sha gravado é o do push, ou o pai dele com o último commit mexendo só no `.code-review-ok.json`. Bateu: abre a MR pra `main`. Não bateu: pipeline falha, rode `/implement-task <fatia>` de novo. Publicar é a esteira de deploy (`docs/agents/esteira-deploy.md`).
 
 ## Fechar a fatia
 
-**No merge (automático):** o job `fechar-fatia` do template-ci (`review/fechar-fatia.yml`) roda no push em `dev` de cada repositório de código. Acha a MR mergeada pelo código da fatia (branch `feature/b2-…` ou título `B2 — …`); se **todas** as MRs da fatia nos repositórios do projeto já estão mergeadas, ele: nota na mãe com os links, fecha as filhas e a mãe, tira `em-execucao`. Liga com `FECHAR_FATIA_ENABLED: "true"` + `WORKSPACE_PROJECT` + `SLICE_REPOS` e usa o mesmo `GITLAB_TOKEN` do gate de review (escopo `api`, e acesso ao workspace). A linha do `specs/README.md` o job não toca (é commit no workspace).
+**No merge (automático):** o job `fechar-fatia` do template-ci (`review/fechar-fatia.yml`) roda no merge na `main` de cada repositório de código **e também quando a MR é fechada pela reprovação** (aí destrói o preview e o namespace `review-<fatia>`, se existirem). Acha a MR mergeada pelo código da fatia (branch `feature/b2-…` ou título `B2 — …`); se **todas** as MRs da fatia nos repositórios do projeto já estão mergeadas, ele: nota na mãe com os links, fecha as filhas e a mãe, tira `em-execucao`. Liga com `FECHAR_FATIA_ENABLED: "true"` + `WORKSPACE_PROJECT` + `SLICE_REPOS` e usa o mesmo `GITLAB_TOKEN` do gate de review (escopo `api`, e acesso ao workspace). A linha do `specs/README.md` o job não toca (é commit no workspace).
 
-**Rede de segurança (sem o job, ou se ele falhou):** roda no começo de todo `/implement-task`, `/to-spec` e `/fatia`, sem o humano pedir. Para cada issue-mãe aberta: se a MR `<fatia> — …` de **cada** repositório que ela tocou está mergeada em `dev` (`glab mr list -R <grupo>/<repo> --merged --search "<fatia> —"`):
+**Rede de segurança (sem o job, ou se ele falhou):** roda no começo de todo `/implement-task`, `/to-spec` e `/fatia`, sem o humano pedir. Para cada issue-mãe aberta: se a MR `<fatia> — …` de **cada** repositório que ela tocou está mergeada na `main` (`glab mr list -R <grupo>/<repo> --merged --search "<fatia> —"`):
 1. nota na mãe com os links das MRs mergeadas;
 2. `glab issue close` em cada filha e na mãe, e tira `em-execucao`;
 3. a linha da fatia no `specs/README.md` passa a "feito" no próximo commit de docs do workspace (o do `/to-spec` seguinte), nunca num commit avulso na `main`. Fatia com artefato que outras specs vão citar (`DESIGN.md`, contrato novo, ADR): o mesmo commit aponta pra ele no `CLAUDE.md` do componente.

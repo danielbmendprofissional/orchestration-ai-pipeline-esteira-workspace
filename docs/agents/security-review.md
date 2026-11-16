@@ -26,7 +26,7 @@ Isso acontece fora do fluxo normal de spec — você (via Claude Code) roda uma 
 1. Abrir uma issue no GitLab descrevendo o achado (arquivo, o que está errado, o que a skill recomendou), já com a label `ready-for-agent` — você já triou o achado ao rodar a auditoria, não precisa passar pelo `/triage`.
 2. Na sessão do Claude Code, delegar ao subagent `security` **sozinho** (não o `/implement-task` inteiro — não tem `data`/`backend`/`front`/`ui` pra rodar aqui, é uma correção pontual de segurança), apontando pra issue.
 3. Mesmo sendo um achado pequeno, não pular o resto do gate: depois do `security` corrigir, rodar `tests` (confirma que nada quebrou) e pelo menos uma passada de `review` antes de virar branch/MR — a correção de segurança segue o mesmo padrão de qualidade de qualquer outra mudança, só que sem `data`/`backend`/`front`/`ui`, que não se aplicam aqui.
-4. Branch de feature normal, `/code-review` (rodando a mesma skill de novo pra confirmar que o achado sumiu — fecha o loop), commit, MR pra `dev`, esteira normal (`docs/agents/esteira-deploy.md`).
+4. Branch de feature normal, `/code-review` (rodando a mesma skill de novo pra confirmar que o achado sumiu — fecha o loop), commit, MR pra `main`, esteira normal (`docs/agents/esteira-deploy.md`).
 
 **Achado que precisa de decisão de arquitetura ou toca múltiplos módulos** (ex: "não validamos expiração de JWT em nenhum endpoint", "todo o módulo Financial expõe dado de outro usuário por falta de filtro de tenant"):
 

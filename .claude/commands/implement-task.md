@@ -1,5 +1,5 @@
 ---
-description: Leva uma fatia da spec até a MR aberta — tasks com TDD, commit por task, /code-review, correção dos achados, push e MR pra dev
+description: Leva uma fatia da spec até a MR aberta — tasks com TDD, commit por task, /code-review, correção dos achados, push e MR pra main
 argument-hint: "[B2 | B2.5 | #issue] [— instrução extra]"
 ---
 Argumento: `$ARGUMENTS`. Rode sempre da **raiz do workspace** (ou da área isolada da fatia, `<workspace>.wt/b2/`). O que vier depois de `—` é instrução extra do humano (ex.: `B2 — corrigir: <achado>`).
@@ -27,14 +27,14 @@ Nomes (`docs/agents/orchestration.md`, "Nomes"): mãe `B2 — <título>`, filhas
 
 ## 0. Preparar (uma vez por execução)
 
-0. **Sincronizar:** `git -C <repo> fetch origin` em cada repositório de código e no workspace, antes de qualquer conferência (feito, bloqueado, mergeado). `origin/dev` sem fetch é dado velho.
+0. **Sincronizar:** `git -C <repo> fetch origin` em cada repositório de código e no workspace, antes de qualquer conferência (feito, bloqueado, mergeado). `origin/main` sem fetch é dado velho.
 1. **Reconciliar:** feche as fatias já mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"). O CI normalmente já fechou no merge; isto é a rede de segurança. É rápido e nunca bloqueia.
 2. **Resolver a fatia:** `B2` → linha do `specs/README.md` (link da spec e `#<mãe>`); sem `#` no mapa → `glab issue list -R <grupo>/<projeto>-workspace --search "B2 —"`. Leia a mãe e as filhas (Child items: `docs/agents/issue-tracker.md`, "Tickets de uma spec") uma vez cada; a spec inteira e o `## Contexto necessário` dela, uma vez. O `risco:` da spec (`baixo`/`alto`) vale pra fatia toda (passo 3).
 3. **Trava e área:**
    - A mãe já tem `em-execucao`? Leia a linha **Área** do painel: é a sua área (mesmo caminho) → retomada, siga; é outra → **pare** ("a fatia está em execução em <área>"), a não ser que o humano tenha escrito `— retomar`.
    - Há outra mãe `em-execucao` (`glab issue list -R … --label em-execucao`) e você está na raiz do workspace, não numa área isolada (`git rev-parse --git-common-dir` ≠ `.git`)? **Pare** e diga: `node .claude/scripts/worktree-fatia.mjs B2 <slug>` e abrir o painel em `<workspace>.wt/b2/`. Sozinha na raiz, trabalhe nela.
    - Sem trava: crie o label se não existir (`glab label create -R … --name em-execucao --color "#1f75cb"`) e ponha `em-execucao` na mãe.
-4. **Branch** em cada repositório que as filhas tocam (`backend` → `<projeto>-api`, `frontend` → `<projeto>-frontend`): `git -C <repo> branch --list "feature/b2-*"` existe → `switch` (na área isolada ela já vem em checkout); senão `fetch origin` + `switch -c feature/b2-<slug> origin/dev` (`<slug>` = nome do arquivo da spec sem o `NN-`). Working tree sujo **num repositório que a fatia toca** → pare. O resto (workspace, outros repositórios) não é seu: não comite nem altere nada lá. Nunca `dev`/`qa`/`hml`/`main`.
+4. **Branch** em cada repositório que as filhas tocam (`backend` → `<projeto>-api`, `frontend` → `<projeto>-frontend`): `git -C <repo> branch --list "feature/b2-*"` existe → `switch` (na área isolada ela já vem em checkout); senão `fetch origin` + `switch -c feature/b2-<slug> origin/main` (`<slug>` = nome do arquivo da spec sem o `NN-`). Working tree sujo **num repositório que a fatia toca** → pare. O resto (workspace, outros repositórios) não é seu: não comite nem altere nada lá. Nunca comite na `main`.
 5. **Cabeçalho** — antes de qualquer alteração, imprima:
    ```
    Fatia B2 — <título> (workspace#2) · spec <caminho> · risco <baixo|alto>
@@ -57,7 +57,7 @@ Nomes (`docs/agents/orchestration.md`, "Nomes"): mãe `B2 — <título>`, filhas
    <!-- /execucao -->
    ```
    Atualizar = ler a descrição (`glab issue view <mãe> -R <grupo>/<projeto>-workspace -O json`), trocar só o bloco e gravar (`glab issue update <mãe> -R … --description "<descrição inteira>"`). **Atualize em lote, só nestes momentos:** ao começar, a cada filha comitada, ao começar/terminar a suite, no início e no resultado de cada rodada de review, na MR e ao parar. Nada de label ou nota por filha — o painel é o registro.
-7. **MR já aberta para a branch** (`glab mr list -R <grupo>/<repo> --source-branch <branch>`): os comentários não resolvidos dela (`glab api projects/:id/merge_requests/<iid>/discussions`) são correções pedidas pelo humano. Cada um vira uma correção no passo 1 (commit `fix: … (B2.N · workspace#<filha>)`), e no passo 4 você responde o comentário com o sha.
+7. **MR já aberta para a branch** (`glab mr list -R <grupo>/<repo> --source-branch <branch>`; inclua as **fechadas**, `--all`): se ela foi **fechada pela reprovação na Esteira**, o comentário do humano (com o nome dele) é a correção pedida e, depois do push, você **reabre a mesma MR** (`glab mr reopen <iid> -R <grupo>/<repo>`) em vez de abrir outra. Os comentários não resolvidos dela (`glab api projects/:id/merge_requests/<iid>/discussions`) são correções pedidas pelo humano. Cada um vira uma correção no passo 1 (commit `fix: … (B2.N · workspace#<filha>)`), e no passo 4 você responde o comentário com o sha.
 
 ## 1. Por task (na ordem do `Blocked by`, só as não feitas)
 
@@ -78,6 +78,8 @@ Escreveu código de produção antes de ver o teste vermelho? **Desfaça esse c�
 
 **Marca da fatia em todo teste novo** (`docs/agents/orchestration.md`, "Marca da fatia nos testes"): o código da fatia (`B2`, não `B2.5`) na classe ou no `describe`. Teste novo sem a marca dá FALHA no `check-escopo`. No modo pago/free, a marca vai no `$TASK` ("marque os testes com a fatia B2").
 
+**Flag:** leia `flag:` na spec. Com `flag: sim`, todo comportamento percebido pelo usuário entra atrás de `Features:<Fatia>` (`docs/agents/padrao-api.md`, "Feature flags"), com **flag ausente = desligado** no código; com `flag: não` (correção, refatoração, infra, migração expand-only), nenhum flag. Fatia que toca o front: leia `preview:` e entregue a sessão falsa e os dados falsos da tela (agente `ui`, `docs/agents/padrao-frontend.md`).
+
 Demais regras — as mesmas dos executores em `.claude/agents/`: só o escopo da task, nada de "Não toque".
 
 Percebeu falta ou erro em repositório compartilhado (`ai-base`, `ai-infra`, `ai-ops`, `template-ci`)? Não contorne nem edite lá: **pare nesse ponto**, proponha ao humano (`docs/agents/melhoria-orquestracao.md`) dizendo se bloqueia a fatia, e só abra a issue com o sim. Não bloqueia → siga e registre no relatório.
@@ -94,8 +96,8 @@ Percebeu falta ou erro em repositório compartilhado (`ai-base`, `ai-infra`, `ai
 
 1. **Suite completa** em cada repositório da fatia, uma vez. Vermelha → corrija (TDD, commit `fix:` na filha dona do arquivo) e rode de novo. Painel: `- [x] Suite completa — verde`.
 2. **Marcas:** `node .claude/scripts/status-specs.mjs B2 --pre-entrega` (zero token; sem a flag `--sem-gitlab` ele também confere issue e MR). `FALHA` = nenhum teste leva a marca da fatia → marque os testes (ou, se a spec não tem teste exigível, diga no relatório) antes da review. Depois do merge, `node .claude/scripts/status-specs.mjs B2` mostra `IMPLEMENTADA`/`INCONSISTENTE`; sem argumento, a tabela de todas as fatias.
-3. `risco: alto` → subagente `security` sobre `git -C <repo> diff origin/dev...<branch>`; achado crítico vira correção como no FAIL abaixo.
-4. **Review** — só se houver commit novo desde a última prova (`.code-review-ok.json`). Rode a skill `code-review` (Skill tool) **sem perguntar o ponto fixo**: em cada repositório da fatia, ponto fixo `origin/dev`, diff `git -C <repo> diff origin/dev...<branch>`, spec = o arquivo da fatia. Painel: `- [ ] Review — rodada <n> · pai (<modelo>)` enquanto roda, `FAIL, corrigindo <k> achados` no FAIL, `- [x] Review — PASS na rodada <n>` no PASS.
+3. `risco: alto` → subagente `security` sobre `git -C <repo> diff origin/main...<branch>`; achado crítico vira correção como no FAIL abaixo.
+4. **Review** — só se houver commit novo desde a última prova (`.code-review-ok.json`). Rode a skill `code-review` (Skill tool) **sem perguntar o ponto fixo**: em cada repositório da fatia, ponto fixo `origin/main`, diff `git -C <repo> diff origin/main...<branch>`, spec = o arquivo da fatia. Painel: `- [ ] Review — rodada <n> · pai (<modelo>)` enquanto roda, `FAIL, corrigindo <k> achados` no FAIL, `- [x] Review — PASS na rodada <n>` no PASS.
 
 - **PASS** → passo 4.
 - **FAIL** → corrija você mesmo, sem devolver ao humano: cada achado vai pra filha dona do arquivo/commit, com TDD quando é comportamento, commit `fix: <achado> (B2.N · workspace#<filha>)`; rode o review de novo. **No máximo 2 rodadas de correção.** Achado de padrão marcado como julgamento (smell) que você decide não corrigir → vai na descrição da MR com o motivo.
@@ -103,13 +105,13 @@ Percebeu falta ou erro em repositório compartilhado (`ai-base`, `ai-infra`, `ai
 
 ## 4. Entrega
 
-Em cada repositório da fatia (`docs/agents/orchestration.md`, "Entrega"): prova `.code-review-ok.json` + commit, `git -C <repo> push -u origin <branch>`, e — sem o gate do template-ci (`grep -q verify-code-review <repo>/.gitlab-ci.yml` falha) — a MR pra `dev`, título `B2 — <título da mãe>`, descrição no formato de lá (com a coluna **Executor**). MR já aberta: só o push (ela se atualiza) e a resposta em cada comentário tratado. Na mãe: `glab issue note <mãe> -m "MR pronta pra revisão: <link>"` e, no painel, `- [x] MR — <link>`. A mãe **continua aberta com `em-execucao`**: quem fecha a mãe e as filhas e tira o label é o merge da MR (job `fechar-fatia` do template-ci, ou "Fechar a fatia" no próximo comando).
+Em cada repositório da fatia (`docs/agents/orchestration.md`, "Entrega"): prova `.code-review-ok.json` + commit, `git -C <repo> push -u origin <branch>`, e — sem o gate do template-ci (`grep -q verify-code-review <repo>/.gitlab-ci.yml` falha) — a MR pra `main`, título `B2 — <título da mãe>`, descrição no formato de lá (com a coluna **Executor**). MR já aberta: só o push (ela se atualiza) e a resposta em cada comentário tratado. Na mãe: `glab issue note <mãe> -m "MR pronta pra revisão: <link>"` e, no painel, `- [x] MR — <link>`. A mãe **continua aberta com `em-execucao`**: quem fecha a mãe e as filhas e tira o label é o merge da MR (job `fechar-fatia` do template-ci, ou "Fechar a fatia" no próximo comando).
 
 ## 5. Encerrar — sempre com este relatório
 
 ```
 B2 — PRONTA PARA SUA REVISÃO          (ou: B2 — PAROU: precisa de você)
-MR: <link> (dev ← feature/b2-<slug>)   · filhas B2.1–B2.5 ✔ · review PASS na rodada <n>
+MR: <link> (main ← feature/b2-<slug>)   · filhas B2.1–B2.5 ✔ · review PASS na rodada <n>
 Executores: <ex.: pai (Claude) em B2.1–B2.3 · backend (omni-pago) em B2.4–B2.5 · review: pai (Claude)>
 Suposições: <as que você fez e o humano deve conferir>
 Você agora: <a próxima ação humana, concreta>

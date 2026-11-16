@@ -41,7 +41,8 @@ if (!soProjeto) {
   }
 }
 
-const protegidas = new Set(['dev', 'qa', 'hml', 'main', 'master']);
+// main e master são as protegidas; dev/qa/hml não existem mais (ADR-0018), mas ficam aqui para a limpeza nunca sugerir apagá-las enquanto um repositório ainda não migrou
+const protegidas = new Set(['main', 'master', 'dev', 'qa', 'hml']);
 const acoes = []; // {p, repo, texto, cmd}
 const add = (p, repo, texto, cmd) => acoes.push({ p, repo, texto, cmd });
 const out = [];
@@ -63,8 +64,7 @@ const mrsAbertas = (repo) => {
 for (const r of repos) {
   tryGit(r.path, 'fetch', 'origin', '--prune');
   const atual = tryGit(r.path, 'branch', '--show-current') || '(detached)';
-  const baseNome = ok(r.path, 'rev-parse', '--verify', 'origin/dev') ? 'dev'
-    : (tryGit(r.path, 'symbolic-ref', '--short', 'refs/remotes/origin/HEAD') ?? 'origin/main').replace('origin/', '');
+  const baseNome = (tryGit(r.path, 'symbolic-ref', '--short', 'refs/remotes/origin/HEAD') ?? 'origin/main').replace('origin/', '');
   const base = `origin/${baseNome}`;
   const temBase = ok(r.path, 'rev-parse', '--verify', base);
   const dirty = (tryGit(r.path, 'status', '--porcelain') ?? '').split('\n').filter(Boolean);

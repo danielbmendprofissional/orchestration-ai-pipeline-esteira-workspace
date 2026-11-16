@@ -9,13 +9,13 @@ Somente leitura: não altera arquivo, issue, label nem branch. Argumento `$ARGUM
 1. `git -C <repo> fetch origin` em cada repositório de código e no workspace.
 2. `specs/README.md`: a tabela de fatias (código, repositório, quem executa, depende de, toca em, risco, feito ou não).
 3. GitLab (`-R <grupo>/<projeto>-workspace`): mães abertas (`glab issue list --search "—" -O json`, título `^<código> — `) com seus labels e o painel `<!-- execucao -->`; MRs abertas e mergeadas recentes em cada repositório (`glab mr list -R <grupo>/<repo> --search "<código> —"`).
-4. Branches `feature/*` locais com commits à frente de `origin/dev` e arquivos de spec em `specs/feature/` sem mãe.
-5. `node .claude/scripts/check-spec-drift.mjs` (sem argumento): o desvio de cada spec pendente do mapa em relação a `dev`.
+4. Branches `feature/*` locais com commits à frente de `origin/main` e arquivos de spec em `specs/feature/` sem mãe.
+5. `node .claude/scripts/check-spec-drift.mjs` (sem argumento): o desvio de cada spec pendente do mapa em relação à `main`.
 6. Melhorias abertas no `orchestration-ai` (`docs/agents/melhoria-orquestracao.md`): para `ai-base`, `ai-infra`, `ai-ops` e `ai-pipeline/template-ci`, `glab issue list -R orchestration-ai/<repo> --label "origem:<projeto>" -O json` (estado aberto), separando as com label `bloqueia:<projeto>` e a MR aberta de cada uma (`glab mr list -R … --search "#<n>"`).
 
 ## 2. Classificar cada fatia
 
-`feita` · `mergeada, falta fechar` · `MR aberta — aguarda você` · `em execução` (label `em-execucao`, com a área e o executor do painel) · `parou` (linha `⚠` no painel) · `spec escrita — aguarda sua aprovação` · `spec aprovada, sem tickets` · `tickets prontos — falta executar` · `livre` (todo "Depende de" feito) · `bloqueada` (diga por qual).
+`feita` · `mergeada, falta fechar` · `MR aberta — aguarda você` (aprovar ou reprovar na Esteira) · `MR fechada pela reprovação — falta corrigir` (`/implement-task` reabre a mesma MR) · `limpeza pendente` (issue "Limpeza da Fatia <código>" sem spec: `/fatia` nela) · `em execução` (label `em-execucao`, com a área e o executor do painel) · `parou` (linha `⚠` no painel) · `spec escrita — aguarda sua aprovação` · `spec aprovada, sem tickets` · `tickets prontos — falta executar` · `livre` (todo "Depende de" feito) · `bloqueada` (diga por qual).
 
 ## 3. Responder — no máximo ~15 linhas
 
@@ -29,7 +29,7 @@ Mapa: 50 fatias · 7 feitas · 1 em execução · 1 spec aguardando seu ok · 41
 
 ```
 Você está em: B2 — MR aberta, aguardando seu merge (<link>)
-Já pronto:    M0, F0, D0 ✔ em dev
+Já pronto:    M0, F0, D0 ✔ na main
 Seu próximo passo: <UMA ação humana concreta: revisar/mergear a MR, aprovar a spec, responder a decisão que travou…>
   ou o comando: /fatia B3   (ou /implement-task B3, conforme a classificação)
 
@@ -53,7 +53,7 @@ Regras da resposta:
 - **Melhorias:** liste cada uma (`ai-infra#7 — verify prova aud e PKCE · MR !3 aberta`). Fatia que uma delas **bloqueia** (`bloqueia:` + a fatia no corpo) **não é recomendada como próxima** enquanto a issue não estiver fechada pelo merge: diga "B4 espera ai-infra#7" e o seu próximo passo é abrir aquele repositório e rodar `/issue-ai 7` (ou mergear a MR). As que não bloqueiam aparecem como lembrete, com a fatia sugerida para resolvê-las antes.
 - **Specs desatualizadas:** uma linha por spec pendente com a saída do passo 5 (`A1: ⚠ desatualizada — 11 commits em esteira-api, citados que mudaram: …`, ou `sem base registrada`; `B3: ✔ em dia`). Spec desatualizada que é a próxima fatia vira o seu próximo passo: `/fatia <código>` revalida.
 - **Mapa sem conferir:** `git log -1 --format=%ct -- specs/README.md` contra o último commit em `docs/adr/`, `docs/design/prototipos/`, `docs/mudancas-*.md` e `PENDENCIAS.md`. Algum desses é **mais novo** que o mapa → "Mapa: ADR/protótipo/mudança alterados depois do último ajuste do mapa — rode `/mapa`". Só avisa; quem confere é o `/mapa`.
-- **Mapa desatualizado:** compare a coluna Status do `specs/README.md` com o git (MRs mergeadas em `dev`); divergência → diga qual linha está velha. Quem corrige é o `/fatia` (no commit da spec).
+- **Mapa desatualizado:** compare a coluna Status do `specs/README.md` com o git (MRs mergeadas na `main`); divergência → diga qual linha está velha. Quem corrige é o `/fatia` (no commit da spec).
 - **Decisões em aberto:** para a próxima fatia, procure em `docs/adr/` e nos `docs/agents/padrao-*.md` o que cobre o assunto dela. Coberto → "Decisões: ADR-000X cobre — vá direto no `/fatia`". Há lacuna → "Decisões: falta <assunto> — o `/fatia` fará um grill curto"; fatia fora do mapa ou só uma frase vaga → "rode `/grill-with-docs` antes". Nunca invente cobertura: se não achou ADR, diga que não achou.
 
 Com `B3`: a mesma ficha da "Próxima fatia", mais o conteúdo do "Contexto necessário" da spec (se existir), as ADRs citadas com uma linha cada sobre o que decidem, e as filhas com o executor de cada uma (se já houve execução).

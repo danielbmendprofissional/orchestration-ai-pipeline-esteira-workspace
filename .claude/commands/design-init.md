@@ -68,7 +68,7 @@ Se no passo 2 o humano escolheu **evoluir** o visual de um projeto existente, us
 
 ## 4. Fechar
 
-- **Novo:** o humano sobe o front, abre a amostra e responde `aprovo` ou `ajuste: <o que mudar>` (volte ao passo 3 com o ajuste). Aprovado: aponte que a branch precisa ser **mergeada em `dev` por ele**, e que depois ele pede "marque a fundação D0 como feita no mapa" (fundação não tem issue; é o que deixa a próxima spec partir de uma base que existe).
+- **Novo:** o humano sobe o front, abre a amostra e responde `aprovo` ou `ajuste: <o que mudar>` (volte ao passo 3 com o ajuste). Aprovado: aponte que a branch precisa ser **mergeada na `main` por ele** (fundação não passa pelo botão da Esteira), e que depois ele pede "marque a fundação D0 como feita no mapa" (fundação não tem issue; é o que deixa a próxima spec partir de uma base que existe).
 - **Existente:** entregue o relatório e diga: cada grupo de achados que ele quiser corrigir vira linha do mapa (`/mapa`, depois `/mapa aplicar`) e segue a rotina por fatia (`/fatia`).
 
 Termine com **Você agora** (a decisão que falta) e **Depois** (o próximo comando). Nunca comite, dê push, mergeie nem edite o `specs/README.md` sem pedido.

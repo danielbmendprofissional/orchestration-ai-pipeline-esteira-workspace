@@ -4,9 +4,11 @@ argument-hint: "B3 [— instrução extra]"
 ---
 Argumento: `$ARGUMENTS` (código da fatia; vazio = a próxima livre do `specs/README.md`, como no `/implement-task`). Comando de entrada único: retoma de onde a fatia está, então pode ser rodado de novo depois de qualquer parada.
 
+**Fatia de limpeza:** o ponto de partida também pode ser a issue **"Limpeza da Fatia <código>"** que a Esteira cria (rótulo `ready-for-human`) quando o humano exclui uma Fatia. Aí **não há linha no mapa**: crie a linha `<código>-L` (ex.: `B2-L`), com repositório da original, `flag: não`, e a spec de limpeza (remove o código e o flag `Features:<código>` da original, sem mudança de comportamento, com migração só `contract` se houver), e siga o fluxo normal a partir do passo 1. Registre na issue de limpeza o link da nova spec.
+
 ## 0. Onde a fatia está
 
-Fechar as mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"), **reconciliar a coluna Status do `specs/README.md` com o git** (fatia cujas MRs estão todas mergeadas em `dev` → `feito`; a alteração vai no commit de docs do passo 1, nunca num commit solto) e ver o estado da fatia (`/proximo`, só a parte da fatia). Se a spec da fatia já existe, rode `node .claude/scripts/check-spec-drift.mjs <spec>`: `⚠ desatualizada` (ou sem `base:`) → o passo 1 vira **revalidação** (`docs/agents/spec-format.md`, "Spec que já existe"), não spec nova do zero. Comece no primeiro passo ainda não feito:
+Fechar as mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"), **reconciliar a coluna Status do `specs/README.md` com o git** (fatia cujas MRs estão todas mergeadas na `main` → `feito`; a alteração vai no commit de docs do passo 1, nunca num commit solto) e ver o estado da fatia (`/proximo`, só a parte da fatia). Se a spec da fatia já existe, rode `node .claude/scripts/check-spec-drift.mjs <spec>`: `⚠ desatualizada` (ou sem `base:`) → o passo 1 vira **revalidação** (`docs/agents/spec-format.md`, "Spec que já existe"), não spec nova do zero. Comece no primeiro passo ainda não feito:
 
 | Estado | Começa em |
 |---|---|

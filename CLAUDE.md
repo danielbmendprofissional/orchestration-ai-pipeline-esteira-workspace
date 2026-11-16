@@ -25,7 +25,7 @@ As skills em `.claude/skills/` têm `disable-model-invocation: true` — nenhuma
 
 **Exceção obrigatória — peças internas:** skill que outra skill chama pelo Skill tool (`grill-with-docs` → `grilling` + `domain-modeling`; `implement` → `tdd` + `code-review`; `improve-codebase-architecture` → `codebase-design`…) **não** pode ter a flag, senão o comando composto quebra. É o mesmo desenho do repositório de origem (mattpocock/skills: só os comandos de entrada têm a flag). A lista sai de um grep, não de memória — `ai-ops/agents/infra/local-environment-config/docs/enviroment/security-skills.md`, passo 3.
 
-**Override de skill de fora:** as skills não são versionadas (reinstaladas pelo `skills-lock.json`), então ajuste nelas se perde — a correção mora aqui. **`/to-spec` segue `docs/agents/spec-format.md`**, não o template nem o processo dele: acha a fatia no mapa, confere o gate, pesquisa ADRs e código e só pergunta o que falta. **`/to-tickets`** publica cada ticket como Task filha da issue-mãe, **só depois da spec aprovada e sem segunda aprovação** (`docs/agents/issue-tracker.md`, "Tickets de uma spec"). **`/fatia <código>`** (`.claude/commands/fatia.md`) encadeia `/to-spec` → [humano aprova a spec] → tickets automáticos (`Cobre:` + `check-tickets.mjs`) → `/implement-task`; **`/proximo`** diz o próximo passo e a procedência (mapa, ADR, spec). **`/code-review`** nunca pergunta o ponto fixo: na raiz do workspace, a fatia é o argumento (`/code-review B2`) ou a branch `feature/<fatia>-*` em que os repositórios de código estão; ponto fixo `origin/dev` em cada repositório da fatia; spec = o arquivo dela no mapa. Normalmente nem é chamado à mão: o `/implement-task` roda, corrige os achados e entrega. **Com PASS** fecha a entrega como em `docs/agents/orchestration.md` ("Entrega"): prova `.code-review-ok.json`, push da branch de feature e MR pra `dev` quando o repositório não tem o gate do CI.
+**Override de skill de fora:** as skills não são versionadas (reinstaladas pelo `skills-lock.json`), então ajuste nelas se perde — a correção mora aqui. **`/to-spec` segue `docs/agents/spec-format.md`**, não o template nem o processo dele: acha a fatia no mapa, confere o gate, pesquisa ADRs e código e só pergunta o que falta. **`/to-tickets`** publica cada ticket como Task filha da issue-mãe, **só depois da spec aprovada e sem segunda aprovação** (`docs/agents/issue-tracker.md`, "Tickets de uma spec"). **`/fatia <código>`** (`.claude/commands/fatia.md`) encadeia `/to-spec` → [humano aprova a spec] → tickets automáticos (`Cobre:` + `check-tickets.mjs`) → `/implement-task`; **`/proximo`** diz o próximo passo e a procedência (mapa, ADR, spec). **`/code-review`** nunca pergunta o ponto fixo: na raiz do workspace, a fatia é o argumento (`/code-review B2`) ou a branch `feature/<fatia>-*` em que os repositórios de código estão; ponto fixo `origin/main` em cada repositório da fatia; spec = o arquivo dela no mapa. Normalmente nem é chamado à mão: o `/implement-task` roda, corrige os achados e entrega. **Com PASS** fecha a entrega como em `docs/agents/orchestration.md` ("Entrega"): prova `.code-review-ok.json`, push da branch de feature e MR pra `main` quando o repositório não tem o gate do CI.
 
 ### Issue tracker
 
@@ -57,15 +57,16 @@ Falta ou erro em `ai-base`, `ai-infra`, `ai-ops` ou `template-ci` (inclusive o `
 
 ## Convenções de repo
 
-Fluxo de branches (promoção via esteira de deploy por tag, não é só uma branch protegida):
+Trunk-based: **ambiente não é branch**. Só existem `main`, `feature/*` e `hotfix/*`; não há `dev`, `qa` nem `hml`.
 
 ```
-feature-x → MR → dev → qa → hml → main
+feature/<fatia>-<slug> → MR → main   (depois, na Esteira: Entrega → qa → hml → produção → Liberação)
 ```
 
-- Vale por repositório de código (`<projeto>-api`, `<projeto>-frontend`), cada um com sua esteira. Issue que toca os dois: mesma branch `feature-x` nos dois, uma MR em cada, API retrocompatível e promovida antes (ver `docs/agents/workspace.md`).
-- O agente sempre sobe o trabalho em `feature-x` e abre merge request pra `dev` — nunca commita direto em nenhuma das branches promovidas.
-- `dev`, `qa`, `hml` e `main` são todas protegidas. Promoção `dev → qa` é merge direto por tag, feito por você (sem Merge Request; o hook bloqueia agente); `qa → hml` e `hml → main` passam por Merge Request com aprovação humana. Ver `docs/agents/esteira-deploy.md` pro fluxo completo.
-- Hotfix direto em `main`: habilitado, mas só por pedido humano direto — branch `hotfix/xxx`, MR, aprovação humana. Não é bypass do processo, é rota de emergência com o mesmo gate de revisão. Ver `docs/agents/esteira-deploy.md`.
-- **Isso é reforçado por hook** (`.claude/hooks/block-dangerous-git.sh`, via skill `git-guardrails-claude-code`): bloqueia `git push` direto em `main`/`dev`/`qa`/`hml`, `--force`, `reset --hard`, `clean -f`, `branch -D`, `checkout .`/`restore .`. Push de feature branch funciona normal. Vale pra toda sessão Claude Code, inclusive os subagentes do `/implement-task`.
+- Vale por repositório de código (`<projeto>-api`, `<projeto>-frontend`). Fatia que toca os dois (`api + frontend`): mesma branch nos dois, uma MR em cada, a da API mergeada primeiro (ver `docs/agents/workspace.md`).
+- O agente sempre sobe o trabalho em `feature/<fatia>-<slug>` e abre merge request pra `main` — nunca commita direto na `main`. **A `main` só aceita merge do bot da Esteira**: o agente nunca mergeia, promove, corta tag nem abre Entrega.
+- Reprovada na Esteira, a MR é fechada com o comentário do humano; depois da correção o `/implement-task` **reabre a mesma MR**, não abre outra.
+- Hotfix: habilitado, mas só por pedido humano direto — branch `hotfix/xxx` a partir da `main`, MR, aprovação humana. Não é bypass do processo, é rota de emergência com o mesmo gate de revisão. Ver `docs/agents/esteira-deploy.md`.
+- Mudança de comportamento percebido pelo usuário entra atrás de **feature flag** `Features:<Fatia>` (flag ausente = desligado), ver `docs/agents/padrao-api.md` e `padrao-frontend.md`. Fatia sem flag declara `flag: não` na spec.
+- **Isso é reforçado por hook** (`.claude/hooks/block-dangerous-git.sh`, via skill `git-guardrails-claude-code`): bloqueia `git push` direto em `main`, `--force`, `reset --hard`, `clean -f`, `branch -D`, `checkout .`/`restore .`. Push de feature branch funciona normal. Vale pra toda sessão Claude Code, inclusive os subagentes do `/implement-task`.
 - Specs e tickets seguem `docs/workflow.md`.

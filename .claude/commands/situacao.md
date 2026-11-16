@@ -6,11 +6,11 @@ Somente leitura (faz `git fetch`; não altera nada). Rode da **raiz do workspace
 
 ## 1. Rodar
 
-`node .claude/scripts/situacao.mjs $ARGUMENTS` — mostra, por repositório: branch atual, alterações não comitadas, cada branch local (mergeada, com MR aberta, sem MR, nunca enviada, remota sumida), branches só remotas e a "base" (`dev` nos de código, `main` no workspace) alinhada ou atrasada. Termina com **O QUE FAZER**, em quatro prioridades:
+`node .claude/scripts/situacao.mjs $ARGUMENTS` — mostra, por repositório: branch atual, alterações não comitadas, cada branch local (mergeada, com MR aberta, sem MR, nunca enviada, remota sumida), branches só remotas e a "base" (`main` em todos) alinhada ou atrasada. Termina com **O QUE FAZER**, em quatro prioridades:
 
 | # | Prioridade | Quem |
 |---|---|---|
-| 1 | commitar ou subir (alteração solta, commit não enviado, branch nunca enviada, commit local na `dev`) | você |
+| 1 | commitar ou subir (alteração solta, commit não enviado, branch nunca enviada, commit local na `main`) | você |
 | 2 | mergear MR aberta, ou abrir MR de branch que está no GitLab sem MR | você, no GitLab |
 | 3 | alinhar (`switch` para a base e `pull --ff-only`) | seguro |
 | 4 | limpar (apagar branch **já mergeada**, com `branch -d`, que recusa se não estiver mergeada) | seguro |
@@ -23,7 +23,7 @@ Repita a saída em **poucas linhas**, na ordem de prioridade, e para cada item d
 
 Casos que merecem uma frase a mais:
 - **Branch à frente da base, sem MR** (ex.: `feature/d0-tema` com 1 commit solto): mostre `git log origin/<base>..<branch> --oneline` e pergunte se é trabalho a entregar (abrir MR) ou lixo (apagar). Nunca decida.
-- **Commit local na `dev`/`main`:** o push direto é bloqueado. Diga para mover o commit a uma branch de feature (`git switch -c feature/...`) antes de qualquer outra coisa.
+- **Commit local na `main`:** o push direto é bloqueado. Diga para mover o commit a uma branch de feature (`git switch -c feature/...`) antes de qualquer outra coisa.
 - **Remota sumida mas há commits não mergeados:** pode ser MR mergeada com squash. Mostre os commits e peça confirmação antes de apagar.
 
 ## 3. Ligar ao fluxo

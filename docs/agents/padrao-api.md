@@ -27,6 +27,16 @@ Default de toda `<projeto>-api` nascida deste template — o mesmo que Valuto e 
 
 A API expõe o que o usuário pode fazer sobre um recurso (ex.: `GET /api/v1/<recurso>/{id}/permissoes`), calculado pelas regras do backend. O front só lê.
 
+## Feature flags
+
+- **Obrigatório** para toda mudança de comportamento que o usuário percebe: tela nova, regra de negócio nova ou alterada, endpoint novo consumido pelo front. **Ficam de fora** (`flag: não` na spec): refatoração, correção de bug, infra e migração expand-only. O agente `review` confere esse critério.
+- **Nome:** `Features:<Fatia>...` com o código da Fatia (ex.: `Features:B2`; no .NET a variável de ambiente é `Features__B2`). Uma busca por `Features:B2` lista tudo o que a Fatia espalhou.
+- **Flag ausente conta como desligado, no código.** Uma feature nunca entra no ar por omissão. O estado pertence ao **Ambiente**, não à imagem; subir um Artefato novo não liga nem desliga flag.
+- **Nasce desligado em produção**, vida curta, removido depois de liberado para todos (a remoção é uma Fatia de limpeza, `<código>-L`). Flag esquecido é dívida.
+- **Só a Esteira liga e desliga**, por Ambiente. Como a configuração .NET é lida no start, aplicar uma mudança de flag é **reiniciar o pod** (sem build).
+- **Banco:** migração incompatível com a versão anterior segue **expand/contract**. O `contract` nunca sai no mesmo deploy da feature nem com o flag ligado; um `contract` invalida o rollback para versões anteriores a ele.
+- **Contrato:** o diff do OpenAPI é parte da revisão da Fatia de API (o review leve não sobe app real, só em `risco: alto`).
+
 ## Identificadores
 
 Toda entidade tem `Id` (`long`, identity) pra chave e join, e `PublicId` (GUID v7, único, gerado no domínio) pra tudo que sai da API: URL, contrato, eventos. O `long` nunca aparece fora do backend; o GUID nunca é usado em join. Rotas recebem GUID; o repositório resolve pro `long` uma vez na entrada.
