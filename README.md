@@ -1,5 +1,7 @@
 # esteira-workspace
 
+> **Perdido?** Digite **`/ajuda`** (todos os comandos, uma linha cada; `/ajuda tudo` inclui as ~90 skills) ou **`/proximo`** (o que fazer agora).
+
 Workspace da **Esteira** — plataforma que controla o fluxo de deploy de cada aplicação por etapas (abertura, versão das tarefas, GMUD, banco de dados, aprovação técnica, DEV, QA, HML, aprovação de negócio, PRD) e recebe os deploys e as análises de segurança das pipelines.
 
 Nasceu do `ai-base` (regras, `.claude/`, `docs/`). Padrão de workspace: `docs/agents/workspace.md`.
