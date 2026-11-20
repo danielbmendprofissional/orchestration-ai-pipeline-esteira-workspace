@@ -307,3 +307,22 @@ O humano executou as pendências; este bloco registra o que a conferência achou
 6. **Configuração do GitLab (seção 5):** escopo do bot, `main` só para o bot, merge sem squash, webhooks. **Não foi verificada**: não há como ver pelos arquivos.
 7. **Migração dos repositórios (seção 8):** `esteira-api` e `esteira-frontend` ainda estão na branch `dev`.
 8. **Teste ponta a ponta nunca rodado** (seção 8, passo 9). Nada do `template-ci` v3 foi executado: a conferência foi por leitura.
+
+## 14. Documentação do `ai-base` a atualizar (levantado em 2026-11-20, depois do `/mapa`)
+
+Itens para o `/issue-ai` no `ai-base` (`docs-human/COMO-CRIAR-UM-PROJETO.md`, `docs-human/glossario-de-comandos.md`) e, no workspace, para o `CONTEXT-MAP.md`. A migração de `esteira-api` e `esteira-frontend` para a `main` (item 7 acima) **foi feita pelo humano**; o `.gitlab-ci.yml` deles ficou para depois.
+
+**`COMO-CRIAR-UM-PROJETO.md`:**
+1. **Tabela "Estado da Esteira"** (fim do arquivo) está velha: diz "B3 em andamento", "fatias feitas B2, B1", ADRs 0001–0017 e próximas "F0.5 → A1 → E1 … E5". Trocar por ADRs 0001–0025 e pelo mapa novo (A1 → D1 → P1 → P2 → E1 …); a última linha já manda usar `/proximo`.
+2. **Merge manual enquanto a Esteira não existe.** O B5 diz "aprove na Esteira (ela mergeia)", mas isso só vale depois da fatia P2 e **nunca vale** para `esteira-api`/`esteira-frontend` nem para projeto novo antes de ter a Esteira. Acrescentar: "sem a Esteira, mergear no GitLab (modo `ESTEIRA_FALLBACK=true`)".
+3. **Configurar o GitLab de um projeto novo** (A2 ou seção nova): `main` como padrão e protegida (merge só do bot, quando houver Esteira; antes, só Maintainer), **merge commit sem squash**, "pipeline must succeed" e "todas as threads resolvidas", bot por grupo com escopo `api`, `ref: v3.0.0` do template (a tag ainda precisa ser criada). Hoje o guia não diz isso.
+4. **B5/B6: o Painel de Fatias** (abas Em andamento, Prontas para Entrega, Em Entrega, Aguardando liberação, Liberadas), o botão **Abrir review** (preview leve; app real só em `risco: alto`) e a Liberação por flag `Features:<Fatia>`. Hoje o B6 resume a Entrega em um parágrafo.
+5. **Nomes:** acrescentar a Fatia de limpeza `B3-L` (mãe `B3-L — …`, tickets `B3-L.1`, branch `feature/b3-l-…`, o **título** da MR decide a Fatia) e a linha `flag: sim|não` na spec.
+6. **Colisão de nomes:** os passos do design se chamam D1, D2, D3 no guia e agora existe a **fatia D1** no mapa da Esteira. Renomear os passos do guia (ex.: "Passo 1, 2, 3") ou escolher outro código para a fatia.
+7. **A3 e "Conferir o mapa":** dizer que o `/mapa` deve ser rodado de novo **quando o modelo de processo mudar** (foi o que revelou E1 a E5 no modelo antigo).
+
+**`glossario-de-comandos.md`:**
+8. Seção 8 (CI): citar os processos novos do `template-ci` v3 (`fluxo`, `promocao`, `liberacao`, `flag`, `rollback`, `rotulo`, `preview`, `preview-destroy`, `limpeza`; só por trigger do bot) e que `fechar-fatia` aceita `-L`.
+9. Seção 7: `status-specs.mjs` agora trata `B2-L` como Fatia à parte.
+
+**`CONTEXT-MAP.md` do workspace (glossário de termos):** os verbetes **Painel de Fatias**, **Review da Fatia**, **Feature flag**, **Fatia de limpeza (`-L`)** e **Em fila / Superado** foram **acrescentados em 2026-11-20**. A "Conferência de escopo" continua marcada "a rever" e depende do D1.
