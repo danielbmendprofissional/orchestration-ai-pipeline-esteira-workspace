@@ -41,24 +41,27 @@ function listar(dir, arquivoDe) {
 
 const comandos = listar(join(raiz, '.claude/commands'), (e) => (e.isFile() && e.name.endsWith('.md') ? join(raiz, '.claude/commands', e.name) : null));
 const skills = listar(join(raiz, '.claude/skills'), (e) => (e.isDirectory() ? join(raiz, '.claude/skills', e.name, 'SKILL.md') : null));
+const md = process.argv.includes('--md'); // markdown (tabelas) para o chat; sem a flag, texto alinhado para o terminal
 const larg = Math.max(12, ...comandos.map((c) => c.nome.length + 1), ...skills.map((s) => s.nome.length + 1));
-const linha = (nome, arq) => `  /${nome.padEnd(larg - 1)} ${descricao(arq)}`;
+const celula = (s) => s.replace(/\|/g, '\\|');
+const titulo = (t) => console.log(md ? `\n### ${t}\n\n| Comando | O que faz |\n|---|---|` : `\n${t}`);
+const linha = (nome, arq) => console.log(md ? `| \`/${nome}\` | ${celula(descricao(arq))} |` : `  /${nome.padEnd(larg - 1)} ${descricao(arq)}`);
 
-console.log('COMANDOS DO PROJETO');
-for (const c of comandos) console.log(linha(c.nome, c.arq));
+titulo('COMANDOS DO PROJETO');
+for (const c of comandos) linha(c.nome, c.arq);
 
 const entrada = ENTRADA.map((n) => skills.find((s) => s.nome === n)).filter(Boolean);
 if (entrada.length) {
-  console.log('\nSKILLS DE ENTRADA (as que você chama de vez em quando)');
-  for (const s of entrada) console.log(linha(s.nome, s.arq));
+  titulo('SKILLS DE ENTRADA (as que você chama de vez em quando)');
+  for (const s of entrada) linha(s.nome, s.arq);
 }
 
 if (tudo) {
   const resto = skills.filter((s) => !ENTRADA.includes(s.nome));
-  console.log(`\nTODAS AS OUTRAS SKILLS (${resto.length}: segurança, auditoria, escrita... só quando você pedir)`);
-  for (const s of resto) console.log(linha(s.nome, s.arq));
+  titulo(`TODAS AS OUTRAS SKILLS (${resto.length}: segurança, auditoria, escrita... só quando você pedir)`);
+  for (const s of resto) linha(s.nome, s.arq);
 } else if (skills.length) {
-  console.log(`\nHá mais ${skills.length - entrada.length} skills instaladas (segurança, auditoria, escrita...). Para ver todas: /ajuda tudo`);
+  console.log(`\n${md ? '**' : ''}Há mais ${skills.length - entrada.length} skills instaladas (segurança, auditoria, escrita...). Para ver todas: /ajuda tudo${md ? '**' : ''}`);
 }
 
-console.log('\nPerdido sobre o que fazer agora? /proximo · Estado do git? /situacao · Detalhe de cada comando: docs-human/glossario-de-comandos.md');
+console.log('\nPerdido sobre o que fazer agora? `/proximo` · Estado do git? `/situacao` · Detalhe de cada comando: docs-human/glossario-de-comandos.md');
