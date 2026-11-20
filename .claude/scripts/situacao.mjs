@@ -158,6 +158,19 @@ for (const p of [1, 2, 3, 4]) {
   console.log(`\n${p}. ${nomes[p]}`);
   lst.forEach((a, i) => console.log(`   ${p}.${i + 1} [${a.repo}] ${a.texto}${a.cmd ? `\n         ${a.cmd}` : ''}`));
 }
+// Fatias em execução (label `em-execucao` na issue-mãe do workspace): só informa
+if (!semMr) {
+  try {
+    const proj = caminhoGitlab(root);
+    if (proj) {
+      const em = JSON.parse(execFileSync('glab', ['issue', 'list', '-R', proj, '--label', 'em-execucao', '-O', 'json', '--per-page', '50'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 30000 }) || '[]');
+      console.log(em.length
+        ? `\nEm execução agora: ${em.map((i) => i.title.split(' — ')[0]).join(', ')} (não comece outra na raiz do workspace: use uma área isolada, \`node .claude/scripts/worktree-fatia.mjs <código> <slug>\`)`
+        : '\nEm execução agora: nenhuma fatia.');
+    }
+  } catch { /* sem glab ou sem acesso: ignora */ }
+}
+
 // Pendências de documento (`- [ ]` em PENDENCIAS.md, pendencias-*.md, docs/mudancas-*.md): só informa, nunca bloqueia a fatia
 try {
   const arg = soProjeto ? ['--so-projeto'] : [];

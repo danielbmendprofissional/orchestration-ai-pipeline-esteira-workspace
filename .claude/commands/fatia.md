@@ -10,6 +10,8 @@ Argumento: `$ARGUMENTS` (código da fatia; vazio = a próxima livre do `specs/RE
 
 Fechar as mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"), **reconciliar a coluna Status do `specs/README.md` com o git** (fatia cujas MRs estão todas mergeadas na `main` → `feito`; a alteração vai no commit de docs do passo 1, nunca num commit solto) e ver o estado da fatia (`/proximo`, só a parte da fatia). Se a spec da fatia já existe, rode `node .claude/scripts/check-spec-drift.mjs <spec>`: `⚠ desatualizada` (ou sem `base:`) → o passo 1 vira **revalidação** (`docs/agents/spec-format.md`, "Spec que já existe"), não spec nova do zero. Comece no primeiro passo ainda não feito:
 
+**Outra fatia em execução?** `glab issue list -R <grupo>/<projeto>-workspace --label em-execucao -F json`. Se há mãe `em-execucao` que **não é** esta fatia, avise **antes de escrever a spec**, em uma frase: "A `B3` está em execução em `<área>`. Escrever a spec desta agora é seguro, mas a execução (`/implement-task`) só começa na raiz se a outra terminar; senão será preciso uma área isolada (`node .claude/scripts/worktree-fatia.mjs <código> <slug>`) e o 'Toca em' das duas não pode cruzar." Pergunte se segue; não bloqueie (spec não mexe em código).
+
 | Estado | Começa em |
 |---|---|
 | sem arquivo de spec | 1 |

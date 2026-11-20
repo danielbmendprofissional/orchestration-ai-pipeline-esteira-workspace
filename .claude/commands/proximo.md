@@ -7,13 +7,15 @@ Somente leitura: não altera arquivo, issue, label nem branch. Argumento `$ARGUM
 ## 1. Levantar o estado real (nada de memória)
 
 1. `git -C <repo> fetch origin` em cada repositório de código e no workspace.
-2. `specs/README.md`: a tabela de fatias (código, repositório, quem executa, depende de, toca em, risco, feito ou não).
+2. `specs/README.md`: a tabela de fatias (código, repositório, quem executa, depende de, toca em, risco, feito ou não). **E o status real, de script, não de memória:** `node .claude/scripts/status-specs.mjs` (demora ~10 s; com `--sem-gitlab` se o `glab` falhar). Ele cruza o mapa com a issue-mãe, a MR mergeada na `main` e os testes da fatia e devolve, por fatia, `implementada`, `em execução`, `não iniciada` ou `inconsistente` (o mapa diz uma coisa e o git outra).
 3. GitLab (`-R <grupo>/<projeto>-workspace`): mães abertas (`glab issue list --search "—" -O json`, título `^<código> — `) com seus labels e o painel `<!-- execucao -->`; MRs abertas e mergeadas recentes em cada repositório (`glab mr list -R <grupo>/<repo> --search "<código> —"`).
 4. Branches `feature/*` locais com commits à frente de `origin/main` e arquivos de spec em `specs/feature/` sem mãe.
 5. `node .claude/scripts/check-spec-drift.mjs` (sem argumento): o desvio de cada spec pendente do mapa em relação à `main`.
 6. Melhorias abertas no `orchestration-ai` (`docs/agents/melhoria-orquestracao.md`): para `ai-base`, `ai-infra`, `ai-ops` e `ai-pipeline/template-ci`, `glab issue list -R orchestration-ai/<repo> --label "origem:<projeto>" -O json` (estado aberto), separando as com label `bloqueia:<projeto>` e a MR aberta de cada uma (`glab mr list -R … --search "#<n>"`).
 
 ## 2. Classificar cada fatia
+
+**Regra que não se quebra:** o `Estado` do `status-specs.mjs` manda sobre a coluna Status do mapa. Fatia `implementada`, `em execução` ou **`inconsistente` nunca é recomendada como "próxima"** nem contada como "livre". Fatia `inconsistente` (ex.: "há MR mergeada, mas o mapa não diz feito") é o **primeiro item** da resposta, antes de qualquer `/fatia`: diga qual fatia, o que o git mostra (MR, testes, issue) e que falta fechar (mãe e filhas, Status do mapa). Uma dependência `implementada` conta como feita para liberar as seguintes, mesmo com o mapa ainda velho. Só recomende `/fatia X` depois de conferir que X está `não iniciada` no script.
 
 `feita` · `mergeada, falta fechar` · `MR aberta — aguarda você` (aprovar ou reprovar na Esteira) · `MR fechada pela reprovação — falta corrigir` (`/implement-task` reabre a mesma MR) · `limpeza pendente` (issue "Limpeza da Fatia <código>" sem spec: `/fatia` nela) · `em execução` (label `em-execucao`, com a área e o executor do painel) · `parou` (linha `⚠` no painel) · `spec escrita — aguarda sua aprovação` · `spec aprovada, sem tickets` · `tickets prontos — falta executar` · `livre` (todo "Depende de" feito) · `bloqueada` (diga por qual).
 
@@ -46,6 +48,7 @@ Em paralelo agora: D0 (não toca em B3)   ← precisa de uma área: node .claude
 Regras da resposta:
 - **Origem sempre dita:** o arquivo e a linha/seção onde a fatia nasce — uma ADR citada na linha do mapa (confira com `grep` em `docs/adr/` pelo código e pelos termos), o `docs/agents/padrao-*.md`, o `PENDENCIAS.md`, ou "definida em conversa, sem documento" (e então recomende registrar o porquê antes da spec). Nunca invente uma origem: se não achou, diga que não achou.
 - **Para onde vai:** as fatias que listam esta em "Depende de" e o artefato que ela cria que outras vão citar (ADR, contrato, `DESIGN.md`).
+- **Fatia em execução (aviso no topo):** se há mãe `em-execucao` (ou `status-specs.mjs` mostra `em execução`), a **primeira linha depois do placar** diz qual e onde: "A `B3` está em execução em `<área do painel>`: termine antes, ou abra uma área isolada (`node .claude/scripts/worktree-fatia.mjs <código> <slug>`) para a próxima". Só recomende outra fatia em paralelo se o "Toca em" não cruzar; sem a coluna, diga que não dá para garantir e que o seguro é esperar.
 - **Em paralelo:** só fatias livres cujo "Toca em" não cruza com nenhuma `em-execucao`; sem a coluna, diga que não dá pra garantir.
 - Uma única ação humana em "Seu próximo passo"; se há várias pendentes (duas MRs, uma spec), liste em ordem de desbloqueio e destaque a que destrava mais fatias.
 - Estado ambíguo (MR mergeada sem fechar, branch sem mãe, mãe `em-execucao` sem painel): diga o que viu e o que fazer, sem corrigir.
