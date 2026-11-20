@@ -299,7 +299,7 @@ O humano executou as pendências; este bloco registra o que a conferência achou
 - `ai-ops`: criado o manifesto `networkpolicy-isolamento.yaml` que os docs diziam existir; os dois docs de Kubernetes foram corrigidos (sem "política do ZAP").
 
 **Continua pendente (humano):**
-- [ ] **Commit e MR** dessas alterações em `ai-base`, `ai-ops` e `template-ci`; e o **1 commit local na `main`** do workspace (o hook bloqueia push direto: vai por branch de feature e MR).
+- [x] **Commit e MR** dessas alterações em `ai-base`, `ai-ops` e `template-ci`; e o **1 commit local na `main`** do workspace (o hook bloqueia push direto: vai por branch de feature e MR).
 - [ ] **Testar a NetworkPolicy no cluster:** o k3s precisa ter o controlador de NetworkPolicy ligado e o Traefik em `kube-system`. Sem isso a política não é aplicada, ou bloqueia o Ingress.
 - [ ] **Outras imagens por digest:** só `ZAP_IMAGE` e `NGINX_IMAGE` foram fixadas; as demais (trivy, node, runtime .NET, runner) continuam por tag e não foram conferidas.
 - **`flags.yml` e `kubernetes.yml`** mantêm o regex de código sem `-L` **de propósito** (a limpeza é sempre `flag: não`). Se um dia uma Fatia de limpeza tiver flag, mudar junto.
@@ -307,7 +307,7 @@ O humano executou as pendências; este bloco registra o que a conferência achou
 - [ ] **Configuração do GitLab (seção 5):** escopo do bot, `main` só para o bot, merge sem squash, webhooks. **Não foi verificada**: não há como ver pelos arquivos.
 - [x] **Migração dos repositórios (seção 8):** `esteira-api` e `esteira-frontend` já estão na `main` (feito pelo humano).
 - [ ] **`.gitlab-ci.yml` de `esteira-api` e `esteira-frontend`:** trocar para `ref: v3.0.0` do template e `ESTEIRA_FALLBACK=true`.
-- [ ] **Publicar a tag `v3.0.0` do `template-ci`** (hoje só local, no commit `9393a8b`) e conferir que a pipeline da tag publica as imagens `security-scanner` e `opengrep`.
+- [ ] **Publicar a tag `v3.0.0` do `template-ci`** (`git push origin v3.0.0`; hoje só local, no commit `9393a8b`). **Sem pressa: só quando a Esteira estiver pronta e o primeiro repositório for usar o template** e conferir que a pipeline da tag publica as imagens `security-scanner` e `opengrep`.
 - [ ] **Teste ponta a ponta nunca rodado** (seção 8, passo 9). Nada do `template-ci` v3 foi executado: a conferência foi por leitura.
 
 ## 14. Documentação do `ai-base` a atualizar (levantado em 2026-11-20, depois do `/mapa`) — **feito em 2026-11-20 no `ai-base`: itens 1 a 9 aplicados (a conferir no diff)**
