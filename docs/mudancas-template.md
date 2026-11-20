@@ -4,6 +4,15 @@ Levantadas no discovery da Esteira (ADR-0008) e **reescritas em 2026-11-16** par
 
 ## Situação por item
 
+**Pendências abertas** (uma por linha, para o `/situacao` e o `/proximo` contarem):
+
+- [ ] **1.1** Definir o formato do envio do `consolidated.json` e das análises (`esteira-gate`) e do `esteira-resultado` (fatia E2).
+- [ ] **3.** `esteira-abrir` devolver a configuração do projeto por Ambiente e Destino, e deploy por Destino em child pipeline dinâmico.
+- [ ] **4.2** Backup pré-publicação (`pg_dump` antes das migrations de produção, guardando os 3 últimos).
+- [ ] **5 e 5.1** Agentes de code-review, security e qa no CI, e os insumos das Notas de entrega (OpenAPI, rotas, screenshots).
+- [ ] **8.** Imagem `tools/agent-runner` (ADR-0012/0017).
+- [ ] **9.** Recusar MR para `main` sem issue referenciada (Conferência de escopo).
+
 | Item | Situação |
 |---|---|
 | 1. Chamadas à Esteira | **Parcial.** `esteira-abrir` feito (v3, `/api/pipeline/v2/abrir`). `esteira-gate` e `esteira-resultado` seguem a definir (item 1.1) |

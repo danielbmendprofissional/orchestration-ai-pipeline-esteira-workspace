@@ -70,3 +70,4 @@ feature/<fatia>-<slug> → MR → main   (depois, na Esteira: Entrega → qa →
 - Mudança de comportamento percebido pelo usuário entra atrás de **feature flag** `Features:<Fatia>` (flag ausente = desligado), ver `docs/agents/padrao-api.md` e `padrao-frontend.md`. Fatia sem flag declara `flag: não` na spec.
 - **Isso é reforçado por hook** (`.claude/hooks/block-dangerous-git.sh`, via skill `git-guardrails-claude-code`): bloqueia `git push` direto em `main`, `--force`, `reset --hard`, `clean -f`, `branch -D`, `checkout .`/`restore .`. Push de feature branch funciona normal. Vale pra toda sessão Claude Code, inclusive os subagentes do `/implement-task`.
 - Specs e tickets seguem `docs/workflow.md`.
+- **Pendência** é sempre uma linha `- [ ]` (feita: `- [x]`) no arquivo de pendência do repositório, nunca texto solto: `/situacao` e `/proximo` contam assim. Formato e quem resolve cada tipo: `docs/agents/pendencias.md`. Esqueceu os comandos? `/ajuda`.

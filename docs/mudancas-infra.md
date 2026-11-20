@@ -2,6 +2,13 @@
 
 Pedidos da Esteira para o agent `ai-ops/agents/infra/local-environment-config`. A Esteira não sobe serviço próprio: cada item aqui vira pedido lá.
 
+## Pendências abertas
+
+- [ ] **1. E-mail (SMTP):** Mailpit em dev, relay real nos ambientes, chaves `Smtp:*` no contrato.
+- [ ] **2. Token do bot do GitLab:** chaves `GitLab:Url` e `GitLab:Bots:<grupo>:Token`, `read_api` até a P1 e `api` a partir da P2.
+- [ ] **3. Guarda dos backups pré-publicação:** local fora do cluster de produção, role de backup e restore testado uma vez.
+- [ ] **4. Realm `esteira`:** role `mor`, usuários `dev` e `dev-sem-papel` (fatia B3).
+
 ## 1. E-mail (SMTP)
 
 - **Por quê:** a Esteira avisa por e-mail quem precisa agir (aprovação técnica da proposta e da entrega, aprovação da candidata, aprovação de negócio, Publicar, Exceção). Hoje a `ai-infra` não tem serviço de e-mail.

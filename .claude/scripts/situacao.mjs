@@ -158,6 +158,12 @@ for (const p of [1, 2, 3, 4]) {
   console.log(`\n${p}. ${nomes[p]}`);
   lst.forEach((a, i) => console.log(`   ${p}.${i + 1} [${a.repo}] ${a.texto}${a.cmd ? `\n         ${a.cmd}` : ''}`));
 }
+// Pendências de documento (`- [ ]` em PENDENCIAS.md, pendencias-*.md, docs/mudancas-*.md): só informa, nunca bloqueia a fatia
+try {
+  const arg = soProjeto ? ['--so-projeto'] : [];
+  const resumo = execFileSync('node', [join(dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), 'pendencias.mjs'), '--resumo', ...arg], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], cwd: root }).trim();
+  console.log(`\n${resumo}`);
+} catch { /* pendencias.mjs ausente: ignora */ }
 const bloqueia = acoes.some((a) => a.p <= 2);
 console.log(`\nPronto para começar a próxima fatia? ${bloqueia ? 'NÃO — resolva as pendências de prioridade 1 e 2' : acoes.some((a) => a.p === 3) ? 'QUASE — alinhe (prioridade 3) antes' : 'SIM'}`);
 process.exit(bloqueia ? 1 : 0);

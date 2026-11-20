@@ -15,6 +15,8 @@ Somente leitura (faz `git fetch`; não altera nada). Rode da **raiz do workspace
 | 3 | alinhar (`switch` para a base e `pull --ff-only`) | seguro |
 | 4 | limpar (apagar branch **já mergeada**, com `branch -d`, que recusa se não estiver mergeada) | seguro |
 
+Antes do veredito mostra **"Pendências: N abertas em K arquivos"** (linhas `- [ ]` dos arquivos de pendência, `docs/agents/pendencias.md`): só informa, não muda o veredito. O detalhe: `node .claude/scripts/pendencias.mjs --lista`.
+
 Fecha com **"Pronto para começar a próxima fatia?"**: `SIM`, `QUASE` (só alinhar) ou `NÃO` (há prioridade 1 ou 2).
 
 ## 2. Responder
