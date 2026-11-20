@@ -90,7 +90,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 
 ### 2.6 **Novos jobs**
 - **Preview estático por MR (parte de front):** build do front em modo preview (sessão falsa e dados falsos), publicado no Kubernetes (namespace `preview` de `esteira-nao-prod`), num nginx mínimo com endereço por Fatia, sem API nem banco (pergunta 7.10). Disparado pelo botão "Abrir review" da Esteira. **Destruição obrigatória** no merge ou fechamento da MR e prazo máximo (`auto_stop_in`): o GitLab não destrói sozinho, o destroy é script nosso.
-- **DAST (OWASP ZAP):** job determinístico, imagem própria (`tools/zap` ou similar, a decidir). **Ativo em `qa`** (bloqueia crítica e alta, salvo Exceção), **passivo em `hml`** (mesma regra) e **passivo em produção, depois da Liberação**, quando o resultado só alerta. Nenhum no review. NetworkPolicy limita o ZAP ao namespace alvo. O agente `security` lê o relatório e produz o JSON de Análise; **quem bloqueia é a Política de segurança da Esteira** (ADR-0020).
+- **DAST (OWASP ZAP):** job determinístico, imagem pública fixada por versão e digest (sem `tools/zap`). **Ativo em `qa`** (bloqueia crítica e alta, salvo Exceção), **passivo em `hml`** (mesma regra) e **passivo em produção, depois da Liberação**, quando o resultado só alerta. Nenhum no review. O ZAP roda no runner, fora do cluster, e alcança só a `APP_URL`; a NetworkPolicy não limita o ZAP (correção de 2026-11-20, ADR-0025). O agente `security` lê o relatório e produz o JSON de Análise; **quem bloqueia é a Política de segurança da Esteira** (ADR-0020).
 - **Smoke em produção:** só depois da Liberação, junto com o ZAP passivo. Depois do deploy em produção roda apenas a verificação de rollout e health.
 - **Rollback por SHA** (redeploy do digest anterior só no ambiente afetado).
 - **Rótulo `X.Y.Z`** (sem "v") aplicado ao Artefato na ida a produção (pelo bot da Esteira, tags protegidas).
@@ -148,7 +148,7 @@ Hoje o template constrói a imagem **uma vez, na tag**, e promove por **digest**
 
 ### 4.1 `ai-ops`
 - **`docs-human/infra/kubernetes-local.md`** e **`agents/infra/local-environment-config/docs/infra/kubernetes-local.md`**: hoje criam **2 clusters por ambiente** (`valuto-qa-local` e `valuto-hml-local`, "Opção 3") com k3d, cert-manager (Issuer self-signed), Traefik (já vem no k3s) e 4 operators (CloudNativePG, Redis Operator da OT-ContainerKit, RabbitMQ Cluster Operator, Keycloak Operator). **Mudar para os 2 clusters da ADR-0020**: `esteira-nao-prod` (namespaces `qa` e `hml`, mais `review-*` só para Fatias de `risco: alto`; **sem `dev`**) e `esteira-prd-local`. Os operators e o cert-manager precisam existir em ambos. O doc já avisa que URLs/versões dos operators são de memória e devem ser conferidas.
-- **Novo:** **NetworkPolicy** isolando `qa`, `hml` e `review-*` entre si; política própria para o ZAP alcançar só o namespace alvo.
+- **Novo:** **NetworkPolicy** isolando `qa`, `hml`, `preview` e `review-*` entre si (entrada só do próprio namespace e do Traefik). **Feito em 2026-11-20:** manifesto em `ai-ops/agents/infra/local-environment-config/docs/infra/manifests/networkpolicy-isolamento.yaml`, **não testado em cluster**. Não há política para o ZAP: ele roda no runner, fora do cluster.
 - **Novo:** **GitLab Agent** nos dois clusters (o `kubernetes-local.md` já cita o agent; ver pergunta 7.5).
 - **Novo:** rotina de criação e destruição de `review-<fatia>`, usada pelo `template-ci` só no review com app real.
 - **Novo:** namespace `preview` em `esteira-nao-prod`, com NetworkPolicy própria, para o nginx do preview estático por MR, e o job diário que apaga os vencidos (pergunta 7.10).
@@ -285,3 +285,25 @@ Itens que a sessão do projeto trata ou que viram specs:
 - Fatia sem flag pré-selecionada e travada na Abertura; vira Liberada ao chegar a produção.
 - Rollback devolve as Fatias da versão revertida a "Aguardando liberação" ou "Pronta para Entrega", com flag desligado.
 - `esteira-api` e `esteira-frontend` fora do esquema (merge e promoção manuais).
+
+## 13. Conferência de 2026-11-20 (depois de o orchestration-ai aplicar as seções 2 a 5)
+
+O humano executou as pendências; este bloco registra o que a conferência achou e o que foi corrigido. As alterações abaixo foram feitas **com autorização expressa do humano, só naquela sessão**, e ficaram **sem commit** nos repositórios compartilhados.
+
+**Conferido e correto:** `ai-base` sem resíduo de `dev`/`rcN`/`candidata` (hook, scripts, comandos, agentes, docs, `docs-human`); cópias do workspace idênticas às do `ai-base`; `template-ci` v3 com os modos `fluxo`, `promocao`, `liberacao`, `flag`, `rollback`, `rotulo`, `preview`, `limpeza`, disparo manual recusado, `CI_COMMIT_SHA` conferido, `resource_group`, `rollout restart`, preview de 7 dias e no máximo 5, MR fechada reaberta e contrato v2; `ai-ops` com os dois clusters e sem `dev`.
+
+**Corrigido nesta conferência (sem commit):**
+- `template-ci/review/fechar-fatia.yml` e `common/controlar-pipeline.yml`: aceitam o código `-L` (`B2-L`, `feature/b2-l-…`, `preview` de `b2-l`). O **título** da MR manda sobre o nome da branch, senão `feature/b2-l-…` seria lida como `B2` e a issue de limpeza nunca fecharia.
+- `ai-base/.claude/scripts/status-specs.mjs` (e a cópia do workspace): a MR e a branch de `B2-L` deixam de contar como da `B2`. Testado com 8 casos (`B2`, `B2-L`, `F0.5`, título sem código).
+- `template-ci`: `ZAP_IMAGE` e `NGINX_IMAGE` agora por **versão e digest** (índices multi-arquitetura obtidos em 2026-11-20, não inventados). Comentários do `zap.yml` e do README corrigidos: o ZAP roda no runner, fora do cluster.
+- `ai-ops`: criado o manifesto `networkpolicy-isolamento.yaml` que os docs diziam existir; os dois docs de Kubernetes foram corrigidos (sem "política do ZAP").
+
+**Continua pendente (humano):**
+1. **Commit e MR** dessas alterações em `ai-base`, `ai-ops` e `template-ci`; e o **1 commit local na `main`** do workspace (o hook bloqueia push direto: vai por branch de feature e MR).
+2. **Testar a NetworkPolicy no cluster:** o k3s precisa ter o controlador de NetworkPolicy ligado e o Traefik em `kube-system`. Sem isso a política não é aplicada, ou bloqueia o Ingress.
+3. **Outras imagens por digest:** só `ZAP_IMAGE` e `NGINX_IMAGE` foram fixadas; as demais (trivy, node, runtime .NET, runner) continuam por tag e não foram conferidas.
+4. **`flags.yml` e `kubernetes.yml`** mantêm o regex de código sem `-L` **de propósito** (a limpeza é sempre `flag: não`). Se um dia uma Fatia de limpeza tiver flag, mudar junto.
+5. **Código com ponto** (`F0.5`) não é aceito pelo preview nem pelo `fechar-fatia` (e ponto não vale em nome de recurso do Kubernetes). Hoje só afeta os repositórios da própria Esteira (fora do esquema); em projeto novo, evitar ponto no código da Fatia.
+6. **Configuração do GitLab (seção 5):** escopo do bot, `main` só para o bot, merge sem squash, webhooks. **Não foi verificada**: não há como ver pelos arquivos.
+7. **Migração dos repositórios (seção 8):** `esteira-api` e `esteira-frontend` ainda estão na branch `dev`.
+8. **Teste ponta a ponta nunca rodado** (seção 8, passo 9). Nada do `template-ci` v3 foi executado: a conferência foi por leitura.

@@ -104,4 +104,6 @@ O texto das seções da spec, o texto da descrição da issue fora do bloco de e
 - O parâmetro de busca de commits por texto na URL do GitLab (link da última linha da tabela de links) não foi verificado. Se não existir, o link cai para a lista de commits da branch.
 - A versão do contrato dentro do bloco de execução (`**Contrato:** v1`) seria um campo **novo e aditivo**. Fica opcional enquanto a v1 é a única.
 - Os formatos acima moram em arquivos do `ai-base` (comandos e docs). Por isso a obrigação do item 4 das regras vira issue no `ai-base`: ver `pendencias-orchestration-ai.md`, seção 6.
-- **Fatia de limpeza** (ADR-0025): código `<código>-L` (ex.: `B2-L`), com linha no mapa criada pelo `/fatia` a partir da issue "Limpeza da Fatia <código>". Formato novo e aditivo; a Esteira a lê como uma Fatia qualquer.
+- **Fatia de limpeza** (ADR-0025): código `<código>-L` (ex.: `B2-L`), com linha no mapa criada pelo `/fatia` a partir da issue "Limpeza da Fatia <código>". Formato novo e aditivo; a Esteira a lê como uma Fatia qualquer. O título da MR e das issues segue `<código> — …` (`B2-L — …`, filhas `B2-L.1 — …`); quem decide a que Fatia uma MR pertence é o **título**, não o nome da branch.
+- **Linha `flag:` na spec** (`sim` | `não`, padrão `sim`): a Esteira a lê para travar na seleção as Fatias `flag: não` e para saber quais flags um Artefato carrega. Aditivo; ausente conta como `sim`.
+- **Linha `preview:` na spec** (módulo e rota de entrada, Fatia que toca o front): a Esteira a lê para montar o link do preview. Aditivo; ausente = "sem preview".

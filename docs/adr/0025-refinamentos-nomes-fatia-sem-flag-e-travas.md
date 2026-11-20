@@ -84,3 +84,9 @@ Qualquer pessoa com permissão no GitLab consegue iniciar um pipeline à mão. D
 ## A Esteira fica fora do esquema
 
 Os repositórios `esteira-api` e `esteira-frontend` **não entram** em Entrega, Fluxo, Painel de Fatias nem botão Aprovar. Merge e promoção são **manuais** no GitLab (`when: manual`), como na ADR-0018. Isso elimina a pergunta 7.9 das pendências.
+
+## Correções de 2026-11-20 (conferência do que o orchestration-ai entregou)
+
+- **O ZAP não é limitado por NetworkPolicy.** Ele roda no runner, fora do cluster, e alcança o ambiente pela `APP_URL` (Ingress); o alcance dele é o alvo da varredura. A frase "Uma NetworkPolicy limita o ZAP ao namespace alvo" (ADR-0020) deixa de valer. A NetworkPolicy continua existindo para **isolar os namespaces entre si** (`qa`, `hml`, `preview`, `review-*`), com entrada só do próprio namespace e do Traefik.
+- **O código `<código>-L` precisa ser aceito em todo o template** (`fechar-fatia`, `preview`): o título da MR (`B2-L — …`) manda sobre o nome da branch (`feature/b2-l-…`), para a limpeza não ser lida como a Fatia original.
+- **Imagens fixadas por versão e digest:** `ZAP_IMAGE` e `NGINX_IMAGE` (as demais, a conferir).

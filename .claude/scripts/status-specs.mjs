@@ -74,13 +74,25 @@ const mrsMergeadas = (r) => {
   return todas;
 };
 const slugs = (cod) => [cod.toLowerCase(), cod.toLowerCase().replace(/\./g, '-')];
-const ehDaFatia = (mr, cod) => new RegExp(`^${cod.replace(/\./g, '\\.')}\\b`, 'i').test(mr.title ?? '')
-  || slugs(cod).some((s) => (mr.source_branch ?? '').startsWith(`feature/${s}-`));
+// Fatia de limpeza (B2-L, ADR-0025) começa com o código da original ("B2-"): a MR e a branch dela não são da B2.
+const ehLimpeza = (cod) => /-L$/i.test(cod);
+const ehDaFatia = (mr, cod) => {
+  const titulo = mr.title ?? '', branch = mr.source_branch ?? '';
+  const c = cod.replace(/\./g, '\\.');
+  // título no padrão "<código> — …" (B2, B2-L, F0.5): só ele decide, sem olhar a branch
+  const doTitulo = titulo.match(/^(\S+)\s+—/)?.[1];
+  if (doTitulo) return doTitulo.toLowerCase() === cod.toLowerCase();
+  if (!ehLimpeza(cod) && new RegExp(`^${c}-L\\b`, 'i').test(titulo)) return false;
+  if (new RegExp(`^${c}\\b`, 'i').test(titulo)) return true;
+  return slugs(cod).some((s) => branch.startsWith(`feature/${s}-`) && (ehLimpeza(cod) || !branch.startsWith(`feature/${s}-l-`)));
+};
 
 // merge commit "Merge branch 'feature/<fatia>-…' into 'main'" em origin/main (merge commit, sem squash — ADR-0025): vale quando a MR não está no GitLab (fatia mergeada antes do processo)
 const mergeCommitNoGit = (r, cod) => {
   if (!git(r.path, 'rev-parse', '--verify', 'origin/main')) return false;
-  return slugs(cod).some((s) => (git(r.path, 'log', 'origin/main', '--merges', '--format=%s', '--fixed-strings', `--grep=Merge branch 'feature/${s}-`) ?? '').trim() !== '');
+  return slugs(cod).some((s) => (git(r.path, 'log', 'origin/main', '--merges', '--format=%s', '--fixed-strings', `--grep=Merge branch 'feature/${s}-`) ?? '')
+    .split(/\r?\n/).filter(Boolean)
+    .some((l) => ehLimpeza(cod) || !l.startsWith(`Merge branch 'feature/${s}-l-`)));
 };
 
 // ---- testes marcados (árvore de trabalho = o que está na branch, comitado ou não; e origin/main)

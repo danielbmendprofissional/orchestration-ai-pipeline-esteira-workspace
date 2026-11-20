@@ -18,7 +18,7 @@ O trabalho chega à `main` Fatia por Fatia, e a Esteira agrupa na hora de **publ
 
 - ~~Tipo da mudança (minor ou major)~~ **Resolvido na ADR-0023** (seção "Versão"): declarado ao abrir o Fluxo, e o número só nasce na confirmação em produção.
 - ~~Coordenação da Liberação entre Projetos~~ **Resolvida na ADR-0023** (seção "Dependência entre Projetos"), pelo `Depende de` do mapa.
-- **Merge fora da Esteira:** como o Artefato só nasce na pipeline de um Fluxo, um merge fora da Esteira já não gera Artefato; falta rever se o `esteira-abrir` ainda precisa recusar algo nesse ponto. **Resolvido na ADR-0025:** sim, e o modo `fluxo` só roda por trigger do bot.
+- ~~Merge fora da Esteira~~ **Resolvido na ADR-0025** (seção "Não gerar Artefato sem Entrega"): o modo `fluxo` só roda por trigger do bot e o `esteira-abrir` recusa sem Entrega aberta para o Projeto e o SHA. **Resolvido na ADR-0025:** sim, e o modo `fluxo` só roda por trigger do bot.
 
 ## Consequences
 
