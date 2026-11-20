@@ -308,7 +308,7 @@ O humano executou as pendências; este bloco registra o que a conferência achou
 7. **Migração dos repositórios (seção 8):** `esteira-api` e `esteira-frontend` ainda estão na branch `dev`.
 8. **Teste ponta a ponta nunca rodado** (seção 8, passo 9). Nada do `template-ci` v3 foi executado: a conferência foi por leitura.
 
-## 14. Documentação do `ai-base` a atualizar (levantado em 2026-11-20, depois do `/mapa`)
+## 14. Documentação do `ai-base` a atualizar (levantado em 2026-11-20, depois do `/mapa`) — **feito em 2026-11-20 no `ai-base`: itens 1 a 9 aplicados (a conferir no diff)**
 
 Itens para o `/issue-ai` no `ai-base` (`docs-human/COMO-CRIAR-UM-PROJETO.md`, `docs-human/glossario-de-comandos.md`) e, no workspace, para o `CONTEXT-MAP.md`. A migração de `esteira-api` e `esteira-frontend` para a `main` (item 7 acima) **foi feita pelo humano**; o `.gitlab-ci.yml` deles ficou para depois.
 
