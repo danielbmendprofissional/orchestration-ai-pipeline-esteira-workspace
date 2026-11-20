@@ -17,9 +17,16 @@ Somente leitura (faz `git fetch`; não altera nada). Rode da **raiz do workspace
 
 Antes do veredito mostra **"Pendências: N abertas em K arquivos"** (linhas `- [ ]` dos arquivos de pendência, `docs/agents/pendencias.md`): só informa, não muda o veredito. O detalhe: `node .claude/scripts/pendencias.mjs --lista`.
 
-Fecha com **"Pronto para começar a próxima fatia?"**: `SIM`, `QUASE` (só alinhar) ou `NÃO` (há prioridade 1 ou 2).
+Fecha com uma linha **"Veredito: …"** em frase completa: tudo em dia (pode começar a próxima fatia), quase pronto (falta só alinhar, prioridade 3) ou ainda não (há prioridade 1 ou 2).
 
 ## 2. Responder
+
+**A primeira linha da resposta é o veredito em uma frase completa, que se entende sozinha**, com o motivo e o que falta. Nunca comece com uma palavra solta (`SIM`, `QUASE`, `NÃO`). Exemplos:
+- "Ainda não dá para começar a próxima fatia: há 2 coisas suas a resolver antes (1 commit solto no `ai-base` e 1 MR aberta)."
+- "Quase pronto: a MR da `feature/x` já foi mergeada, falta só atualizar a `main` do `esteira-api` e apagar a branch. Depois, `/fatia B3`."
+- "Tudo em dia, pode começar a próxima fatia: rode `/proximo`."
+
+Só depois da frase vêm os itens, por prioridade.
 
 Repita a saída em **poucas linhas**, na ordem de prioridade, e para cada item dê **o que fazer em palavras e, logo abaixo, o comando exato** em linha de código (o script já traz o comando de cada ação: `git -C "<repo>" branch -d <b>`, `git -C "<repo>" push origin --delete <b>`, `switch main && pull --ff-only`...). O humano deve poder copiar e rodar sozinho, sem pedir a você; o comando de **apagar a remota** aparece sempre, marcado "só com o seu ok". Exemplo de item: "apagar a branch local já mergeada" + `git -C "…\esteira-api" branch -d feature/x`. Exemplos de palavras: "commitar o que sobrou em `ai-base` (são arquivos do processo)", "mergear a MR !5 da B4". Não execute nada sozinho, **exceto** a prioridade 3 e 4 se o humano disser "pode alinhar e limpar": nesse caso rode os comandos da prioridade 3 e depois os da 4 (`branch -d`, nunca `-D`; apagar branch **remota** só com o ok explícito, item a item). Prioridade 1 e 2 são sempre do humano.
 

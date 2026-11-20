@@ -165,5 +165,5 @@ try {
   console.log(`\n${resumo}`);
 } catch { /* pendencias.mjs ausente: ignora */ }
 const bloqueia = acoes.some((a) => a.p <= 2);
-console.log(`\nPronto para começar a próxima fatia? ${bloqueia ? 'NÃO — resolva as pendências de prioridade 1 e 2' : acoes.some((a) => a.p === 3) ? 'QUASE — alinhe (prioridade 3) antes' : 'SIM'}`);
+console.log(`\nVeredito: ${bloqueia ? 'ainda não dá para começar a próxima fatia: resolva antes os itens de prioridade 1 e 2 acima.' : acoes.some((a) => a.p === 3) ? 'quase pronto: falta só alinhar (prioridade 3) e já pode começar a próxima fatia.' : 'tudo em dia, pode começar a próxima fatia.'}`);
 process.exit(bloqueia ? 1 : 0);
