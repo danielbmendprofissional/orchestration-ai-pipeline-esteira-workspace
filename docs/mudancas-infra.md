@@ -11,9 +11,9 @@ Pedidos da Esteira para o agent `ai-ops/agents/infra/local-environment-config`. 
 
 ## 2. Token do bot do GitLab
 
-- **Por quê:** a Esteira fala com o GitLab por um bot, **um por grupo** (ADR-0008). Na fatia A1 só lê (listar projetos do grupo e o `.gitlab-ci.yml`); a partir da E4 também cria tag, abre/mergeia MR e dá play em job.
+- **Por quê:** a Esteira fala com o GitLab por um bot, **um por grupo** (ADR-0008). Nas fatias A1 e P1 só lê (listar projetos do grupo, o `.gitlab-ci.yml`, mapa, specs e issues); a partir da P2 também comenta, fecha, reabre e mergeia MR, e a partir da E4 cria tag e dá play em job (ADR-0021).
 - **Precisa:** nome das chaves no contrato (proposta: `GitLab:Url` e `GitLab:Bots:<caminho-do-grupo>:Token`), token só em user-secrets/Secret, rotação antes do vencimento (máx. 1 ano) com alerta.
-- Escopo: `read_api` até a E3; `api` a partir da E4 (o GitLab não tem escopo mais fino para tag + merge).
+- Escopo: `read_api` até a P1; `api` a partir da P2 (o GitLab não tem escopo mais fino para comentar, mergear e criar tag). A `main` fica protegida com merge só do bot.
 
 ## 3. Guarda dos backups pré-publicação
 
