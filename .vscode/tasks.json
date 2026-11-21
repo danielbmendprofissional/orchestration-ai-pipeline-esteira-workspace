@@ -1,0 +1,70 @@
+{
+  // Modelo de .vscode/tasks.json do workspace (junto de .claude/scripts/dev.ps1). NÃO copie na mão em projeto novo:
+  // o agent da Etapa 2 (ai-ops) pergunta o layout, confirma os caminhos e pede a sua aprovação antes de gravar.
+  // Ao abrir a pasta no VS Code, abre um terminal nomeado por task e RODA o comando de cada um
+  // (a API e os modos do Claude esperam a infra / o OmniRoute subirem). Remova a task que você não quer.
+  // Na primeira vez o VS Code pergunta "Allow Automatic Tasks": Allow. Reabrir um terminal: Terminal > Run Task.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Infra",
+      "type": "process",
+      "command": "powershell",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/.claude/scripts/dev.ps1", "infra"],
+      "isBackground": true,
+      "presentation": { "panel": "dedicated", "reveal": "silent", "showReuseMessage": false },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Claude",
+      "type": "process",
+      "command": "powershell",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/.claude/scripts/dev.ps1", "claude"],
+      "isBackground": true,
+      "presentation": { "panel": "dedicated", "reveal": "always", "showReuseMessage": false, "focus": true },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Claude pago",
+      "type": "process",
+      "command": "powershell",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/.claude/scripts/dev.ps1", "pago"],
+      "isBackground": true,
+      "presentation": { "panel": "dedicated", "reveal": "silent", "showReuseMessage": false },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Claude free",
+      "type": "process",
+      "command": "powershell",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/.claude/scripts/dev.ps1", "free"],
+      "isBackground": true,
+      "presentation": { "panel": "dedicated", "reveal": "silent", "showReuseMessage": false },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
+    },
+    {
+      "label": "API",
+      "type": "process",
+      "command": "powershell",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/.claude/scripts/dev.ps1", "api"],
+      "isBackground": true,
+      "presentation": { "panel": "dedicated", "reveal": "silent", "showReuseMessage": false },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend",
+      "type": "process",
+      "command": "powershell",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/.claude/scripts/dev.ps1", "front"],
+      "isBackground": true,
+      "presentation": { "panel": "dedicated", "reveal": "silent", "showReuseMessage": false },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
+    }
+  ]
+}
