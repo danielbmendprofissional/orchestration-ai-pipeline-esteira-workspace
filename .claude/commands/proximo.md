@@ -46,6 +46,7 @@ Em paralelo agora: D0 (não toca em B3)   ← precisa de uma área: node .claude
 ```
 
 Regras da resposta:
+- **Todo comando que você mandar rodar por fatia leva o título dela**, tirado da coluna "Fatia" do mapa (sem links nem números de issue): `/fatia B3` — Sessão BFF: login, callback, refresh, logout e me. Vale em toda menção (próximo passo, paralelo, bloqueios, fila).
 - **Origem sempre dita:** o arquivo e a linha/seção onde a fatia nasce — uma ADR citada na linha do mapa (confira com `grep` em `docs/adr/` pelo código e pelos termos), o `docs/agents/padrao-*.md`, o `PENDENCIAS.md`, ou "definida em conversa, sem documento" (e então recomende registrar o porquê antes da spec). Nunca invente uma origem: se não achou, diga que não achou.
 - **Para onde vai:** as fatias que listam esta em "Depende de" e o artefato que ela cria que outras vão citar (ADR, contrato, `DESIGN.md`).
 - **Fatia em execução (aviso no topo):** se há mãe `em-execucao` (ou `status-specs.mjs` mostra `em execução`), a **primeira linha depois do placar** diz qual e onde: "A `B3` está em execução em `<área do painel>`: termine antes, ou abra uma área isolada (`node .claude/scripts/worktree-fatia.mjs <código> <slug>`) para a próxima". Só recomende outra fatia em paralelo se o "Toca em" não cruzar; sem a coluna, diga que não dá para garantir e que o seguro é esperar.

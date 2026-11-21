@@ -37,4 +37,6 @@ Casos que merecem uma frase a mais:
 
 ## 3. Ligar ao fluxo
 
+Quando mandar rodar `/fatia <código>` ou `/implement-task <código>`, acrescente o **título da fatia** (coluna "Fatia" do `specs/README.md`, sem links): `/fatia B3` — Sessão BFF: login, callback, refresh, logout e me.
+
 Com `SIM`, diga: "Pronto. Rode `/proximo`." Com pendência de prioridade 1 ou 2, diga qual resolver primeiro e que depois basta rodar `/situacao` de novo.

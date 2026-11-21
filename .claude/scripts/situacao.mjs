@@ -165,7 +165,7 @@ if (!semMr) {
     if (proj) {
       const em = JSON.parse(execFileSync('glab', ['issue', 'list', '-R', proj, '--label', 'em-execucao', '-O', 'json', '--per-page', '50'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 30000 }) || '[]');
       console.log(em.length
-        ? `\nEm execução agora: ${em.map((i) => i.title.split(' — ')[0]).join(', ')} (não comece outra na raiz do workspace: use uma área isolada, \`node .claude/scripts/worktree-fatia.mjs <código> <slug>\`)`
+        ? `\nEm execução agora: ${em.map((i) => i.title).join('; ')} (não comece outra na raiz do workspace: use uma área isolada, \`node .claude/scripts/worktree-fatia.mjs <código> <slug>\`)`
         : '\nEm execução agora: nenhuma fatia.');
     }
   } catch { /* sem glab ou sem acesso: ignora */ }

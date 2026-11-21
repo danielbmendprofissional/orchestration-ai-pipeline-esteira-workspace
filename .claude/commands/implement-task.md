@@ -115,7 +115,7 @@ MR: <link> (main ← feature/b2-<slug>)   · filhas B2.1–B2.5 ✔ · review PA
 Executores: <ex.: pai (Claude) em B2.1–B2.3 · backend (omni-pago) em B2.4–B2.5 · review: pai (Claude)>
 Suposições: <as que você fez e o humano deve conferir>
 Você agora: <a próxima ação humana, concreta>
-Depois: <o que /proximo diria: fatia que isto destrava e fatias que já podem rodar em paralelo>
+Depois: <o que /proximo diria: fatia que isto destrava e fatias que já podem rodar em paralelo; cada fatia citada com o código e o título do mapa, ex.: `/fatia F0.5` — Shell, sessão compartilhada, interceptors e guards>
 ```
 
 "Você agora", conforme o caso: **pronta** → abrir a MR, testar (comandos do "Como testar"), aprovar e mergear — ou comentar na MR e rodar `/implement-task B2` de novo; **parou** → o motivo e a decisão exata que falta (ex.: "o critério 3 da spec diz X e o código legado Y: qual vale?"). Ao parar, registre o mesmo texto na mãe (`glab issue note`) e troque a linha do painel onde parou por `⚠ parou: <motivo em uma frase>`; o `em-execucao` fica (a fatia segue sua). Termine com uma notificação (ferramenta `PushNotification`, quando a sessão tiver) com a primeira linha do relatório.
