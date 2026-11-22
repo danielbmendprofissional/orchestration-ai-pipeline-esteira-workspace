@@ -14,6 +14,12 @@
         "value": "inter",
         "createdAt": "2026-11-22T19:14:11.351Z",
         "reason": "fixture: Inter só existe como opção de comparação da página prototipo-fontes.html (comum.js, tabela FONTES); a fonte do produto é Mona Sans"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-11-22T19:41:12.662Z",
+        "reason": "user confirmed: Geist Mono escolhida pelo Daniel em 2026-10-23 como fonte de código, junto com Mona Sans (prototipo-fontes.html, DESIGN.md)"
       }
     ]
   }

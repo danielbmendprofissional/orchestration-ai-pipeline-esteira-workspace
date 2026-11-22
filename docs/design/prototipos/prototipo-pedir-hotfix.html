@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Pedir hotfix (protótipo D1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+main{max-width:980px}
+[hidden]{display:none!important}
+.lead{color:var(--mu);font-size:13px;margin:-2px 0 22px}
+.form2{display:grid;grid-template-columns:minmax(220px,300px) minmax(260px,1fr);gap:16px;margin-bottom:18px}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:14px}
+.fld>span{color:var(--tx2);font-weight:600}
+.fld small{color:var(--di);font-size:12px}
+.rot-campo{color:var(--tx2);font-weight:600;font-size:13px;margin-bottom:8px}
+.inp,.sel{padding:9px 12px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx);font:inherit;outline:none}
+textarea.inp{resize:vertical;min-height:72px}
+.inp:focus,.sel:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #0A4EE433}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opc{display:flex;gap:12px;border:1px solid var(--ln2);border-radius:10px;padding:14px 16px;background:var(--s1);cursor:pointer}
+.opc:hover{border-color:#4A4A52}
+.opc:has(input:checked){border-color:var(--blue2);background:var(--blue-bg)}
+.opc:has(input:focus-visible){outline:2px solid var(--blue-tx);outline-offset:2px}
+.opc input[type=radio]{accent-color:var(--blue2);width:16px;height:16px;margin-top:2px;flex:none}
+.opc p{color:var(--mu);font-size:13px;margin:2px 0 6px}
+.pnome{font-weight:600;font-family:var(--mono);font-size:13px}
+.sub2{color:var(--di);font-size:12.5px;margin-top:2px}
+.linkr{display:inline-flex;align-items:center;gap:6px;color:var(--blue-tx);font-size:13px}
+.linkr:hover{text-decoration:underline}
+.passos2{list-style:none;padding:0;border:1px solid var(--ln);border-radius:10px;overflow:hidden;margin-top:12px}
+.passos2 li{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--ln);font-size:13px;color:var(--tx2)}
+.passos2 li:last-child{border-bottom:0}
+@media (max-width:900px){.form2,.tipos{grid-template-columns:1fr}}
+</style></head>
+<body data-pagina="entregas">
+<nav data-menu></nav>
+<main>
+  <div class="crumb"><svg class="i"><use href="#i-layers"/></svg><a href="prototipo-entregas.html" style="color:inherit">Entregas</a> <svg class="i"><use href="#i-chev"/></svg> Pedir hotfix · dados fictícios</div>
+  <div class="head"><h1>Pedir hotfix</h1></div>
+  <p class="lead">O hotfix só nasce por pedido de uma pessoa. A Esteira cria a issue no GitLab; a Entrega só abre depois da correção mergeada na <span class="mono">main</span>.</p>
+
+  <section class="panel" data-form>
+    <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-alert"/></svg></span>O que precisa de correção</h2></div>
+    <div class="form2">
+      <label class="fld"><span>Aplicação</span><select class="sel" data-app><option value="valuto">Valuto</option><option value="portal">Portal do Cliente</option></select></label>
+      <label class="fld"><span>Projeto</span><select class="sel" data-proj></select><small data-prd></small></label>
+    </div>
+    <label class="fld"><span>Motivo</span>
+      <textarea class="inp" data-motivo placeholder="ex.: extrato de contas encerradas devolve erro 500 desde a v3.7.0"></textarea>
+      <small>Obrigatório. Vira o título e o corpo da issue <span class="mono">Hotfix: &lt;motivo&gt;</span> e é repetido no Atalho, se for usado.</small></label>
+    <div class="rot-campo" id="rot-exe">Quem executa a correção</div>
+    <div class="tipos" role="radiogroup" aria-labelledby="rot-exe">
+      <label class="opc"><input type="radio" name="exe" value="agente" checked><div><b>O agente</b><p>Você pede a ele, numa sessão do Claude Code, que implemente a issue. Ele cria a branch <span class="mono">hotfix/*</span> a partir da <span class="mono">main</span>, implementa com TDD, passa pelo <span class="mono">/code-review</span> e abre a MR. <b>Para aí.</b></p></div></label>
+      <label class="opc"><input type="radio" name="exe" value="humano"><div><b>Eu mesmo</b><p>Você escreve o código numa branch <span class="mono">hotfix/*</span> a partir da <span class="mono">main</span> e abre a MR citando a issue. A issue existe do mesmo jeito: o template recusa MR sem ela.</p></div></label>
+    </div>
+  </section>
+
+  <section class="panel" data-feito hidden>
+    <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-check"/></svg></span>Pedido registrado</h2><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aguardando a correção</span></div>
+    <p class="txt">A Esteira criou a issue <a class="linkr" href="#"><svg class="i"><use href="#i-issue"/></svg><span data-issue></span><svg class="i"><use href="#i-ext"/></svg></a> no GitLab, com o rótulo <span class="mono">ready-for-human</span>. O pedido aparece em <b>Hotfixes pedidos</b>, na tela Entregas.</p>
+    <ol class="passos2" data-passos></ol>
+  </section>
+
+  <div class="barra-acao" data-acoes>
+    <a class="btn g" href="prototipo-entregas.html" style="text-decoration:none">Cancelar</a>
+    <button class="btn p" data-pedir disabled><svg class="i"><use href="#i-alert"/></svg>Pedir hotfix</button>
+  </div>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+const APPS={valuto:{projetos:{'valuto-api':'3.7.0','valuto-frontend':'2.0.3'}},portal:{projetos:{'portal-api':'2.2.0','portal-web':'1.8.0'}}};
+let n=153;
+function proj(){const a=APPS[$('[data-app]').value];$('[data-proj]').innerHTML=Object.keys(a.projetos).map(p=>`<option>${p}</option>`).join('');prd()}
+function prd(){const a=APPS[$('[data-app]').value],p=$('[data-proj]').value,v=a.projetos[p].split('.').map(Number);$('[data-prd]').textContent=`Em produção v${a.projetos[p]} · a correção sai como patch, v${v[0]}.${v[1]}.${v[2]+1} (prevista)`}
+function valida(){const ok=$('[data-motivo]').value.trim().length>0,b=$('[data-pedir]');b.disabled=!ok;b.title=ok?'':'Falta: informe o motivo do hotfix'}
+$('[data-app]').onchange=()=>{proj();valida()};$('[data-proj]').onchange=prd;$('[data-motivo]').oninput=valida;
+$('[data-pedir]').onclick=()=>{
+  const exe=document.querySelector('[name=exe]:checked').value,m=$('[data-motivo]').value.trim();
+  $('[data-form]').hidden=true;$('[data-feito]').hidden=false;$('[data-issue]').textContent=`#${n} · Hotfix: ${m.slice(0,56)}${m.length>56?'…':''}`;
+  $('[data-passos]').innerHTML=(exe==='agente'
+   ?[['run','Peça ao agente, numa sessão do Claude Code na raiz do workspace, que implemente a issue como hotfix. Ele cria a branch <span class="mono">hotfix/*</span>, implementa e abre a MR. Ele não mergeia.'],['user-ok','O Aprovador técnico aprova a MR na Esteira (quem pediu não aprova, exceto o MOR, como autoaprovação).'],['layers','Com a MR na <span class="mono">main</span>, um Membro abre a Entrega do hotfix.']]
+   :[['code','Crie a branch <span class="mono">hotfix/*</span> a partir da <span class="mono">main</span>, escreva a correção e abra a MR citando a issue.'],['user-ok','O Aprovador técnico aprova a MR na Esteira (quem escreveu não aprova, exceto o MOR, como autoaprovação).'],['layers','Com a MR na <span class="mono">main</span>, um Membro abre a Entrega do hotfix.']]
+  ).map(([i,t],k)=>`<li><span class="stat none">${ic(i)}</span><span>${k+1}. ${t}</span></li>`).join('');
+  $('[data-acoes]').innerHTML=`<a class="btn g" href="prototipo-entregas.html" style="text-decoration:none">Voltar às Entregas</a>`;
+};
+proj();valida();
+</script>
+</body></html>

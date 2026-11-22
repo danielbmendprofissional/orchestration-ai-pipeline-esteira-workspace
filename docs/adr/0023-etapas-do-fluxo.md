@@ -15,7 +15,7 @@ A **Entrega** é o processo que o humano abre; cada **Fluxo** (a faixa de um Pro
 ## Regras
 
 - **Smoke e ZAP passivo em produção rodam depois da Liberação**, quando o flag expõe a feature. Antes disso testariam o mesmo código de antes. O resultado só alerta e nunca reverte sozinho; o alerta se trata desligando o flag (sem deploy, ADR-0019) ou com hotfix ou nova Fatia.
-- **Atalho e hotfix** continuam como na ADR-0021: o Publicador pula `qa` e `hml`, com o nome de quem ordenou e o motivo registrados. O hotfix é uma Entrega de tipo hotfix, de um Projeto só, com o Atalho e sem seleção de Fatias.
+- **Atalho e hotfix** continuam como na ADR-0021: o Publicador pula `qa` e `hml`, com o nome de quem ordenou e o motivo registrados. O hotfix é uma Entrega de tipo hotfix, de um Projeto só, com o Atalho **opcional** e sem seleção de Fatias; o pedido, a correção e a MR vêm antes da Entrega, que só abre depois da MR na `main` (ADR-0027).
 - **A AET-1 sai:** a aprovação técnica da proposta já acontece na **aprovação da spec**, antes de qualquer código.
 - **A AET-2 deixa de ser etapa:** a aprovação do `hml` e a confirmação do Publicador cobrem esse papel.
 - **A AAN passa a ser a Liberação**, depois do deploy em produção, e não mais antes.

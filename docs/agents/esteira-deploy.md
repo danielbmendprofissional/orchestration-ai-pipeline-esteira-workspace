@@ -36,12 +36,13 @@ Uma Fatia de front que depende de uma de API (coluna `Depende de` do mapa) não 
 
 ## Hotfix
 
-Só por solicitação direta de um humano; o agente nunca inicia um hotfix por conta própria.
+Só por solicitação direta de um humano; o agente nunca inicia um hotfix por conta própria. Regras completas: ADR-0027.
 
-1. `git checkout -b hotfix/xxxx` a partir da `main`.
-2. Implementa a demanda pedida.
-3. Abre MR para a `main` e espera a aprovação humana (mesmo pipeline, mesmo gate de revisão).
-4. A Esteira abre uma Entrega de tipo hotfix, de um Projeto só. O Publicador usa o **Atalho** (pula qa e hml), registrando o **nome de quem ordenou** e o motivo. O Atalho não pula o gate de segurança com achado crítico ou alto, a não ser por Exceção. Faz só o deploy; ligar o flag é um segundo ato.
+1. **Pedido:** o humano pede o hotfix na Esteira (tela Entregas, botão **Pedir hotfix**): Aplicação, Projeto, motivo e **quem executa** (o agente ou ele mesmo). A Esteira **sempre** cria a issue `Hotfix: <motivo>`, com o rótulo `ready-for-human`.
+2. **Correção:** `git checkout -b hotfix/xxxx` a partir da `main`. Quem executa é o agente (numa sessão do Claude Code, a pedido do humano, com TDD e `/code-review`) ou o próprio humano. A MR cita a issue.
+3. **MR para a `main`:** o agente **para aqui**. O Aprovador técnico aprova a MR na Esteira (mesmo pipeline, mesmo gate de revisão); quem pediu ou escreveu o hotfix não a aprova, exceto o MOR como autoaprovação, com motivo.
+4. **Entrega:** só **depois** da MR mergeada na `main`, um Membro abre a Entrega de tipo hotfix (um Projeto só, sem seleção de Fatias, versão PATCH). A Abertura avisa as Fatias que vão junto, sem passar por QA, com o flag desligado.
+5. **QA, HML e produção:** a Entrega nasce com QA e HML normais. O Publicador pode usar o **Atalho** (pula qa e hml), registrando o **nome de quem ordenou** e o motivo. O Atalho não pula o gate de segurança com achado crítico ou alto, a não ser por Exceção. Faz só o deploy; ligar o flag é um segundo ato.
 
 ## Rollback
 

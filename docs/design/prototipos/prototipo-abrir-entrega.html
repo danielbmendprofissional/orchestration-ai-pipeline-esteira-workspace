@@ -121,16 +121,9 @@ textarea.inp{resize:vertical;min-height:72px}
 
   <!-- hotfix -->
   <section class="panel" aria-labelledby="t4" data-hotfix hidden>
-    <div class="ph"><h2 id="t4"><span class="num" data-num="4">2</span>Projeto e motivo</h2><span data-st="4"></span></div>
-    <div class="box"><div data-hf-proj></div></div>
-    <label class="fld motivo-hf"><span>Motivo do hotfix</span>
-      <textarea class="inp" data-motivo placeholder="ex.: extrato de contas encerradas devolve erro 500 desde a v3.7.0"></textarea>
-      <small>Obrigatório. O Atalho depois pede também o nome de quem ordenou, e o Publicador confirma a produção.</small></label>
-    <div class="rot-campo" id="rot-orig" style="margin-top:18px">Como a correção será feita</div>
-    <div class="tipos" role="radiogroup" aria-labelledby="rot-orig">
-      <label class="opc"><input type="radio" name="orig" value="agente" checked><div><b>Issue de hotfix: o agente implementa</b><p>A Esteira cria no GitLab a issue <span class="mono">Hotfix: &lt;motivo&gt;</span>, com o motivo e o rótulo <span class="mono">ready-for-human</span>. Você roda o fluxo normal nela (spec, tickets e MR <span class="mono">hotfix/*</span>) e a Entrega só segue quando a MR estiver na <span class="mono">main</span>.</p></div></label>
-      <label class="opc"><input type="radio" name="orig" value="humano"><div><b>Eu mesmo faço o código</b><p>Sem issue: você escreve a correção numa branch <span class="mono">hotfix/*</span> a partir da <span class="mono">main</span> e abre a MR. A aprovação continua sendo humana.</p><input class="inp" data-branch placeholder="hotfix/extrato-conta-encerrada (pode informar depois)" aria-label="Branch do hotfix" style="width:100%"></div></label>
-    </div>
+    <div class="ph"><h2 id="t4"><span class="num" data-num="4">2</span>Hotfix pronto para Entrega</h2><span data-st="4"></span></div>
+    <div class="box"><div data-hf-lista></div></div>
+    <p class="txt" style="color:var(--mu);margin-top:10px">Só aparecem hotfixes com a MR <span class="mono">hotfix/*</span> já mergeada na <span class="mono">main</span>. <a class="lk" href="prototipo-pedir-hotfix.html">Pedir um hotfix</a></p>
   </section>
 
   <!-- resumo -->
@@ -174,7 +167,7 @@ const v=s=>s.split('.').map(Number),fmt=a=>a.join('.');
 const proxima=(prd,major)=>{const b=v(prd);return major?[b[0]+1,0,0]:[b[0],b[1]+1,0]};
 const patch=prd=>{const b=v(prd);return [b[0],b[1],b[2]+1]};
 
-let st={app:'valuto',tipo:'normal',cen:'normal',fatias:[],major:{},hfProj:'',removidas:new Set()};
+let st={app:'valuto',tipo:'normal',cen:'normal',fatias:[],major:{},hfProj:'',hfSel:'',removidas:new Set()};
 const A=()=>APPS[st.app],hf=()=>st.tipo==='hotfix',proj=id=>A().projetos[id];
 const projDe=(f)=>f.p.map(x=>x==='API'?Object.keys(A().projetos)[0]:Object.keys(A().projetos)[1]);
 function reinicia(){
@@ -221,17 +214,23 @@ function desenhaFluxos(){
   const o=ordem();
   $('[data-ordem]').innerHTML=fx.length>1?`<div class="ordem" title="Os Fluxos andam e liberam nessa ordem; num rollback, voltam na ordem inversa">${ic('branch')}<span>Ordem</span><span class="cad">${o.join(` ${ic('arrow')} `)}</span><span class="pill" title="Pelo Depende de do mapa">do mapa</span></div>`:'';
 }
+const HOTFIXES={valuto:[
+  {id:'H-3',proj:'valuto-api',motivo:'Erro 500 no extrato de contas encerradas',exe:'agente',issue:151,mr:71,branch:'hotfix/extrato-conta-encerrada'},
+  {id:'H-4',proj:'valuto-frontend',motivo:'Botão de download quebrado no Safari',exe:'humano',issue:152,mr:73,branch:'hotfix/download-safari'}],portal:[]};
+const hotfixSel=()=>(HOTFIXES[st.app]||[]).find(h=>h.id===st.hfSel);
 function desenhaHf(){
-  $('[data-hf-proj]').innerHTML=Object.entries(A().projetos).map(([id,p])=>`<label class="fx" style="grid-template-columns:24px 1fr 130px 1fr;cursor:pointer"><input type="radio" name="hfp" value="${id}" ${st.hfProj===id?'checked':''} style="accent-color:var(--blue2)"><div><div class="pnome">${id}</div><div class="sub2">${p.stack}</div></div><div class="hoje">em produção<br><span class="vers" style="color:var(--tx2)">v${p.prd}</span></div><div class="vers">patch → v${fmt(patch(p.prd))}<small>o número definitivo só nasce na confirmação em produção</small></div></label>`).join('');
-  document.querySelectorAll('[name=hfp]').forEach(r=>r.onchange=()=>{st.hfProj=r.value;tudo()});
+  const l=HOTFIXES[st.app]||[];
+  $('[data-hf-lista]').innerHTML=l.length?l.map(h=>{const p=proj(h.proj);return `<label class="fx" style="grid-template-columns:24px minmax(0,1.5fr) 130px minmax(160px,1fr);cursor:pointer"><input type="radio" name="hfp" value="${h.id}" ${st.hfSel===h.id?'checked':''} style="accent-color:var(--blue2)">
+    <div><div class="pnome">${h.id} · ${h.proj}</div><div class="sub2">${h.motivo}</div></div>
+    <div class="hoje">em produção<br><span class="vers" style="color:var(--tx2)">v${p.prd}</span></div>
+    <div class="vers">patch → v${fmt(patch(p.prd))}<small>executa: ${h.exe==='agente'?'o agente':'humano'} · MR !${h.mr} mergeada</small></div></label>`}).join('')
+   :`<div class="empty" style="border:0">${ic('alert','lg')}Nenhum hotfix com a MR na main. Peça um na tela Entregas.</div>`;
+  document.querySelectorAll('[name=hfp]').forEach(r=>r.onchange=()=>{st.hfSel=r.value;tudo()});
 }
-
-const orig=()=>document.querySelector('[name=orig]:checked')?.value||'agente';
-function origTxt(){const m=($('[data-motivo]').value||'').trim();return orig()==='agente'?`<span class="pill">${ic('issue')}Issue de hotfix criada no GitLab</span><span class="mono">Hotfix: ${m?m.slice(0,48):'…'}</span>`:`<span class="pill">${ic('code')}Código feito por você</span><span class="mono">${($('[data-branch]').value||'').trim()||'branch hotfix/* a informar'}</span>`}
 function falta(){
   const f={1:[],2:[],3:[],4:[]};
   if(!$('[data-nome]').value.trim())f[1].push('dê um nome à Entrega');
-  if(hf()){if(!$('[data-motivo]').value.trim())f[4].push('informe o motivo do hotfix')}
+  if(hf()){if(!hotfixSel())f[4].push('escolha um hotfix com a MR na main')}
   else{if(!st.fatias.length){f[2].push('escolha ao menos uma Fatia');f[3].push('sem Fatias não há Fluxos')}}
   avisos().filter(a=>a[4]).forEach(a=>f[hf()?4:2].push(a[2].toLowerCase()));
   return f;
@@ -240,7 +239,7 @@ function tudo(){
   document.querySelectorAll('[data-normal]').forEach(s=>s.hidden=hf());
   document.querySelectorAll('[data-hotfix]').forEach(s=>s.hidden=!hf());
   $('[data-grupo]').innerHTML=`Grupo do GitLab <span class="mono">${A().grupo}</span> · ${Object.keys(A().projetos).length} projetos`;
-  $('[data-lead]').textContent=hf()?'Hotfix sobre produção, de um Projeto só. A correção nasce de uma issue (feita pelo agente) ou do seu próprio código; depois de na main, vai para o Atalho e para a confirmação do Publicador.':'Uma Entrega é de uma Aplicação só. Depois de aberta, a Esteira cria um Fluxo por Projeto tocado e gera o Artefato sobre o último SHA verde da main.';
+  $('[data-lead]').textContent=hf()?'Hotfix sobre produção, de um Projeto só. A correção já está na main; a Entrega nasce com QA e HML normais, e o Publicador pode usar o Atalho.':'Uma Entrega é de uma Aplicação só. Depois de aberta, a Esteira cria um Fluxo por Projeto tocado e gera o Artefato sobre o último SHA verde da main.';
   desenhaFatias();desenhaFluxos();desenhaHf();
   $('[data-faixas]').innerHTML=avisos().map(([cor,icone,tit,txt])=>`<div class="faixa ${cor}">${ic(icone)}<div><b>${tit}</b><p>${txt}</p></div></div>`).join('');
   const f=falta(),nums=hf()?[1,4]:[1,2,3];
@@ -256,15 +255,15 @@ function resumo(){
    linha('grid','Aplicação',`${A().nome} <span class="mono" style="color:var(--di)">grupo ${A().grupo}</span>`)+
    linha('layers','Entrega',nome||pend('sem nome'))+
    linha('tag','Tipo',hf()?'<span class="pill">Hotfix · PATCH</span>':'<span class="pill">Normal</span>')+
-   (hf()?linha('box','Projeto',`<span class="pill">${ic('box')}<span class="mono">${st.hfProj} · v${fmt(patch(proj(st.hfProj).prd))}</span></span>`)+linha('git','Correção',origTxt())
+   (hf()?(hotfixSel()?linha('box','Projeto',`<span class="pill">${ic('box')}<span class="mono">${hotfixSel().proj} · patch → v${fmt(patch(proj(hotfixSel().proj).prd))}</span></span>`)+linha('alert','Motivo',hotfixSel().motivo)+linha('git','Correção',`<span class="pill">${ic('issue')}issue #${hotfixSel().issue}</span><span class="pill">${ic('git')}MR !${hotfixSel().mr} mergeada</span><span class="pill">${ic('code')}${hotfixSel().exe==='agente'?'executada pelo agente':'código seu'}</span>`):linha('box','Hotfix',pend('nenhum escolhido')))
     :linha('list','Fatias',selecionadas().length?selecionadas().map(f=>`<span class="mono">${f.c}</span>`).join(', ')+` <span class="n">${selecionadas().length}</span>`:pend('nenhuma'))+
      linha('box','Fluxos',fx.length?o.map(id=>{const f=fx.find(x=>x.id===id),mj=!!st.major[id];return `<span class="pill">${ic('box')}<span class="mono">${id} · ${mj?'major':'minor'} → v${fmt(proxima(f.prd,mj))}</span></span>`}).join(ic('arrow')):pend('nenhum')))+
    linha('git','Etapas',`<span class="trilha">${trilha(st.tipo)}</span>`);
   /* conferência de escopo: três blocos recolhidos, só avisam e nunca bloqueiam */
-  const sel=st.fatias,vaoJunto=hf()?[]:PRONTAS[st.app].filter(f=>!sel.includes(f.c)),sem=hf()?[]:SEM_FATIA[st.app],lim=LIMPEZAS[st.app];
+  const sel=hf()?[]:st.fatias,vaoJunto=PRONTAS[st.app].filter(f=>!sel.includes(f.c)),sem=SEM_FATIA[st.app],lim=LIMPEZAS[st.app];
   const bloco=(icone,tit,n,corpo)=>n?`<details class="conf"><summary>${ic(icone)}${tit} <span class="n">${n}</span>${ic('chev','chev')}</summary><div class="corpo">${corpo}</div></details>`:'';
   $('[data-conf]').innerHTML=
-   bloco('alert','Vão junto, com o flag desligado',vaoJunto.length,vaoJunto.map(f=>`<div class="it"><span class="mono">${f.c}</span><span>${f.t}</span><span class="d">Pronta para Entrega · vai no Artefato porque a main é cumulativa</span></div>`).join(''))+
+   bloco('alert','Vão junto, com o flag desligado',vaoJunto.length,vaoJunto.map(f=>`<div class="it"><span class="mono">${f.c}</span><span>${f.t}</span><span class="d">${hf()?'na main, vai no Artefato do hotfix sem ter passado por QA, flag desligado':'Pronta para Entrega · vai no Artefato porque a main é cumulativa'}</span></div>`).join(''))+
    bloco('alert','MRs mergeadas sem Fatia',sem.length,sem.map(([p,mr,t,d])=>`<div class="it"><span class="mono">${p} ${mr}</span><span>${t}</span><span class="d">mergeada em ${d} · só avisa</span></div>`).join(''))+
    bloco('lock','Limpezas pendentes do Projeto',lim.length,lim.map(([c,t,b])=>`<div class="it"><span class="mono">${c}</span><span>${t}</span><span class="d">${b?'bloqueia nova Entrega do Projeto':'não bloqueia'}</span></div>`).join(''));
 }
@@ -273,9 +272,9 @@ function resumo(){
 $('[data-app]').onchange=e=>{st.app=e.target.value;reinicia();tudo()};
 $('[data-cen]').onchange=e=>{st.cen=e.target.value;tudo()};
 document.querySelectorAll('[name=tipo]').forEach(r=>r.onchange=()=>{st.tipo=r.value;tudo()});
-$('[data-nome]').oninput=tudo;$('[data-motivo]').oninput=tudo;$('[data-branch]').oninput=tudo;document.querySelectorAll('[name=orig]').forEach(r=>r.onchange=tudo);
+$('[data-nome]').oninput=tudo;
 $('[data-abrir]').onclick=()=>location.href='prototipo-entrega.html';
-if(/#tipo=hotfix/.test(location.hash)){st.tipo='hotfix';document.querySelector('[name=tipo][value=hotfix]').checked=true}
+if(/#tipo=hotfix/.test(location.hash)){st.tipo='hotfix';st.hfSel=(location.hash.match(/hf=([\w-]+)/)||[])[1]||'';document.querySelector('[name=tipo][value=hotfix]').checked=true}
 reinicia();tudo();
 </script>
 </body></html>

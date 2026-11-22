@@ -53,7 +53,7 @@ Vale para Fatia excluída com flag (limpeza pendente) e para Fatia em **Aguardan
 
 ## Hotfix
 
-Continua partindo da `main` (ADR-0018). Ele pode levar código de Fatias Prontas para Entrega que nunca passaram por qa, sempre com o flag desligado. **Risco aceito** pelo dono: flag desligado, bem controlado, não é risco.
+Continua partindo da `main` (ADR-0018). Ele pode levar código de Fatias Prontas para Entrega que nunca passaram por qa, sempre com o flag desligado. **Risco aceito** pelo dono: flag desligado, bem controlado, não é risco. A Abertura do hotfix mostra essas Fatias como aviso, e a Entrega só abre depois da MR na `main` (ADR-0027).
 
 ## Rollback
 
