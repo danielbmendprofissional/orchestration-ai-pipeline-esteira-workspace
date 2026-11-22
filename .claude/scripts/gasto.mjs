@@ -5,7 +5,11 @@
 //
 // Sem id: a sessão mais recente da pasta atual (a que está rodando). `--resumo`: uma linha só.
 // Fonte: ~/.claude/projects/<pasta>/<sessão>.jsonl e <sessão>/subagents/*.jsonl (campo `usage` de cada resposta).
-// Mede o que o transcrito registra. A fórmula de cota do plano não é pública: serve para comparar fatias/tickets, não para prever o limite.
+//
+// O número que importa é UM: TOTAL = tokens NOVOS (o que o modelo leu pela primeira vez, entrada + gravação no cache)
+// + GERADOS (o que ele escreveu). Os "relidos do cache" ficam fora do total: cada chamada relê a conversa inteira,
+// mas isso é mais barato que token novo. A fórmula de cota do plano não é pública: o número serve para comparar
+// fatias/tickets entre si, não para prever o limite.
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
@@ -33,18 +37,20 @@ const id = alvo.f.replace(/\.jsonl$/, '');
 function ler(arquivo) {
   const linhas = readFileSync(arquivo, 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
   const porMsg = new Map(); // a mesma resposta aparece em mais de uma linha: vale a última
-  let ini = null, fim = null, ativo = 0;
+  let fim = null, ativo = 0;
   for (const e of linhas) {
-    if (e.timestamp) { const t = new Date(e.timestamp).getTime(); ini ??= t; if (fim !== null && t - fim < 600000) ativo += t - fim; fim = t; }
+    if (e.timestamp) { const t = new Date(e.timestamp).getTime(); if (fim !== null && t - fim < 600000) ativo += t - fim; fim = t; }
     if (e.type === 'assistant' && e.message?.usage) porMsg.set(e.message.id, e.message.usage);
   }
-  let chamadas = 0, cacheLido = 0, cacheGravado = 0, saida = 0, ctxSoma = 0, ctxMax = 0;
+  let chamadas = 0, cacheLido = 0, novos = 0, saida = 0, ctxSoma = 0, ctxMax = 0, ctxMin = Infinity;
   for (const u of porMsg.values()) {
     const ctx = (u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0);
-    chamadas++; cacheLido += u.cache_read_input_tokens || 0; cacheGravado += u.cache_creation_input_tokens || 0;
-    saida += u.output_tokens || 0; ctxSoma += ctx; ctxMax = Math.max(ctxMax, ctx);
+    if (!ctx) continue; // registro sem uso (resposta interrompida)
+    chamadas++; cacheLido += u.cache_read_input_tokens || 0;
+    novos += (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0);
+    saida += u.output_tokens || 0; ctxSoma += ctx; ctxMax = Math.max(ctxMax, ctx); ctxMin = Math.min(ctxMin, ctx);
   }
-  return { chamadas, cacheLido, cacheGravado, saida, ctxMedio: chamadas ? Math.round(ctxSoma / chamadas) : 0, ctxMax, seg: Math.round(ativo / 1000) };
+  return { chamadas, cacheLido, novos, saida, ctxMedio: chamadas ? Math.round(ctxSoma / chamadas) : 0, ctxMax, ctxMin: chamadas ? ctxMin : 0, seg: Math.round(ativo / 1000) };
 }
 
 const linhas = [{ nome: 'sessão principal', ...ler(join(dir, alvo.f)) }];
@@ -62,25 +68,27 @@ if (existsSync(subDir)) {
 }
 
 const k = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)} M` : n >= 1e3 ? `${Math.round(n / 1e3)} mil` : String(n));
-const min = (s) => (s >= 60 ? `${Math.floor(s / 60)}min${String(s % 60).padStart(2, '0')}` : `${s}s`);
-const tot = linhas.reduce((a, l) => ({ chamadas: a.chamadas + l.chamadas, cacheLido: a.cacheLido + l.cacheLido, cacheGravado: a.cacheGravado + l.cacheGravado, saida: a.saida + l.saida }), { chamadas: 0, cacheLido: 0, cacheGravado: 0, saida: 0 });
+const tot = linhas.reduce((a, l) => ({ chamadas: a.chamadas + l.chamadas, cacheLido: a.cacheLido + l.cacheLido, novos: a.novos + l.novos, saida: a.saida + l.saida }), { chamadas: 0, cacheLido: 0, novos: 0, saida: 0 });
+const total = tot.novos + tot.saida;
 const subs = linhas.length - 1;
+const p = linhas[0];
+const base = p.ctxMin; // 1ª chamada da sessão principal ≈ o que é reenviado antes de qualquer mensagem (prompt, ferramentas, MCPs, instruções)
 
 if (resumo) {
-  const p = linhas[0];
-  console.log(`Gasto: ${tot.chamadas} chamadas (${subs} subagente${subs === 1 ? '' : 's'}), ${k(tot.cacheLido)} de contexto lido do cache, ${k(tot.saida)} gerados; sessão principal com contexto de ${k(p.ctxMedio)} em média (máx ${k(p.ctxMax)}).`);
+  console.log(`Gasto: TOTAL ${k(total)} tokens (${k(tot.novos)} novos + ${k(tot.saida)} gerados) em ${tot.chamadas} chamadas${subs ? `, ${subs} subagente${subs === 1 ? '' : 's'}` : ''}; mais ${k(tot.cacheLido)} relidos do cache. Base reenviada a cada chamada: ${k(base)}.`);
   process.exit(0);
 }
 
-console.log(`Gasto de tokens — sessão ${id.slice(0, 8)} (mais recente em ${pasta})\n`);
-console.log('| Agente | Tempo ativo | Chamadas | Contexto médio | Contexto máx. | Cache lido | Gerado |');
-console.log('|---|---|---|---|---|---|---|');
-for (const l of linhas) console.log(`| ${l.nome} | ${min(l.seg)} | ${l.chamadas} | ${k(l.ctxMedio)} | ${k(l.ctxMax)} | ${k(l.cacheLido)} | ${k(l.saida)} |`);
-console.log(`| **Total** | | **${tot.chamadas}** | | | **${k(tot.cacheLido)}** | **${k(tot.saida)}** |\n`);
-const p = linhas[0];
+console.log(`# TOTAL GASTO NESTA SESSÃO: ${k(total)} tokens\n`);
+console.log(`= ${k(tot.novos)} **novos** (o que o modelo leu pela primeira vez) + ${k(tot.saida)} **gerados** (o que ele escreveu, inclui raciocínio escondido).`);
+console.log(`Fora desse total, ${k(tot.cacheLido)} foram **relidos do cache**: a cada chamada o modelo relê a conversa inteira, e isso sai mais barato que token novo. Pesa quando a sessão é grande.\n`);
+console.log('| Agente | Chamadas | Novos | Gerados | **Total** | Relidos do cache |');
+console.log('|---|---|---|---|---|---|');
+for (const l of linhas) console.log(`| ${l.nome} | ${l.chamadas} | ${k(l.novos)} | ${k(l.saida)} | **${k(l.novos + l.saida)}** | ${k(l.cacheLido)} |`);
+console.log(`| **Soma** | **${tot.chamadas}** | ${k(tot.novos)} | ${k(tot.saida)} | **${k(total)}** | ${k(tot.cacheLido)} |\n`);
 const aviso = [];
-if (p.ctxMedio > 150000) aviso.push(`a sessão principal relê ${k(p.ctxMedio)} de contexto a cada chamada: use \`/clear\` entre \`/fatia\` e \`/implement-task\``);
+if (base > 80000) aviso.push(`a base reenviada em cada chamada é ${k(base)} (prompt, ferramentas, MCPs): rode \`/mcp\` e desligue os servidores que você não usa neste projeto (fica gravado por projeto: é uma vez só, não toda sessão). É o corte mais barato`);
+if (p.ctxMedio > 150000) aviso.push(`a sessão principal chegou a ${k(p.ctxMedio)} de contexto médio: abra sessão nova em vez de continuar (entre /fatia e /implement-task, use /clear)`);
 const grandes = linhas.slice(1).filter((l) => l.ctxMax > 180000);
 if (grandes.length) aviso.push(`contexto perto de 200 mil em: ${grandes.map((l) => l.nome).join('; ')} (ticket grande demais: dividir)`);
 if (aviso.length) console.log(`Atenção: ${aviso.join('. ')}.`);
-console.log('Contexto = o que cada chamada ao modelo recebe (entrada + cache). "Cache lido" soma isso em todas as chamadas, é o que mais pesa na cota. "Gerado" é a saída (inclui raciocínio escondido).');

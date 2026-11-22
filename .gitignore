@@ -49,3 +49,7 @@ kubeconfig
 *.db
 *.dump
 *.bak
+
+# Passagem de sessão (estado local, nunca versionar): .claude/scripts/passagem.mjs
+.claude/passagem.md
+.claude/passagem.lida.md

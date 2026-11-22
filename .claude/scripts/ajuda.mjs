@@ -56,6 +56,19 @@ if (entrada.length) {
   for (const s of entrada) linha(s.nome, s.arq);
 }
 
+// Comandos nativos do Claude Code (não vivem em .claude/commands): gasto e contexto
+const NATIVOS = [
+  ['context', 'Mostra de onde vem o contexto da sessão agora: prompt do sistema, ferramentas, MCPs, CLAUDE.md/memórias, skills e mensagens, com tokens de cada parte'],
+  ['mcp', 'Liga/desliga os servidores MCP (GitHub, GitLab, Figma...). Desligue os que o projeto não usa: cada um reenvia suas ferramentas a toda chamada. Fica gravado por projeto'],
+  ['cost','Tokens e custo estimado desta sessão (no plano, o custo é só estimativa)'],
+  ['usage', 'Uso do seu plano e quanto falta para o limite da sessão/semana'],
+  ['clear', 'Zera o contexto e começa conversa nova (o histórico antigo fica em disco; para apagar de verdade: /limpar)'],
+  ['compact', 'Resume a conversa para liberar contexto sem perder o fio'],
+];
+console.log(md ? '\n### NATIVOS DO CLAUDE CODE (gasto e contexto)\n\n| Comando | O que faz |\n|---|---|' : '\nNATIVOS DO CLAUDE CODE (gasto e contexto)');
+for (const [n, d] of NATIVOS) console.log(md ? `| \`/${n}\` | ${d} |` : `  /${n.padEnd(larg - 1)} ${d}`);
+console.log(`${md ? '\n' : ''}Para o gasto por ticket e por subagente da fatia: \`/gasto\` (do projeto, lê os transcritos sem gastar token).`);
+
 if (tudo) {
   const resto = skills.filter((s) => !ENTRADA.includes(s.nome));
   titulo(`TODAS AS OUTRAS SKILLS (${resto.length}: segurança, auditoria, escrita... só quando você pedir)`);
