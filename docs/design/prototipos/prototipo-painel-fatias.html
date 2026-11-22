@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esteira — Painel de Fatias (protótipo D1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+[hidden]{display:none!important}
+.topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 4px}
+.topo h1{margin-right:auto}
+.resumo-t{color:var(--mu);font-size:13.5px;margin-bottom:16px}
+.filtrobar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.sel{padding:7px 11px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--tx2);font:inherit;max-width:100%}
+.demo{flex-wrap:wrap;justify-content:flex-end;max-width:100%}.demo select{min-width:0;max-width:100%}
+.cod{font-family:var(--mono);font-size:12.5px;color:var(--tx2);margin-right:8px}
+.tt{font-weight:600}
+.proj{display:inline-flex;gap:6px}
+.risco{font-size:12.5px;color:var(--mu)}.risco.alto{color:var(--run-tx);font-weight:600}
+.prog{color:var(--mu);font-size:12.5px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--mu);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px;margin-left:8px;white-space:nowrap}
+.tag .i{width:12px;height:12px}
+.pill.neutro{color:var(--tx2)}
+.pill.riscado .tx{text-decoration:line-through;color:var(--di)}
+.idade{font-size:12.5px;color:var(--mu);white-space:nowrap}
+.idade.venc{color:var(--run-tx);font-weight:600}
+td.chk{width:36px;padding-right:0}
+td.chk input,.fs input{width:16px;height:16px;accent-color:var(--blue2)}
+td.chk .i{color:var(--di)}
+td.dir{white-space:nowrap}
+.linkr{display:inline-flex;align-items:center;gap:6px;color:var(--blue-tx);font-size:12.5px}
+.linkr:hover{text-decoration:underline}
+.app{color:var(--mu);font-size:12.5px}
+.rodape-acao{margin-top:14px}
+.obs{color:var(--mu);font-size:12.5px;margin-top:14px}.obs .i{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+.vazio{display:flex;flex-direction:column;align-items:center;gap:8px;padding:48px 20px;color:var(--mu);text-align:center}
+.vazio .ib{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--s2);border:1px solid var(--ln2);color:var(--tx2)}
+/* filtros */
+.busca-f{display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--ln2);border-radius:9px;background:var(--s1);color:var(--mu);min-width:220px}
+.busca-f input{background:none;border:0;outline:0;color:var(--tx);font:inherit;width:100%}
+.busca-f:focus-within{border-color:var(--blue2)}
+.cb{position:relative}
+.cbb{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.cbb .n{margin-left:2px}
+.cbp{position:absolute;top:42px;left:0;width:340px;max-width:calc(100vw - 32px);z-index:6;background:var(--s1);border:1px solid var(--ln2);border-radius:12px;box-shadow:0 18px 40px #000C,inset 0 1px 0 var(--hl);overflow:hidden}
+.cbp .busca-f{border:0;border-bottom:1px solid var(--ln);border-radius:0;background:var(--s2)}
+.cbl{max-height:300px;overflow-y:auto}
+.cbg{padding:8px 14px 4px;font-size:12px;color:var(--di)}
+.cbi{display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:13px;color:var(--tx2);cursor:pointer}
+.cbi:hover{background:var(--s2)}.cbi input{width:16px;height:16px;accent-color:var(--blue2)}
+.cbi .c{margin-left:auto;color:var(--mu);font-size:12px}
+.cbf{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--ln);color:var(--mu);font-size:12px;background:var(--s2)}
+.cbf button{background:none;border:0;color:var(--blue-tx);font-size:12px}
+.f.sm{padding:5px 11px;font-size:12.5px}
+/* paginação (mesmo desenho da lista de Entregas) */
+.pagl{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;color:var(--mu);font-size:13px}
+.pagl .dir2{display:flex;align-items:center;gap:12px}
+.nums{display:flex;gap:4px}
+.nums button{min-width:32px;height:32px;border-radius:8px;border:1px solid var(--ln2);background:var(--s1);color:var(--tx2)}
+.nums button.on{border-color:var(--blue2);background:var(--blue-bg);color:#fff}
+.nums button:disabled{opacity:.4;cursor:not-allowed}
+/* gaveta */
+.gaveta{display:flex;flex-direction:column;padding:0}
+.g-corpo{flex:1;overflow-y:auto;padding:22px 24px}
+.g-pe{display:flex;justify-content:flex-end;gap:10px;padding:14px 24px;border-top:1px solid var(--ln);background:var(--s1)}
+.g-pe .esq{margin-right:auto}
+.fs{display:grid;gap:6px;padding:12px 14px;border-bottom:1px solid var(--ln);font-size:13px}
+.fs:last-child{border-bottom:0}
+.fs .l1{display:flex;align-items:center;gap:10px;cursor:pointer}.fs .idade{margin-left:auto}
+.fs .links{display:flex;gap:6px 16px;flex-wrap:wrap;padding-left:26px}
+.fs .links .nd{color:var(--di);font-size:12.5px}
+.ordem{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--tx2);font-size:13px}
+.ordem .i{color:var(--mu)}
+.excl{display:grid;gap:10px;border:1px solid var(--ln2);border-radius:10px;padding:14px;margin-top:16px;font-size:13px}
+.excl label{display:flex;gap:8px;align-items:flex-start;color:var(--tx2)}
+.excl input[type=radio]{margin-top:3px;accent-color:var(--blue2)}
+.excl textarea{min-height:64px;width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--ln2);background:var(--s2);color:var(--tx);font:inherit}
+.fl{display:flex;gap:16px;flex-wrap:wrap;font-size:13px}
+.fl span{display:inline-flex;align-items:center;gap:6px}
+@media (max-width:760px){.topo h1{width:100%}}
+</style></head>
+<body data-pagina="painel">
+<nav data-menu></nav>
+<main>
+  <div class="crumb" data-crumb></div>
+  <div class="topo"><h1>Painel de Fatias</h1></div>
+  <p class="resumo-t" data-resumo></p>
+  <div class="filtrobar" data-filtros></div>
+  <div class="tabs" role="tablist" data-abas></div>
+  <div class="box"><div class="tw" data-lista></div></div>
+  <div class="pagl"><span data-pag-info></span><div class="dir2"><label>Por página <select class="sel" data-por aria-label="Fatias por página"><option>5</option><option>8</option><option>10</option><option>20</option><option>50</option><option>100</option></select></label><div class="nums" data-nums></div></div></div>
+  <div class="barra-acao rodape-acao" data-rodape></div>
+  <p class="obs"><svg class="i"><use href="#i-list"/></svg>As Fatias são lidas do mapa, da spec, das issues e do bloco de execução. Ninguém marca estado à mão. Você só vê as Aplicações em que tem papel (o MOR vê todas).</p>
+</main>
+<div data-gaveta></div>
+
+<script src="comum.js"></script>
+<script>
+const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+const PRAZO=30;
+
+/* quem vê o quê: o MOR pode tudo */
+const QUEM={
+ mor:{nome:'Daniel',ini:'DB',rot:'MOR',pode:['entrega','review','decidir','liberar']},
+ tecnico:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico',pode:['entrega','review','decidir']},
+ negocio:{nome:'Elisa Prado',ini:'EP',rot:'Aprovadora de negócio',pode:['liberar']},
+ membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro',pode:['entrega','review']}};
+let quem='mor';
+const pode=a=>QUEM[quem].pode.includes(a);
+const porque={entrega:'Só Membro, Aprovador técnico ou MOR abrem Entrega',review:'Só Membro, Aprovador técnico ou MOR abrem o review',decidir:'Só o Aprovador técnico ou o MOR aprovam ou reprovam a MR',liberar:'Só o Aprovador de negócio ou o MOR liberam e excluem Fatias'};
+
+/* aplicações: 3 com Fatias e 47 só cadastradas (o seletor precisa funcionar com 50) */
+const EXTRA=['Atlas','Balcão Digital','Cobrança','Compras','Conciliação','Contábil','CRM Interno','Cadastro Único','Dados de Clientes','Faturamento','Fidelidade','Folha de Pagamento','Frota','Gestão de Ativos','Gestão de Riscos','Helpdesk','Integrador Fiscal','Logística','Marketplace','Notas Fiscais','Ouvidoria','Parceiros','Patrimônio','Pedidos','Pix Empresas','Portal do Fornecedor','Precificação','Prestação de Contas','Recebíveis','Relatórios','RH Digital','Seguros','Sinistros','Suprimentos','Tesouraria','Treinamentos','Vendas','Viagens','Antifraude','Onboarding','Open Finance','Câmbio','Crédito','Consórcios','Investimentos','Atendimento','Agenda'];
+const APPS=['Valuto','Portal do Cliente','Gestão de Contratos',...EXTRA];
+const RECENTES=['Valuto','Portal do Cliente'];
+
+/* estado: [texto, ícone, cor do badge] — nunca só por cor: ícone + texto */
+const ESTADOS={
+ planejada:['Planejada','none','neutro'],spec:['Com spec','file','neutro'],
+ exec:['Em execução','run','blue'],rev:['Em revisão','branch','blue'],
+ pronta:['Pronta para Entrega','box','run'],entrega:['Em Entrega','layers','blue'],
+ aguard:['Aguardando liberação','wait','run'],lib:['Liberada','check','neutro'],excl:['Excluída','x','neutro']};
+
+const ABAS=[
+ ['andamento','Em andamento',['spec','exec','rev']],['prontas','Prontas para Entrega',['pronta']],
+ ['entrega','Em Entrega',['entrega']],['aguard','Aguardando liberação',['aguard']],
+ ['limpeza','Limpeza pendente',['excl']],['lib','Liberadas',['lib']],['todas','Todas',null]];
+
+const NOTAS={
+ 'E-9':{v:'v3.5.0',notas:[['Pix agendado','Quem tem Pix agendado passa a poder cancelar ou mudar a data até a véspera, direto no app.'],['Extrato por período','O extrato aceita um intervalo de datas e mostra o total do período no topo.']]},
+ 'E-12':{v:'v3.6.0',notas:[['Notificações de limite','O cliente recebe um aviso quando chega a 80% do limite do cartão.']]},
+ 'E-15':{v:'v1.4.0',notas:[['Aditivos de contrato','O jurídico registra aditivos e o contrato mostra o histórico de alterações.']]}};
+
+/* a: Aplicação · flag: tem flag · dias: idade no estado · ent: Entrega · noIssue: issue não está mais disponível */
+const F=[
+ {c:'V1',a:'Valuto',t:'Limite por cartão',p:['API'],r:'médio',e:'planejada',flag:true},
+ {c:'V2',a:'Valuto',t:'Cancelamento de Pix agendado',p:['API','Front'],r:'médio',e:'spec',flag:true,prog:'spec aprovada, execução não começou'},
+ {c:'V3',a:'Valuto',t:'Extrato em PDF',p:['API','Front'],r:'médio',e:'exec',flag:true,prog:'3 de 5 tasks',tasks:[['V3.1 — Dados do extrato','a1b2c3d',1],['V3.2 — Geração do PDF','e4f5a6b',1],['V3.3 — Endpoint e paginação','c7d8e9f',1],['V3.4 — Tela do extrato','',0],['V3.5 — E2E, axe, preview e docs','',0]]},
+ {c:'V4',a:'Valuto',t:'Busca de transações',p:['API'],r:'baixo',e:'rev',flag:true,prog:'CI verde, aguardando você',review:'aberto'},
+ {c:'P1',a:'Portal do Cliente',t:'Tema escuro',p:['Front'],r:'baixo',e:'rev',flag:true,prog:'em correção: reprovada em 20/11',corr:true},
+ {c:'V6',a:'Valuto',t:'Cadastro de cartões',p:['Front'],r:'baixo',e:'pronta',flag:true,prog:'mergeada em 21/11 · flag desligado'},
+ {c:'V7',a:'Valuto',t:'Exportação em CSV',p:['API','Front'],r:'médio',e:'pronta',flag:true,prog:'mergeada em 19/11 · flag desligado',superada:true},
+ {c:'V8',a:'Valuto',t:'Limpeza do módulo legado de boleto',p:['API'],r:'alto',e:'pronta',flag:false,prog:'mergeada em 22/11 · sem flag'},
+ {c:'P2',a:'Portal do Cliente',t:'Menu lateral recolhível',p:['Front'],r:'baixo',e:'pronta',flag:true,prog:'mergeada em 20/11 · flag desligado'},
+ {c:'G1',a:'Gestão de Contratos',t:'Renovação automática',p:['API','Front'],r:'médio',e:'pronta',flag:true,prog:'mergeada em 18/11 · flag desligado'},
+ {c:'V9',a:'Valuto',t:'Notificações de limite',p:['API','Front'],r:'médio',e:'entrega',flag:true,prog:'QA em andamento',ent:'E-12'},
+ {c:'V10',a:'Valuto',t:'Resumo mensal',p:['API'],r:'baixo',e:'entrega',flag:true,prog:'aguardando aprovação do HML',ent:'E-12'},
+ {c:'V11',a:'Valuto',t:'Pix agendado',p:['API','Front'],r:'alto',e:'aguard',flag:true,prog:'em produção, flag desligado',dias:12,ent:'E-9'},
+ {c:'V12',a:'Valuto',t:'Extrato por período',p:['API','Front'],r:'médio',e:'aguard',flag:true,prog:'em produção, flag desligado',dias:34,ent:'E-9',noIssue:true},
+ {c:'G2',a:'Gestão de Contratos',t:'Aditivos de contrato',p:['API','Front'],r:'médio',e:'aguard',flag:true,prog:'em produção, flag desligado',dias:5,ent:'E-15'},
+ {c:'V13',a:'Valuto',t:'Boleto por e-mail',p:['API'],r:'baixo',e:'lib',flag:true,prog:'liberada em 10/11'},
+ {c:'P3',a:'Portal do Cliente',t:'Perfil do usuário',p:['Front'],r:'baixo',e:'lib',flag:true,prog:'liberada em 02/11'},
+ {c:'V14',a:'Valuto',t:'Cartão virtual (cancelado)',p:['API','Front'],r:'médio',e:'excl',flag:true,prog:'excluída: reverter · aguardando a limpeza',dias:9},
+ {c:'G3',a:'Gestão de Contratos',t:'Assinatura eletrônica (cancelada)',p:['API'],r:'alto',e:'excl',flag:true,prog:'excluída: reverter · aguardando a limpeza',dias:41}];
+
+/* massa de teste: 280 Fatias nas outras 47 Aplicações (determinístico) */
+let semente=7;const rnd=()=>(semente=(semente*1103515245+12345)%2147483648)/2147483648;
+const DIST=[['lib',.5],['pronta',.1],['aguard',.07],['rev',.06],['exec',.06],['entrega',.06],['spec',.05],['planejada',.04],['excl',.03]];
+const NOMES=['Relatório','Cadastro','Busca','Exportação','Importação','Painel','Notificação','Perfil','Permissões','Histórico','Conciliação','Aprovação','Agenda','Filtro','Auditoria'];
+for(let i=0;i<280;i++){const a=EXTRA[i%EXTRA.length],sg=a.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2),r=rnd();let acc=0,e='lib';for(const [k,p] of DIST){acc+=p;if(r<acc){e=k;break}}
+  F.push({c:sg+(i+1),a,t:NOMES[i%NOMES.length]+' '+['de saldo','por período','em lote','mensal','por cliente'][i%5],p:i%3===0?['API','Front']:i%3===1?['API']:['Front'],r:['baixo','médio','alto'][i%3],e,flag:true,
+   prog:e==='exec'?`${1+i%4} de 5 tasks`:e==='rev'?'CI verde, aguardando você':e==='lib'?'liberada':e==='aguard'?'em produção, flag desligado':e==='entrega'?'QA em andamento':e==='pronta'?'mergeada · flag desligado':e==='excl'?'excluída: reverter · aguardando a limpeza':'',
+   dias:e==='aguard'?1+i%45:e==='excl'?3+i%40:undefined,ent:e==='entrega'||e==='aguard'?'E-'+(100+i):undefined})}
+
+/* links no GitLab: o que não existir mais simplesmente não aparece */
+const num=f=>Number(f.c.replace(/\D/g,''));
+const sha=f=>(num(f)*2654435+f.c.charCodeAt(0)*977).toString(16).padStart(7,'0').slice(0,7);
+const links=f=>[f.noIssue?null:['issue',`issue #${20+num(f)*3}`],['git',`MR !${num(f)+4} mergeada`],['code',`commit ${sha(f)}`]];
+
+let aba='andamento',pagina=0,POR=8,sel=new Set(['V8']);
+const filtro={apps:new Set(),busca:'',proj:new Set()};
+let cbAberto=false,cbBusca='';
+const fmt=d=>d.split('-').reverse().join('/');
+
+function crumb(){
+  $('[data-crumb]').innerHTML=`${ic('list')}Painel de Fatias · dados fictícios
+   <label class="demo">Ver como <select data-quem>${Object.entries(QUEM).map(([k,q])=>`<option value="${k}" ${k===quem?'selected':''}>${q.nome} · ${q.rot}</option>`).join('')}</select></label>`;
+  $('[data-quem]').onchange=e=>{quem=e.target.value;$('.me').innerHTML=`<span class="av">${QUEM[quem].ini}</span><div>${QUEM[quem].nome}<small>${quem==='mor'?'MOR':'papel na Aplicação'}</small></div>`;pinta()};
+}
+const badge=f=>{const [tx,i,cor]=ESTADOS[f.e];const t=f.corr?'Em correção':tx;
+  return `<span class="pill ${cor} ${f.e==='excl'?'riscado':''}">${ic(i,f.e==='exec'?'spin':'')}<span class="tx">${t}</span></span>`};
+const projs=f=>`<span class="proj">${f.p.map(x=>`<span class="chip">${ic(x==='API'?'server':'monitor')}${x}</span>`).join('')}</span>`;
+const base=()=>F.filter(f=>(!filtro.apps.size||filtro.apps.has(f.a))&&(!filtro.proj.size||f.p.some(p=>filtro.proj.has(p)))&&(!filtro.busca||(f.c+' '+f.t).toLowerCase().includes(filtro.busca.toLowerCase())));
+const lista=a=>{const m=ABAS.find(x=>x[0]===a)[2];return base().filter(f=>!m||m.includes(f.e))};
+const idadeTx=f=>{const v=f.dias>PRAZO;return `<span class="idade ${v?'venc':''}">há ${f.dias} dias${v?` · passou de ${PRAZO}`:''}</span>`};
+const contaApp=a=>F.filter(f=>f.a===a).length;
+
+/* filtros: Aplicação (busca + várias), busca por Fatia e Projeto */
+function filtros(){
+  const n=filtro.apps.size,rot=n===0?'Todas as aplicações':n===1?[...filtro.apps][0]:`${[...filtro.apps][0]} +${n-1}`;
+  $('[data-filtros]').innerHTML=`<div class="cb"><button class="sel cbb" data-cbb aria-haspopup="listbox" aria-expanded="${cbAberto}">${ic('grid')}${rot}${ic('chev')}</button>
+     <div class="cbp" data-cbp ${cbAberto?'':'hidden'}></div></div>
+   <label class="busca-f">${ic('search')}<input data-busca placeholder="Buscar Fatia por código ou título" value="${filtro.busca}" aria-label="Buscar Fatia"></label>
+   ${['API','Front'].map(p=>`<button class="f sm ${filtro.proj.has(p)?'on':''}" data-proj="${p}" aria-pressed="${filtro.proj.has(p)}">${ic(p==='API'?'server':'monitor')}${p}</button>`).join('')}
+   ${n||filtro.busca||filtro.proj.size?`<button class="f sm" data-limpar>${ic('x')}Limpar filtros</button>`:''}`;
+  $('[data-cbb]').onclick=e=>{e.stopPropagation();cbAberto=!cbAberto;cbBusca='';filtros();if(cbAberto)$('[data-cbq]').focus()};
+  $('[data-busca]').oninput=e=>{filtro.busca=e.target.value;pagina=0;const p=e.target.selectionStart;pinta(true);const i=$('[data-busca]');i.focus();i.setSelectionRange(p,p)};
+  document.querySelectorAll('[data-proj]').forEach(b=>b.onclick=()=>{const p=b.dataset.proj;filtro.proj.has(p)?filtro.proj.delete(p):filtro.proj.add(p);pagina=0;pinta()});
+  const l=$('[data-limpar]');if(l)l.onclick=()=>{filtro.apps.clear();filtro.proj.clear();filtro.busca='';pagina=0;pinta()};
+  if(cbAberto)combo();
+}
+function combo(){
+  const q=cbBusca.toLowerCase(),acha=APPS.filter(a=>a.toLowerCase().includes(q));
+  const rec=q?[]:RECENTES,resto=acha.filter(a=>!rec.includes(a)).sort((a,b)=>(contaApp(b)>0)-(contaApp(a)>0)||a.localeCompare(b,'pt'));
+  const MAX=8,vis=resto.slice(0,MAX),item=a=>`<label class="cbi"><input type="checkbox" data-app="${a}" ${filtro.apps.has(a)?'checked':''}>${a}<span class="c">${contaApp(a)} Fatias</span></label>`;
+  $('[data-cbp]').innerHTML=`<label class="busca-f">${ic('search')}<input data-cbq placeholder="Buscar entre ${APPS.length} aplicações" value="${cbBusca}" aria-label="Buscar Aplicação"></label>
+    <div class="cbl" role="listbox">${rec.length?`<div class="cbg">Recentes</div>${rec.map(item).join('')}`:''}${vis.length?`<div class="cbg">${q?'Resultado':'Outras aplicações'}</div>${vis.map(item).join('')}`:(rec.length?'':`<div class="vazio" style="padding:24px">Nenhuma aplicação com “${cbBusca}”</div>`)}</div>
+    <div class="cbf"><span>${resto.length>MAX?`Mostrando ${MAX} de ${resto.length}: digite para refinar`:`${acha.length} de ${APPS.length} aplicações`}</span><button data-cblimpa>Limpar seleção</button></div>`;
+  const qi=$('[data-cbq]');qi.oninput=e=>{cbBusca=e.target.value;const p=e.target.selectionStart;combo();const i=$('[data-cbq]');i.focus();i.setSelectionRange(p,p)};
+  document.querySelectorAll('[data-app]').forEach(c=>c.onchange=()=>{c.checked?filtro.apps.add(c.dataset.app):filtro.apps.delete(c.dataset.app);pagina=0;pinta(false,true)});
+  $('[data-cblimpa]').onclick=()=>{filtro.apps.clear();pagina=0;pinta(false,true)};
+}
+document.addEventListener('click',e=>{if(cbAberto&&!e.target.closest('.cb')){cbAberto=false;filtros()}});
+
+/* janela de páginas: 1 … 4 5 6 … 60, com anterior, próxima e ir para a página */
+function pager(p,total){
+  const set=new Set([0,1,p-1,p,p+1,total-2,total-1].filter(i=>i>=0&&i<total)),lista=[...set].sort((x,y)=>x-y),itens=[];
+  lista.forEach((i,k)=>{if(k&&i-lista[k-1]>1)itens.push('…');itens.push(i)});
+  return `<button data-p="${p-1}" ${p===0?'disabled':''} aria-label="Página anterior">‹</button>`+itens.map(i=>i==='…'?'<span style="align-self:center;color:var(--di)">…</span>':`<button data-p="${i}" class="${i===p?'on':''}" ${i===p?'aria-current="page"':''}>${i+1}</button>`).join('')+`<button data-p="${p+1}" ${p>=total-1?'disabled':''} aria-label="Próxima página">›</button><label style="display:flex;align-items:center;gap:6px;margin-left:8px">Ir para <input class="sel" style="width:64px" type="number" min="1" max="${total}" data-ir placeholder="${p+1}" aria-label="Ir para a página"></label>`;
+}
+function abas(){
+  $('[data-abas]').innerHTML=ABAS.map(([k,n])=>`<button class="tab ${k===aba?'on':''}" role="tab" aria-selected="${k===aba}" data-aba="${k}">${n}<span class="n">${lista(k).length}</span></button>`).join('');
+  document.querySelectorAll('[data-aba]').forEach(b=>b.onclick=()=>{aba=b.dataset.aba;pagina=0;pinta()});
+}
+function acoes(f){
+  if(f.e==='rev'&&!f.corr){
+    return `${f.review==='aberto'?`<a class="linkr" href="#" onclick="event.stopPropagation()">${ic('ext')}review aberto</a>`:`<button class="btn g sm" data-a="review" ${pode('review')?'':`disabled title="${porque.review}"`}>${ic('flask')}Abrir review</button>`}
+      <button class="btn d sm" data-a="reprovar" ${pode('decidir')?'':`disabled title="${porque.decidir}"`}>Reprovar</button>
+      <button class="btn p sm" data-a="aprovar" ${pode('decidir')?'':`disabled title="${porque.decidir}"`}>Aprovar</button>`;}
+  if(f.e==='aguard'){
+    return `<button class="btn d sm" data-a="liberar" ${pode('liberar')?'':`disabled title="${porque.liberar}"`}>Excluir</button>
+      <button class="btn p sm" data-a="liberar" ${pode('liberar')?'':`disabled title="${porque.liberar}"`}>Liberar</button>`;}
+  if(f.e==='entrega')return `<a class="linkr" href="prototipo-entrega.html" onclick="event.stopPropagation()">${ic('ext')}Entrega ${f.ent}</a>`;
+  if(f.e==='excl')return `<a class="linkr" href="#" onclick="event.stopPropagation()">${ic('ext')}issue ${f.c}-L</a>`;
+  return '';
+}
+function pinta(manterBusca=false,manterCombo=false){
+  crumb();if(!manterCombo)filtros();else{const n=filtro.apps.size;$('[data-cbb]').innerHTML=`${ic('grid')}${n===0?'Todas as aplicações':n===1?[...filtro.apps][0]:`${[...filtro.apps][0]} +${n-1}`}${ic('chev')}`}
+  abas();
+  const todas=lista(aba),pronta=aba==='prontas',varias=filtro.apps.size!==1;
+  const paginas=Math.max(1,Math.ceil(todas.length/POR));pagina=Math.min(pagina,paginas-1);
+  const l=todas.slice(pagina*POR,pagina*POR+POR);
+  const cnt=k=>base().filter(f=>f.e===k).length;
+  $('[data-resumo]').textContent=`${cnt('pronta')} prontas para Entrega · ${cnt('aguard')} aguardando liberação · ${cnt('exec')+cnt('rev')} em andamento`;
+  const selApp=sel.size?F.find(f=>f.c===[...sel][0]).a:null;
+  const cols=(pronta?1:0)+7+(varias?1:0)+((aba==='aguard'||aba==='limpeza')?1:0);
+  $('[data-lista]').innerHTML=l.length?`<table class="clic"><thead><tr>${pronta?'<th></th>':''}<th>Fatia</th>${varias?'<th>Aplicação</th>':''}<th>Projeto</th><th>Risco</th><th>Estado</th><th>Progresso</th>${aba==='aguard'||aba==='limpeza'?'<th>Idade</th>':''}<th></th></tr></thead><tbody>${
+    l.map(f=>{const trava=!f.flag,outra=pronta&&selApp&&f.a!==selApp&&!sel.has(f.c);
+      return `<tr data-c="${f.c}">${pronta?`<td class="chk">${trava?`<span title="Fatia sem flag: já vem marcada e travada (vira Liberada ao chegar a produção)">${ic('lock')}</span>`:`<input type="checkbox" data-sel="${f.c}" aria-label="Selecionar ${f.c}" ${sel.has(f.c)?'checked':''} ${outra?'disabled title="Uma Entrega é de uma Aplicação só"':''}>`}</td>`:''}
+      <td><span class="cod">${f.c}</span><span class="tt">${f.t}</span>${trava?`<span class="tag" title="Sem flag: vira Liberada ao chegar a produção">${ic('lock')}sem flag</span>`:''}${f.superada?`<span class="tag">${ic('alert')}vinha de uma Entrega superada</span>`:''}</td>
+      ${varias?`<td class="app">${f.a}</td>`:''}
+      <td>${projs(f)}</td><td><span class="risco ${f.r==='alto'?'alto':''}">${f.r}</span></td><td>${badge(f)}</td><td class="prog">${f.prog||''}</td>
+      ${aba==='aguard'||aba==='limpeza'?`<td>${f.dias?idadeTx(f):''}</td>`:''}
+      <td class="dir">${acoes(f)}</td></tr>`}).join('')}</tbody></table>`
+    :`<div class="vazio"><span class="ib">${ic('list','lg')}</span><b style="color:var(--tx)">Nenhuma Fatia aqui</b><span>${filtro.apps.size||filtro.busca||filtro.proj.size?'Nenhuma Fatia com esses filtros nesta aba.':'Quando uma Fatia chegar a este estado, ela aparece nesta aba.'}</span></div>`;
+  $('[data-pag-info]').textContent=todas.length?`${pagina*POR+1}–${Math.min(todas.length,pagina*POR+POR)} de ${todas.length}`:'';
+  $('[data-por]').value=POR;$('[data-por]').onchange=e=>{POR=Number(e.target.value);pagina=0;pinta()};
+  $('[data-nums]').innerHTML=paginas>1?pager(pagina,paginas):'';
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pagina=Number(b.dataset.p);pinta()});
+  const ir=$('[data-ir]');if(ir)ir.onkeydown=e=>{if(e.key==='Enter'){pagina=Math.min(paginas,Math.max(1,Number(ir.value)||1))-1;pinta()}};
+  $('[data-rodape]').innerHTML=pronta?`<button class="btn p" data-abrir ${pode('entrega')&&sel.size?'':`disabled title="${pode('entrega')?'Marque ao menos uma Fatia':porque.entrega}"`}>${ic('plus')}Abrir Entrega (${sel.size})</button>`:'';
+  document.querySelectorAll('[data-sel]').forEach(c=>c.onclick=e=>{e.stopPropagation();c.checked?sel.add(c.dataset.sel):sel.delete(c.dataset.sel);pinta()});
+  document.querySelectorAll('tbody tr').forEach(tr=>tr.onclick=()=>abreFatia(tr.dataset.c));
+  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=e=>{e.stopPropagation();const f=F.find(x=>x.c===b.closest('tr').dataset.c),a=b.dataset.a;
+    a==='liberar'?abreLiberacao(f):a==='review'?(f.review='aberto',pinta()):abreFatia(f.c)});
+  const ab=$('[data-abrir]');if(ab)ab.onclick=()=>{location.href='prototipo-abrir-entrega.html#fatias='+[...sel].join(',')};
+}
+
+/* gaveta */
+function fecha(){$('[data-gaveta]').innerHTML=''}
+function gaveta(corpo,pe=''){
+  $('[data-gaveta]').innerHTML=`<div class="veu" data-fecha></div><aside class="gaveta" role="dialog" aria-modal="true"><div class="g-corpo">${corpo}</div>${pe?`<div class="g-pe">${pe}</div>`:''}</aside>`;
+  document.querySelectorAll('[data-fecha]').forEach(x=>x.onclick=fecha);
+}
+const ln=([i,t])=>`<a class="linkr" href="#">${ic(i==='issue'?'issue':i==='git'?'git':'code')}${t}${ic('ext')}</a>`;
+function abreFatia(c){
+  const f=F.find(x=>x.c===c);
+  const flags=f.e==='lib'?['ligado','ligado','ligado']:f.e==='aguard'?['desligado','desligado','desligado']:f.e==='entrega'?['desligado','—','—']:['—','—','—'];
+  const chegou=['pronta','entrega','aguard','lib','excl'].includes(f.e);
+  gaveta(`<div class="dh"><div><span class="cod">${f.c}</span>${badge(f)}<h2>${f.t}</h2></div><button class="x" data-fecha aria-label="Fechar">${ic('x')}</button></div>
+   <dl class="kv"><dt>${ic('grid')}Aplicação</dt><dd>${f.a}</dd><dt>${ic('box')}Projeto</dt><dd>${projs(f)}</dd><dt>${ic('alert')}Risco</dt><dd>${f.r}</dd>
+    <dt>${ic('file')}Spec</dt><dd><a class="linkr" href="#">${ic('ext')}specs/feature/…/${f.c.toLowerCase()}.md</a></dd>
+    <dt>${ic('branch')}Branch</dt><dd class="mono">feature/${f.c.toLowerCase()}-${f.t.toLowerCase().split(' ')[0]}</dd>
+    ${chegou?`<dt>${ic('git')}No GitLab</dt><dd style="gap:6px 16px">${links(f).filter(Boolean).map(ln).join('')}</dd>`:`<dt>${ic('issue')}Issue-mãe</dt><dd><a class="linkr" href="#">${ic('ext')}#${20+num(f)*3}</a></dd>`}</dl>
+   ${f.tasks?`<div class="sub">${ic('list')}Tasks</div><ul class="ops">${f.tasks.map(([t,s,ok])=>`<li><span class="stat ${ok?'ok':'none'}">${ic(ok?'ok':'none')}</span><span>${t}</span>${s?`<span class="mono" style="margin-left:auto;color:var(--mu)">${s}</span>`:''}</li>`).join('')}</ul>`:''}
+   <div class="sub">${ic('flask')}Flag Features:${f.c}</div>
+   ${f.flag?`<div class="fl"><span>QA ${flags[0]}</span><span>HML ${flags[1]}</span><span>Produção ${flags[2]}</span></div>`:'<p class="txt">Fatia sem flag: nada a ligar. Vira Liberada ao chegar a produção.</p>'}
+   <a class="link-aud" href="prototipo-auditoria.html#obj=${f.c}">${ic('clock')}ver na auditoria</a>`);
+}
+
+/* gaveta: Liberar / Excluir */
+function abreLiberacao(f){
+  const grupo=F.filter(x=>x.e==='aguard'&&x.ent===f.ent),n=NOTAS[f.ent]||{v:'v1.0.0',notas:[[f.t,'Nova funcionalidade para os clientes desta Aplicação.']]};
+  const marcadas=new Set(grupo.map(x=>x.c));
+  const desenha=(modoExcluir=false)=>{
+    gaveta(`<div class="dh"><div><span class="pill run">${ic('wait')}Aguardando liberação</span><h2>Liberar Fatias · ${f.a} · Entrega ${f.ent} ${n.v}</h2></div><button class="x" data-fecha aria-label="Fechar">${ic('x')}</button></div>
+     <div class="sub">${ic('brief')}Notas de entrega</div>
+     <div class="notas">${n.notas.map(([a,b])=>`<div class="nota"><span class="ib">${ic('file')}</span><div><b>${a}</b><p>${b}</p></div></div>`).join('')}</div>
+     <div class="sub">${ic('layers')}Fatias desta Entrega</div>
+     <div class="box">${grupo.map(x=>{const l=links(x).filter(Boolean);return `<div class="fs"><label class="l1"><input type="checkbox" data-m="${x.c}" ${marcadas.has(x.c)?'checked':''}><span class="cod">${x.c}</span><span>${x.t}</span>${idadeTx(x)}</label>
+        <div class="links">${l.map(ln).join('')}${x.noIssue?'<span class="nd" title="A issue não está mais disponível no GitLab">issue indisponível</span>':''}</div></div>`}).join('')}</div>
+     <p class="txt" style="margin-top:8px">Os links levam ao GitLab: o que foi feito, a MR já mergeada e a issue. Só aparece o que ainda existe.</p>
+     <div class="sub">${ic('arrow')}Ordem da Liberação</div>
+     <div class="ordem"><span class="chip">${ic('server')}1 · API</span>${ic('arrow')}<span class="chip">${ic('monitor')}2 · Front</span></div>
+     <p class="txt" style="margin-top:8px">A Esteira liga os flags nessa ordem. Quem não for marcada continua aguardando.</p>
+     ${modoExcluir?`<div class="excl"><b>Excluir as Fatias marcadas</b>
+       <label><input type="radio" name="d" checked><span><b>Reverter</b> — desliga o flag em todos os ambientes e pede uma Fatia de limpeza (<span class="mono">${f.c}-L</span>) que remove o código.</span></label>
+       <label><input type="radio" name="d"><span><b>Absorver</b> — o código e o flag continuam e passam a ser declarados na próxima Entrega.</span></label>
+       <textarea placeholder="Motivo (obrigatório)" aria-label="Motivo"></textarea></div>`:''}`,
+     modoExcluir?`<button class="btn g esq" data-voltar>Voltar</button><button class="btn d" data-fecha>Confirmar exclusão</button>`
+     :`<button class="btn d esq" data-exc>${ic('trash')}Excluir</button><button class="btn p" data-lib>${ic('rocket')}Liberar selecionadas</button>`);
+    document.querySelectorAll('[data-m]').forEach(c=>c.onclick=()=>{c.checked?marcadas.add(c.dataset.m):marcadas.delete(c.dataset.m)});
+    const e=$('[data-exc]');if(e)e.onclick=()=>desenha(true);
+    const v=$('[data-voltar]');if(v)v.onclick=()=>desenha(false);
+    const l=$('[data-lib]');if(l)l.onclick=()=>{grupo.filter(x=>marcadas.has(x.c)).forEach(x=>{x.e='lib';x.prog='liberada hoje';delete x.dias});fecha();pinta()};
+  };
+  desenha(false);
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecha();if(cbAberto){cbAberto=false;filtros()}}});
+pinta();
+</script>
+</body></html>

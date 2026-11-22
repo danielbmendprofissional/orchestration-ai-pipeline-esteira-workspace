@@ -61,7 +61,7 @@ table.dif td.depois{color:var(--tx)}
         <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
         <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
           <div class="av-h">Aguardando você</div>
-          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
+          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar QA · E-12</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por Exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
           <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><a class="btn g" style="text-decoration:none" href="prototipo-excecoes.html#ver=SEC-2291">Revisar</a></div></div></div>
         </div>
       </div>
@@ -91,37 +91,37 @@ const rotDia=s=>{const n=Math.round((HOJE-dataDe(s))/DIA);return n===0?'Hoje':n=
 const QUEM={mor:{nome:'Daniel',ini:'DB',rot:'MOR',apps:null},aprovador:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico',apps:['Valuto','Cobrança Pix']},membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro',apps:['Valuto','Portal do Cliente','Gestão de Contratos']}};
 let quem='mor';
 
-const CATS={aprovacao:['Aprovações','user-ok'],escopo:['Escopo','issue'],entrega:['Entregas','layers'],publicacao:['Publicações','rocket'],excecao:['Exceções','shield'],politica:['Política','shield-ok'],cadastro:['Cadastro','grid'],papeis:['Papéis','users']};
+const CATS={aprovacao:['Aprovações','user-ok'],fatias:['Fatias','list'],entrega:['Entregas','layers'],publicacao:['Publicações','rocket'],excecao:['Exceções','shield'],politica:['Política','shield-ok'],cadastro:['Cadastro','grid'],papeis:['Papéis','users']};
 const ORIGEM={tela:'Tela da Esteira',bot:'Bot da Esteira, no GitLab',pipeline:'Pipeline do GitLab (template-ci)'};
 /* [quando, quem, origem, categoria, verbo, objeto [código, nome, link], aplicação, mudanças [[campo, antes, depois]], motivo, autoaprovação] */
 const EV=[
  ['23/10/2026 15:40','Daniel','tela','excecao','aprovou a exceção',['SEC-2311','Path traversal no upload','prototipo-excecoes.html#ver=SEC-2311'],'Valuto',[['Estado','Aguardando aprovação','Ativa']],'Único aprovador técnico disponível hoje.',true],
- ['23/10/2026 14:58','bot da Esteira','bot','publicacao','promoveu para QA',['v4.0.0-rc2','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Tag','—','v4.0.0-rc2'],['Merge','—','!88 (dev → qa)']]],
- ['23/10/2026 14:50','pipeline #2841','pipeline','publicacao','gate de QA liberou',['v4.0.0-rc2','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Resultado','—','Liberado (1 alta coberta pela SEC-2291)']]],
+ ['23/10/2026 14:58','bot da Esteira','bot','publicacao','fez o deploy no QA',['E-12','valuto-api · Notificações de limite','prototipo-entrega.html'],'Valuto',[['Artefato','—','sha 9f2c41a'],['Flags no QA','—','Features:V9 e Features:V10 ligados']]],
+ ['23/10/2026 14:50','pipeline #2841','pipeline','publicacao','gate de QA liberou',['E-12','valuto-api · Notificações de limite','prototipo-entrega.html'],'Valuto',[['Resultado','—','Liberado (1 alta coberta pela SEC-2291)']]],
  ['23/10/2026 11:20','Bruno Lima','tela','excecao','pediu a exceção',['SEC-2310','CVE crítica no Npgsql','prototipo-excecoes.html#ver=SEC-2310'],'Valuto',[['Tipo','—','Risco aceito'],['Vale em','—','QA, HML'],['Validade','—','até 20/11/2026']]],
  ['23/10/2026 10:40','Ana Souza','tela','cadastro','adicionou o destino',['prd-rj / valuto','valuto-api · PRD','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['KUBE_CONTEXT','—','prd-rj'],['NAMESPACE','—','valuto'],['REPLICAS','—','4']]],
  ['23/10/2026 10:05','Daniel','tela','politica','endureceu a política de PRD',['Valuto','Política de segurança','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Média (máx. sem exceção)','sem limite','5']]],
- ['23/10/2026 09:14','bot da Esteira','bot','publicacao','cortou a candidata',['v4.0.0-rc2','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Tag','—','v4.0.0-rc2 sobre dev @ 9f2c1e4']]],
+ ['23/10/2026 09:14','bot da Esteira','bot','publicacao','gerou o Artefato',['E-12','valuto-api · Notificações de limite','prototipo-entrega.html'],'Valuto',[['SHA','—','9f2c41a (último SHA verde da main)']]],
  ['22/10/2026 18:30','Carla Mendes','tela','excecao','aprovou a exceção',['SEC-2298','Chave de API no repositório','prototipo-excecoes.html#ver=SEC-2298'],'Portal do Cliente',[['Estado','Aguardando aprovação','Ativa']]],
  ['22/10/2026 17:02','Ana Souza','tela','excecao','pediu a exceção',['SEC-2298','Chave de API no repositório','prototipo-excecoes.html#ver=SEC-2298'],'Portal do Cliente',[['Tipo','—','Falso positivo'],['Vale em','—','QA, HML, PRD']]],
- ['22/10/2026 16:45','Daniel','tela','escopo','adicionou a issue #124 à entrega',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Issues','#118, #121','#118, #121, #124']]],
- ['22/10/2026 16:44','Daniel','tela','escopo','tirou a issue #119 da entrega',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Issues','#118, #119, #121','#118, #121']],'Fica para a entrega de filtros do extrato.'],
+ ['22/10/2026 16:45','Daniel','tela','fatias','aprovou a Fatia V4 (MR)',['V4','Busca de transações','prototipo-painel-fatias.html'],'Valuto',[['MR','Em revisão','Mergeada na main'],['Features:V4','—','desligado em todo ambiente']]],
+ ['22/10/2026 16:44','Daniel','tela','fatias','excluiu a Fatia V14',['V14','Cartão virtual','prototipo-painel-fatias.html'],'Valuto',[['Estado','Aguardando liberação','Excluída'],['Destino do código','—','reverter (limpeza V14-L)']],'Cliente adiou o cartão virtual.'],
  ['22/10/2026 14:10','Daniel','tela','papeis','deu o papel Publicador a Fábio Nunes',['Valuto','Pessoas e papéis','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Fábio Nunes','—','Publicador']]],
- ['22/10/2026 11:00','Elisa Prado','tela','aprovacao','aprovou a issue #131 na aprovação de negócio',['ENT-0046','Pix agendado','prototipo-entrega.html'],'Valuto',[['#131','Pendente','Aprovada']]],
- ['21/10/2026 19:30','Daniel','tela','aprovacao','reprovou a candidata',['v4.0.0-rc1','valuto-api · Extrato em PDF · QA','prototipo-entrega.html'],'Valuto',[['Candidata','Aguardando aprovação','Reprovada']],'Saldo inicial do extrato não bate com o fechamento de agosto.'],
+ ['22/10/2026 11:00','Elisa Prado','tela','aprovacao','liberou a Fatia V11',['E-9','Pix agendado','prototipo-entrega.html'],'Valuto',[['Features:V11','desligado','ligado em produção']]],
+ ['21/10/2026 19:30','Daniel','tela','aprovacao','reprovou o QA',['E-8','valuto-api · Extrato em PDF · QA','prototipo-entrega.html'],'Valuto',[['QA','Aguardando aprovação','Reprovado']],'Saldo inicial do extrato não bate com o fechamento de agosto.'],
  ['21/10/2026 16:40','Ana Souza','tela','cadastro','desabilitou QA no projeto',['valuto-batch','Projeto','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['QA','habilitado','desabilitado']]],
  ['21/10/2026 15:00','Carla Mendes','tela','excecao','reprovou a exceção',['SEC-2280','XSS refletido na busca','prototipo-excecoes.html#ver=SEC-2280'],'Portal do Cliente',[['Estado','Aguardando aprovação','Reprovada']],'Tem correção simples (escapar o termo); corrigir em vez de aceitar.'],
- ['21/10/2026 09:00','Diego Rocha','tela','entrega','abriu a entrega',['ENT-0043','Notificações por e-mail','prototipo-entrega.html'],'Portal do Cliente',[['Projetos','—','portal-api v2.3.0, portal-web v1.10.0'],['Issues','—','#58, #61']]],
- ['20/10/2026 18:00','Daniel','tela','entrega','cancelou a entrega',['ENT-0037','Exportação para ERP','prototipo-entrega.html'],'Valuto',[['Estado','Em andamento','Cancelada'],['Código em dev','—','absorvido pela próxima entrega']],'Cliente adiou a integração com o ERP para 2027.'],
- ['20/10/2026 16:20','Bruno Lima','tela','politica','endureceu a política de DEV',['Cobrança Pix','Política de segurança','prototipo-aplicacoes.html#app=CPX'],'Cobrança Pix',[['Modo em DEV','avisa','bloqueia'],['Crítica (máx. sem exceção)','—','0']]],
- ['20/10/2026 11:12','pipeline #2830','pipeline','publicacao','gate de QA bloqueou',['v2.2.0-rc1','valuto-frontend · Cadastro de cartões','prototipo-entrega.html'],'Valuto',[['Resultado','—','Bloqueado: 1 crítica sem exceção']]],
- ['19/10/2026 16:40','bot da Esteira','bot','publicacao','cortou a candidata',['v4.0.0-rc1','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Tag','—','v4.0.0-rc1 sobre dev @ 41b7a02']]],
- ['19/10/2026 10:30','Daniel','tela','cadastro','adicionou o projeto',['valuto-batch','Projeto','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Stack','—','outro'],['Ambientes','—','DEV, QA, PRD']]],
- ['18/10/2026 15:02','Daniel','tela','aprovacao','aprovou a proposta',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Aprovação da proposta','Pendente','Aprovada']],'Único aprovador técnico disponível.',true],
- ['18/10/2026 14:46','Daniel','tela','entrega','abriu a entrega',['ENT-0042','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Projetos','—','valuto-api v4.0.0, valuto-frontend v2.1.0'],['Issues','—','#118, #119, #121']]],
- ['17/10/2026 18:05','Carla Mendes','tela','aprovacao','publicou em produção',['v2.4.0','cpx-web · Pix por QR code','prototipo-entrega.html'],'Cobrança Pix',[['PRD','v2.3.2','v2.4.0']]],
+ ['21/10/2026 09:00','Diego Rocha','tela','entrega','abriu a Entrega',['E-11','Notificações por e-mail','prototipo-entrega.html'],'Portal do Cliente',[['Fatias','—','P4, P5'],['Fluxos','—','portal-api minor → v2.3.0, portal-web minor → v1.10.0']]],
+ ['20/10/2026 18:00','Daniel','tela','entrega','cancelou a Entrega',['E-7','Exportação para ERP','prototipo-entrega.html'],'Valuto',[['Estado','Em andamento','Cancelada'],['Código na main','—','absorvido pela próxima Entrega']],'Cliente adiou a integração com o ERP para 2027.'],
+ ['20/10/2026 16:20','Bruno Lima','tela','politica','endureceu a política de HML',['Cobrança Pix','Política de segurança','prototipo-aplicacoes.html#app=CPX'],'Cobrança Pix',[['Média (máx. sem Exceção)','sem limite','5']]],
+ ['20/10/2026 11:12','pipeline #2830','pipeline','publicacao','gate de QA bloqueou',['E-13','valuto-frontend · Cadastro de cartões','prototipo-entrega.html'],'Valuto',[['Resultado','—','Bloqueado: 1 crítica sem exceção']]],
+ ['19/10/2026 16:40','bot da Esteira','bot','publicacao','gerou o Artefato',['E-8','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['SHA','—','41b7a02 (último SHA verde da main)']]],
+ ['19/10/2026 10:30','Daniel','tela','cadastro','adicionou o projeto',['valuto-batch','Projeto','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Stack','—','outro'],['Ambientes','—','QA, PRD']]],
+ ['18/10/2026 15:02','Daniel','tela','aprovacao','aprovou o QA',['E-8','valuto-api · Extrato em PDF','prototipo-entrega.html'],'Valuto',[['QA · valuto-api','Aguardando aprovação','Aprovado']],'Único aprovador técnico disponível.',true],
+ ['18/10/2026 14:46','Daniel','tela','entrega','abriu a Entrega',['E-8','Extrato em PDF','prototipo-entrega.html'],'Valuto',[['Fatias','—','V1, V2, V3'],['Fluxos','—','valuto-api minor → v3.7.0, valuto-frontend minor → v2.0.3']]],
+ ['17/10/2026 18:05','Carla Mendes','tela','aprovacao','confirmou a produção',['v2.4.0','cpx-web · Pix por QR code','prototipo-entrega.html'],'Cobrança Pix',[['PRD','v2.3.2','v2.4.0']]],
  ['16/10/2026 09:40','Daniel','tela','papeis','tirou o papel Analista de Gabi Torres',['Valuto','Pessoas e papéis','prototipo-aplicacoes.html#app=VLT'],'Valuto',[['Gabi Torres','Analista, Membro','Membro']],'Mudou de time.'],
- ['15/10/2026 14:00','Diego Rocha','tela','entrega','abriu a entrega',['ENT-0039','Aditivos em lote','prototipo-entrega.html'],'Gestão de Contratos',[['Projetos','—','contratos-api v3.2.0']]],
+ ['15/10/2026 14:00','Diego Rocha','tela','entrega','abriu a Entrega',['E-10','Aditivos em lote','prototipo-entrega.html'],'Gestão de Contratos',[['Fluxos','—','contratos-api minor → v3.2.0']]],
  ['14/10/2026 10:15','Daniel','tela','cadastro','criou a aplicação',['CPX','Cobrança Pix','prototipo-aplicacoes.html#app=CPX'],'Cobrança Pix',[['Grupo do GitLab','—','cobranca-pix'],['Política','—','padrão']]]
 ].map(([quando,quem,orig,cat,verbo,obj,app,mud,motivo,auto],i)=>({id:'AUD-'+String(9120-i),quando,quem,orig,cat,verbo,obj,app,mud,motivo,auto}));
 
@@ -129,7 +129,7 @@ const ini=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
 const ator=e=>e.orig==='tela'?`<b>${e.quem}</b>`:`<span class="ator-bot">${ic(e.orig==='bot'?'bot':'git')}<b>${e.quem}</b></span>`;
 const resumoMud=e=>e.mud.slice(0,2).map(([c,a,d])=>`${c}: ${a==='—'?'':`<s>${a}</s> → `}<span class="para">${d}</span>`).join(' · ');
 
-/* filtro vindo de outra tela: #obj=ENT-0042&cat=escopo · #app=Valuto&cat=politica */
+/* filtro vindo de outra tela: #obj=E-12&cat=fatias · #app=Valuto&cat=politica */
 let objF='',filtroCat='todas',pagina=0;
 function lerHash(){
   const h=new URLSearchParams(location.hash.slice(1));

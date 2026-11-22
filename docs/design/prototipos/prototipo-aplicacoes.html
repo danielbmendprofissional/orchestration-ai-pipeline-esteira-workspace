@@ -146,7 +146,7 @@ tr.nova td{background:#0A4EE40D}
           <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
           <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
             <div class="av-h">Aguardando você</div>
-            <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
+            <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar QA · E-12</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por Exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
             <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><button class="btn g">Revisar</button></div></div></div>
           </div>
         </div>
@@ -196,26 +196,26 @@ const APLS=[
 ].map(([nome,sigla,grupo,proj,pes,abertas,ativa,papeis,lista])=>({nome,sigla,grupo,proj,pes,abertas,ativa,papeis,lista}));
 const visiveis=()=>APLS.filter(a=>quem==='mor'||a.papeis[quem]);
 
-const STACK={dotnet:'.NET',angular:'Angular',outro:'outro'},AMBS=['dev','qa','hml','prd'],AMB_N={dev:'DEV',qa:'QA',hml:'HML',prd:'PRD'};
+const STACK={dotnet:'.NET',angular:'Angular',outro:'outro'},AMBS=['review','qa','hml','prd'],AMB_N={review:'Review',qa:'QA',hml:'HML',prd:'PRD'};
 const SEVS=[['critica','Crítica','var(--bad)'],['alta','Alta','var(--run)'],['media','Média','#C9B458'],['baixa','Baixa','var(--low)']];
-const PAPEIS=[['analista','Analista','Mantém projetos, ambientes, destinos e a configuração de publicação'],['membro','Membro','Abre entrega, corta nova candidata, reexecuta'],['aprovador-tecnico','Aprovador técnico','Aprova proposta, candidata e entrega; aprova exceções; ajusta a política de segurança'],['aprovador-negocio','Aprovador de negócio','Aprovação de negócio, issue por issue, lendo as notas de entrega'],['publicador','Publicador','Publica em produção']];
+const PAPEIS=[['analista','Analista','Mantém projetos, ambientes, destinos e a configuração de publicação'],['membro','Membro','Abre Entrega (seleciona as Fatias), reexecuta'],['aprovador-tecnico','Aprovador técnico','Aprova a MR da Fatia, o QA e o HML; aprova Exceções; ajusta a política de segurança'],['aprovador-negocio','Aprovador de negócio','Libera e exclui Fatias, lendo as Notas de entrega'],['publicador','Publicador','Confirma a produção e usa o Atalho']];
 const SEGREDO=/PASSWORD|SENHA|SECRET|TOKEN|KEY|CREDENTIAL/i;
 const dst=(nome,ordem,cfg)=>({nome,ordem,cfg:Object.entries(cfg)});
 let dados={
- projetos:[{id:'valuto-api',stack:'dotnet',prd:'3.4.1',dep:'',ativo:true,branches:'dev, qa, hml, main'},{id:'valuto-frontend',stack:'angular',prd:'2.0.3',dep:'valuto-api',ativo:true,branches:'dev, qa, hml, main'},{id:'valuto-batch',stack:'outro',prd:'1.2.0',dep:'valuto-api',ativo:true,branches:'dev, main'}],
+ projetos:[{id:'valuto-api',stack:'dotnet',prd:'3.4.1',dep:'',ativo:true,branches:'main'},{id:'valuto-frontend',stack:'angular',prd:'2.0.3',dep:'valuto-api',ativo:true,branches:'main'},{id:'valuto-batch',stack:'outro',prd:'1.2.0',dep:'valuto-api',ativo:true,branches:'main'}],
  amb:{
-  'valuto-api':{dev:{on:true,d:[dst('k3d-dev / no-1',1,{KUBE_CONTEXT:'k3d-dev',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.dev.local'}),dst('k3d-dev / no-2',2,{KUBE_CONTEXT:'k3d-dev-2',NAMESPACE:'valuto',REPLICAS:'1',INGRESS_HOST:'api2.valuto.dev.local'})]},
+  'valuto-api':{review:{on:true,d:[dst('k3d-review / no-1',1,{KUBE_CONTEXT:'k3d-review',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.review.local'}),dst('k3d-review / no-2',2,{KUBE_CONTEXT:'k3d-review-2',NAMESPACE:'valuto',REPLICAS:'1',INGRESS_HOST:'api2.valuto.review.local'})]},
    qa:{on:true,d:[dst('k3d-qa / valuto',1,{KUBE_CONTEXT:'k3d-qa',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.qa.local'})]},
    hml:{on:true,d:[dst('k3d-hml / valuto',1,{KUBE_CONTEXT:'k3d-hml',NAMESPACE:'valuto',REPLICAS:'2',INGRESS_HOST:'api.valuto.hml.local'})]},
    prd:{on:true,d:[dst('prd-sp / valuto',1,{KUBE_CONTEXT:'prd-sp',NAMESPACE:'valuto',REPLICAS:'4',INGRESS_HOST:'api.valuto.com.br'}),dst('prd-rj / valuto',2,{KUBE_CONTEXT:'prd-rj',NAMESPACE:'valuto',REPLICAS:'4',INGRESS_HOST:'api.valuto.com.br'})]}},
-  'valuto-frontend':{dev:{on:true,d:[dst('k3d-dev / no-1',1,{KUBE_CONTEXT:'k3d-dev',NAMESPACE:'valuto',INGRESS_HOST:'valuto.dev.local'})]},qa:{on:true,d:[dst('k3d-qa / valuto',1,{KUBE_CONTEXT:'k3d-qa',NAMESPACE:'valuto',INGRESS_HOST:'valuto.qa.local'})]},
+  'valuto-frontend':{review:{on:true,d:[dst('k3d-review / no-1',1,{KUBE_CONTEXT:'k3d-review',NAMESPACE:'valuto',INGRESS_HOST:'valuto.review.local'})]},qa:{on:true,d:[dst('k3d-qa / valuto',1,{KUBE_CONTEXT:'k3d-qa',NAMESPACE:'valuto',INGRESS_HOST:'valuto.qa.local'})]},
    hml:{on:true,d:[dst('k3d-hml / valuto',1,{KUBE_CONTEXT:'k3d-hml',NAMESPACE:'valuto',INGRESS_HOST:'valuto.hml.local'})]},prd:{on:true,d:[dst('prd-sp / valuto',1,{KUBE_CONTEXT:'prd-sp',NAMESPACE:'valuto',INGRESS_HOST:'valuto.com.br'})]}},
-  'valuto-batch':{dev:{on:true,d:[dst('k3d-dev / jobs',1,{KUBE_CONTEXT:'k3d-dev',NAMESPACE:'valuto-jobs',SCHEDULE:'0 3 * * *'})]},qa:{on:false,d:[]},hml:{on:false,d:[]},prd:{on:true,d:[]}}},
- pol:{dev:{modo:'avisa',lim:{critica:'',alta:'',media:'',baixa:''}},qa:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}},hml:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}},prd:{modo:'bloqueia',lim:{critica:0,alta:0,media:5,baixa:''}}},
+  'valuto-batch':{review:{on:true,d:[dst('k3d-review / jobs',1,{KUBE_CONTEXT:'k3d-review',NAMESPACE:'valuto-jobs',SCHEDULE:'0 3 * * *'})]},qa:{on:false,d:[]},hml:{on:false,d:[]},prd:{on:true,d:[]}}},
+ pol:{review:{modo:'avisa',lim:{critica:'',alta:'',media:'',baixa:''}},qa:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}},hml:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}},prd:{modo:'bloqueia',lim:{critica:0,alta:0,media:5,baixa:''}}},
  papeis:[{n:'Ana Souza',u:'ana.souza',p:['analista','membro']},{n:'Bruno Lima',u:'bruno.lima',p:['membro','aprovador-tecnico']},{n:'Carla Mendes',u:'carla.mendes',p:['aprovador-tecnico','publicador']},{n:'Diego Rocha',u:'diego.rocha',p:['membro']},{n:'Elisa Prado',u:'elisa.prado',p:['aprovador-negocio']},{n:'Fábio Nunes',u:'fabio.nunes',p:['publicador']},{n:'Gabi Torres',u:'gabi.torres',p:['membro']}]
 };
 let salvo=clone(dados);
-const padrao=a=>a==='dev'?{modo:'avisa',lim:{critica:'',alta:'',media:'',baixa:''}}:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}};
+const padrao=a=>a==='review'?{modo:'avisa',lim:{critica:'',alta:'',media:'',baixa:''}}:{modo:'bloqueia',lim:{critica:0,alta:0,media:'',baixa:''}};
 const ini=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
 
 let atual=null,aba='projetos',pagina=0;
@@ -274,7 +274,7 @@ $('[data-nova]').onclick=()=>gaveta(topoG('<span class="pill blue">MOR</span>','
   <label class="fld"><span>Nome</span><input class="inp" data-n placeholder="ex.: Recursos Humanos"></label>
   <label class="fld"><span>Sigla</span><input class="inp mono" data-s maxlength="6" placeholder="ex.: RHU" style="text-transform:uppercase"><small data-s-msg></small></label>
   <label class="fld"><span>Grupo do GitLab</span><input class="inp mono" data-g placeholder="ex.: recursos-humanos"><small data-g-msg>Conferido ao sair do campo.</small></label>
-  <p class="obs">${ic('shield')}Nasce com a <span class="dic" title="DEV só avisa; QA, HML e produção bloqueiam crítica e alta sem exceção. Projetos e papéis vêm depois.">política padrão</span>.</p>
+  <p class="obs">${ic('shield')}Nasce com a <span class="dic" title="O review da Fatia só avisa; QA, HML e produção bloqueiam crítica e alta sem Exceção. Projetos e papéis vêm depois.">política padrão</span>.</p>
   <div class="acoes dir"><button class="btn g" data-fechar>Cancelar</button><button class="btn p" data-criar disabled title="Preencha nome, sigla e um grupo válido">${ic('plus')}Criar aplicação</button></div>`,(g,fechar)=>{
   let grupoOk=false;const n=g.querySelector('[data-n]'),s=g.querySelector('[data-s]'),gr=g.querySelector('[data-g]'),gm=g.querySelector('[data-g-msg]'),sm=g.querySelector('[data-s-msg]'),bt=g.querySelector('[data-criar]');
   const ver=()=>{const sig=s.value.trim().toUpperCase(),dup=APLS.some(a=>a.sigla===sig);
@@ -328,7 +328,7 @@ function criaCiclo(id,dep){let x=dep,n=0;while(x&&n<10){if(x===id)return true;x=
 function editarProjeto(id){
   const ed=pode.cad(),p=dados.projetos.find(x=>x.id===id),am=dados.amb[id],dis=ed?'':'disabled';
   gaveta(topoG(`<span class="pill">${ic('box')}projeto</span>`,`<span class="mono" style="font-size:inherit">${id}</span>`)+`
-    <dl class="kv"><dt>GitLab</dt><dd class="mono">${atual.grupo}/${id} ${ic('ext')}</dd><dt>Em produção</dt><dd class="mono">${p.prd==='—'?'nunca publicado':'v'+p.prd}</dd><dt>Branches</dt><dd class="mono">${p.branches}</dd></dl>
+    <dl class="kv"><dt>GitLab</dt><dd class="mono">${atual.grupo}/${id} ${ic('ext')}</dd><dt>Em produção</dt><dd class="mono">${p.prd==='—'?'nunca publicado':'v'+p.prd}</dd><dt>Branch</dt><dd class="mono">${p.branches}</dd></dl>
     <div class="lado"><label class="fld"><span>Stack</span><select class="sel" data-stack ${dis}>${Object.entries(STACK).map(([k,n])=>`<option value="${k}" ${p.stack===k?'selected':''}>${n}</option>`).join('')}</select></label>
       <label class="fld"><span>Ativo</span><span style="height:38px;display:flex;align-items:center"><input type="checkbox" class="tg" data-ativo ${p.ativo?'checked':''} ${dis} aria-label="Projeto ativo"></span></label></div>
     <label class="fld"><span>Depende de</span><select class="sel" data-dep ${dis}><option value="">nenhum</option>${dados.projetos.filter(o=>o.id!==id).map(o=>`<option ${p.dep===o.id?'selected':''}>${o.id}</option>`).join('')}</select><small data-dep-msg>Vem marcada em toda entrega nova; dá para mudar só na entrega.</small></label>
@@ -350,12 +350,12 @@ function addProjetos(){
   gaveta(topoG(`<span class="pill">${ic('git')}<span class="mono">${atual.grupo}</span></span>`,'Adicionar projetos')+`
     <div class="box">${DO_GRUPO.map(([id,sug])=>{const ja=dados.projetos.some(p=>p.id===id);
       return `<label class="ck${ja?' ja':''}"><input type="checkbox" data-pid="${id}" ${ja?'disabled checked':''}><span class="mono">${id}</span>${ja?'<span class="dica-g" style="margin-left:auto">já cadastrado</span>':`<select class="sel sm" data-pst="${id}" aria-label="Stack de ${id}" title="${sug?'Sugerida pelo APP_TECHNOLOGY do .gitlab-ci.yml':'Sem APP_TECHNOLOGY no .gitlab-ci.yml'}">${Object.entries(STACK).map(([k,n])=>`<option value="${k}" ${sug===k||(!sug&&k==='outro')?'selected':''}>${n}</option>`).join('')}</select>`}</label>`}).join('')}</div>
-    <p class="obs">${ic('server')}Entra com <span class="dic" title="Produção sempre habilitada; DEV, QA e HML conforme existam as branches no projeto.">os 4 ambientes</span> e stack <span class="dic" title="Lida do APP_TECHNOLOGY no .gitlab-ci.yml, quando existe">sugerida</span>.</p>
+    <p class="obs">${ic('server')}Entra com <span class="dic" title="Produção sempre habilitada; QA e HML conforme o projeto. O review da Fatia só avisa.">os 4 ambientes</span> e stack <span class="dic" title="Lida do APP_TECHNOLOGY no .gitlab-ci.yml, quando existe">sugerida</span>.</p>
     <div class="acoes dir"><button class="btn g" data-fechar>Cancelar</button><button class="btn p" data-ok disabled title="Marque ao menos um projeto">${ic('plus')}Adicionar</button></div>`,(g,fechar)=>{
     const bt=g.querySelector('[data-ok]'),marc=()=>[...g.querySelectorAll('[data-pid]:checked:not(:disabled)')];
     g.querySelectorAll('[data-pid]').forEach(c=>c.onchange=()=>{const n=marc().length;bt.disabled=!n;bt.title=n?'':'Marque ao menos um projeto';bt.innerHTML=ic('plus')+(n?`Adicionar ${n} projeto${n>1?'s':''}`:'Adicionar')});
-    bt.onclick=()=>{marc().forEach(c=>{const id=c.dataset.pid;dados.projetos.push({id,stack:g.querySelector(`[data-pst="${id}"]`).value,prd:'—',dep:'',ativo:true,branches:'dev, main'});
-      dados.amb[id]={dev:{on:true,d:[]},qa:{on:false,d:[]},hml:{on:false,d:[]},prd:{on:true,d:[]}}});persiste();fechar();detalhe()};
+    bt.onclick=()=>{marc().forEach(c=>{const id=c.dataset.pid;dados.projetos.push({id,stack:g.querySelector(`[data-pst="${id}"]`).value,prd:'—',dep:'',ativo:true,branches:'main'});
+      dados.amb[id]={review:{on:true,d:[]},qa:{on:false,d:[]},hml:{on:false,d:[]},prd:{on:true,d:[]}}});persiste();fechar();detalhe()};
   });
 }
 
@@ -405,16 +405,16 @@ function editarDestino(pid,amb,i){
 function abaPolitica(){
   const ed=pode.pol(),P=dados.pol;
   const cab=x=>{const endu=JSON.stringify(P[x])!==JSON.stringify(padrao(x));return `<th>${AMB_N[x]}<small class="${endu?'endu':''}">${endu?'endurecida':'padrão'}</small></th>`};
-  const modo=x=>x==='dev'?`<span class="seg" role="group" aria-label="Modo em DEV"><button data-modo="avisa" class="${P.dev.modo==='avisa'?'on':''}" ${ed?'':'disabled'}>Avisa</button><button data-modo="bloqueia" class="${P.dev.modo==='bloqueia'?'on':''}" ${ed?'':'disabled'}>Bloqueia</button></span>`
+  const modo=x=>x==='review'?`<span class="seg" role="group" aria-label="Modo no review"><button data-modo="avisa" class="${P.review.modo==='avisa'?'on':''}" ${ed?'':'disabled'}>Avisa</button><button data-modo="bloqueia" class="${P.review.modo==='bloqueia'?'on':''}" ${ed?'':'disabled'}>Bloqueia</button></span>`
     :`<span class="travado" style="font-family:inherit;font-size:13px" title="Piso fixo: em ${AMB_N[x]} sempre bloqueia">Bloqueia ${ic('lock')}</span>`;
-  const cel=(x,k,n)=>x!=='dev'&&(k==='critica'||k==='alta')?`<span class="travado" title="Piso fixo: ${n.toLowerCase()} em ${AMB_N[x]} só passa com exceção">0 ${ic('lock')}</span>`
+  const cel=(x,k,n)=>x!=='review'&&(k==='critica'||k==='alta')?`<span class="travado" title="Piso fixo: ${n.toLowerCase()} em ${AMB_N[x]} só passa com exceção">0 ${ic('lock')}</span>`
     :`<input class="inp" type="number" min="0" data-lim="${x}|${k}" value="${P[x].lim[k]}" placeholder="${P[x].modo==='avisa'?'só avisa':'sem limite'}" ${ed&&P[x].modo==='bloqueia'?'':'disabled'} aria-label="Máximo de ${n} sem exceção em ${AMB_N[x]}">`;
   $('#aba').innerHTML=(ed?'':soLeitura('Aprovador técnico ou MOR'))+`<div class="box tw"><table class="pol"><thead><tr><th><span class="dic" title="Número = quantas passam sem exceção (0 = nenhuma). Vazio = sem limite.">Máximo sem exceção</span></th>${AMBS.map(cab).join('')}</tr></thead><tbody>
       <tr><td>Modo</td>${AMBS.map(x=>`<td>${modo(x)}</td>`).join('')}</tr>
       ${SEVS.map(([k,n,c])=>`<tr><td><span class="sevn"><i class="dotc" style="--c:${c}"></i>${n}</span></td>${AMBS.map(x=>`<td>${cel(x,k,n)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
-    <div class="links"><p class="obs">${ic('lock')}<span class="dic" title="Em QA, HML e produção, crítica e alta só não bloqueiam com exceção; em DEV só avisa. A aplicação pode endurecer, nunca afrouxar.">Piso fixo da Esteira</span>: dá para endurecer, nunca afrouxar.</p><a class="link-aud" href="prototipo-excecoes.html">${ic('shield')}2 exceções ativas${ic('chev')}</a>${linkAud('Quem mudou a política','politica')}</div>`;
+    <div class="links"><p class="obs">${ic('lock')}<span class="dic" title="Em QA, HML e produção, crítica e alta só não bloqueiam com exceção; no review só avisa. A aplicação pode endurecer, nunca afrouxar.">Piso fixo da Esteira</span>: dá para endurecer, nunca afrouxar.</p><a class="link-aud" href="prototipo-excecoes.html">${ic('shield')}2 exceções ativas${ic('chev')}</a>${linkAud('Quem mudou a política','politica')}</div>`;
   if(!ed){barra('');return}
-  document.querySelectorAll('[data-modo]').forEach(b=>b.onclick=()=>{P.dev.modo=b.dataset.modo;if(P.dev.modo==='avisa')P.dev.lim={critica:'',alta:'',media:'',baixa:''};abaPolitica()});
+  document.querySelectorAll('[data-modo]').forEach(b=>b.onclick=()=>{P.review.modo=b.dataset.modo;if(P.review.modo==='avisa')P.review.lim={critica:'',alta:'',media:'',baixa:''};abaPolitica()});
   document.querySelectorAll('[data-lim]').forEach(n=>n.oninput=()=>{const [x,k]=n.dataset.lim.split('|');P[x].lim[k]=n.value===''?'':Math.max(0,Math.floor(+n.value));
     const th=document.querySelectorAll('table.pol thead th')[AMBS.indexOf(x)+1],endu=JSON.stringify(P[x])!==JSON.stringify(padrao(x));th.querySelector('small').className=endu?'endu':'';th.querySelector('small').textContent=endu?'endurecida':'padrão';
     barraSalvar('pol','Salvar política')});
