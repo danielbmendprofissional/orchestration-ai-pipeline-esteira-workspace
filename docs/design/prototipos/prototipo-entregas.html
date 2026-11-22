@@ -64,6 +64,11 @@
 .slot{border:1px solid var(--ln2);border-radius:8px;padding:8px 12px;background:var(--s2);color:var(--tx2);display:flex;align-items:center;gap:6px;min-height:34px}
 .slot.livre{border-style:dashed;color:var(--di);background:none}
 .slot.ocup{border-color:#2D6BFF66;background:var(--blue-bg)}
+.hfl{display:grid;grid-template-columns:minmax(0,1.6fr) 150px 190px minmax(160px,auto);gap:16px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ln);font-size:13px}
+.hfl:last-child{border-bottom:0}.hfl .pj{font-family:var(--mono);font-size:12.5px;color:var(--tx2)}
+.hfl .lk2{display:inline-flex;align-items:center;gap:6px;color:var(--blue-tx);font-size:12.5px}.hfl .lk2:hover{text-decoration:underline}
+.hfl .acao{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+@media (max-width:1100px){.hfl{grid-template-columns:1fr}.hfl .acao{justify-content:flex-start}}
 .slot.bloq{border-color:var(--bad-ln);background:var(--bad-bg);color:var(--bad-tx)}
 @media (max-width:1100px){.cab{display:none}.ent{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.grade2{grid-template-columns:1fr}}
 </style></head>
@@ -77,9 +82,14 @@
       <button class="on" data-vis="lista"><svg class="i"><use href="#i-list"/></svg>Lista</button>
       <button data-vis="painel"><svg class="i"><use href="#i-grid"/></svg>Painel</button>
     </div>
-    <a class="btn g" href="prototipo-abrir-entrega.html#tipo=hotfix" style="text-decoration:none"><svg class="i"><use href="#i-alert"/></svg>Abrir hotfix</a>
+    <a class="btn g" href="prototipo-pedir-hotfix.html" style="text-decoration:none" title="O hotfix nasce de um pedido: a Esteira cria a issue e a Entrega só abre depois da MR na main"><svg class="i"><use href="#i-alert"/></svg>Pedir hotfix</a>
     <a class="btn p" href="prototipo-painel-fatias.html" style="text-decoration:none" title="A Entrega nasce da seleção de Fatias Prontas para Entrega"><svg class="i"><use href="#i-layers"/></svg>Escolher Fatias</a>
   </div>
+
+  <section class="panel" data-hf hidden>
+    <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-alert"/></svg></span>Hotfixes pedidos <span class="n" data-hf-n></span></h2><span class="legenda">a Entrega só abre com a MR hotfix/* na main</span></div>
+    <div class="box" data-hf-lista></div>
+  </section>
 
   <section data-vista="lista">
     <div class="filtrobar">
@@ -174,6 +184,19 @@ document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{document.queryS
 document.querySelector('[data-app]').onchange=()=>{pagina=0;desenha()};document.querySelector('[data-busca]').oninput=()=>{pagina=0;desenha()};
 document.querySelectorAll('[data-vis]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-vis]').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('[data-vista]').forEach(s=>s.hidden=s.dataset.vista!==b.dataset.vis)});
 desenha();
+
+/* hotfixes pedidos: pedido, correção e MR antes da Entrega (ADR-0027) */
+const HF=[
+ {id:'H-3',proj:'valuto-api',motivo:'Erro 500 no extrato de contas encerradas',exe:'agente',est:'pronto',issue:151,mr:71,t:'15 min'},
+ {id:'H-4',proj:'valuto-frontend',motivo:'Botão de download quebrado no Safari',exe:'humano',est:'mr',issue:152,mr:73,t:'2 h'},
+ {id:'H-5',proj:'portal-web',motivo:'Link de recuperar senha expirado',exe:'agente',est:'corr',issue:153,t:'1 dia'}];
+const HFE={pronto:['run','box','Pronto para Entrega'],mr:['blue','branch','MR aberta'],corr:['','wait','Aguardando a correção']};
+document.querySelector('[data-hf]').hidden=!HF.length;document.querySelector('[data-hf-n]').textContent=HF.length;
+document.querySelector('[data-hf-lista]').innerHTML=HF.map(h=>{const [c,i,t]=HFE[h.est];
+ return `<div class="hfl"><div><div class="nome"><span class="mono" style="color:var(--di)">${h.id}</span>${h.motivo}</div><div class="sub2"><span class="pj">${h.proj}</span> · executa: ${h.exe==='agente'?'o agente':'você'} · há ${h.t}</div></div>
+  <span><span class="pill ${c}">${ic(i)}${t}</span></span>
+  <span style="display:grid;gap:3px"><a class="lk2" href="#">${ic('issue')}issue #${h.issue}${ic('ext')}</a>${h.mr?`<a class="lk2" href="#">${ic('git')}MR !${h.mr} hotfix/*${ic('ext')}</a>`:'<span class="sub2">sem MR ainda</span>'}</span>
+  <span class="acao">${h.est==='pronto'?`<a class="btn p sm" style="text-decoration:none" href="prototipo-abrir-entrega.html#tipo=hotfix&hf=${h.id}">${ic('layers')}Abrir Entrega</a>`:h.est==='mr'?'<button class="btn g sm" title="Só o Aprovador técnico ou o MOR aprovam a MR">Aprovar MR</button>':''}</span></div>`}).join('');
 
 /* gráficos em SVG: barras finas, ponta arredondada no topo, grade discreta, tooltip por coluna */
 const NS='http://www.w3.org/2000/svg';
