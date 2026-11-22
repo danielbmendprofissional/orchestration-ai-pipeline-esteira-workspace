@@ -1,6 +1,6 @@
 ﻿<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Esteira — Entregas (protótipo)</title>
+<title>Esteira — Entregas (protótipo D1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="base.css">
 <style>
@@ -59,7 +59,7 @@
 .grafico .alvo{fill:transparent}
 .dica{position:absolute;pointer-events:none;background:var(--s3);border:1px solid var(--ln2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);box-shadow:0 8px 20px #000A;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-8px;z-index:2}
 .dica small{display:block;color:var(--mu)}
-.amb{display:grid;grid-template-columns:130px repeat(4,1fr);gap:8px;align-items:center;font-size:12.5px;padding:9px 0;border-bottom:1px solid var(--ln)}
+.amb{display:grid;grid-template-columns:130px repeat(3,1fr);gap:8px;align-items:center;font-size:12.5px;padding:9px 0;border-bottom:1px solid var(--ln)}
 .amb:last-child{border-bottom:0}.amb .h{color:var(--mu);font-weight:600}
 .slot{border:1px solid var(--ln2);border-radius:8px;padding:8px 12px;background:var(--s2);color:var(--tx2);display:flex;align-items:center;gap:6px;min-height:34px}
 .slot.livre{border-style:dashed;color:var(--di);background:none}
@@ -77,12 +77,13 @@
       <button class="on" data-vis="lista"><svg class="i"><use href="#i-list"/></svg>Lista</button>
       <button data-vis="painel"><svg class="i"><use href="#i-grid"/></svg>Painel</button>
     </div>
-    <a class="btn p" href="prototipo-abrir-entrega.html" style="text-decoration:none"><svg class="i"><use href="#i-layers"/></svg>Abrir entrega</a>
+    <a class="btn g" href="prototipo-abrir-entrega.html#tipo=hotfix" style="text-decoration:none"><svg class="i"><use href="#i-alert"/></svg>Abrir hotfix</a>
+    <a class="btn p" href="prototipo-painel-fatias.html" style="text-decoration:none" title="A Entrega nasce da seleção de Fatias Prontas para Entrega"><svg class="i"><use href="#i-layers"/></svg>Escolher Fatias</a>
   </div>
 
   <section data-vista="lista">
     <div class="filtrobar">
-      <label class="campo"><svg class="i"><use href="#i-list"/></svg><input type="search" placeholder="Buscar por nome, issue ou versão" data-busca></label>
+      <label class="campo"><svg class="i"><use href="#i-list"/></svg><input type="search" placeholder="Buscar por nome, Fatia ou versão" data-busca></label>
       <select class="sel" data-app><option value="">Todas as aplicações</option><option>Valuto</option><option>Portal do Cliente</option></select>
       <button class="f on" data-st="abertas">Abertas <span class="n" data-c="abertas"></span></button>
       <button class="f" data-st="concluidas">Concluídas <span class="n" data-c="concluidas"></span></button>
@@ -90,7 +91,7 @@
       <button class="f" data-st="todas">Todas <span class="n" data-c="todas"></span></button>
     </div>
     <div class="lista">
-      <div class="cab"><span>Entrega</span><span>Projetos e etapas</span><span>Etapa atual</span><span>Vez</span><span></span></div>
+      <div class="cab"><span>Entrega</span><span>Projetos e etapas</span><span>Estado</span><span>Vez</span><span></span></div>
       <div data-lista></div>
     </div>
     <div class="pagl"><span data-pag-info></span><div class="nums" data-nums></div></div>
@@ -99,8 +100,8 @@
   <section data-vista="painel" hidden>
     <div class="kpis">
       <div class="kpi"><span class="top">Entregas abertas<svg class="i"><use href="#i-layers"/></svg></span><b>9</b><small>em 2 aplicações</small></div>
-      <div class="kpi"><span class="top">Aguardando você<svg class="i"><use href="#i-inbox"/></svg></span><b style="color:var(--blue-tx)">2</b><small>1 candidata · 1 exceção</small></div>
-      <div class="kpi"><span class="top">Bloqueadas ou com falha<svg class="i" style="color:var(--bad-tx)"><use href="#i-alert"/></svg></span><b style="color:var(--bad-tx)">1</b><small>Cadastro de cartões · gate</small></div>
+      <div class="kpi"><span class="top">Aguardando você<svg class="i"><use href="#i-inbox"/></svg></span><b style="color:var(--blue-tx)">2</b><small>1 QA · 1 Exceção</small></div>
+      <div class="kpi"><span class="top">Bloqueadas ou com falha<svg class="i" style="color:var(--bad-tx)"><use href="#i-alert"/></svg></span><b style="color:var(--bad-tx)">1</b><small>Cadastro de cartões · gate de QA</small></div>
       <div class="kpi"><span class="top">Tempo médio até produção<svg class="i"><use href="#i-clock"/></svg></span><b>6,2 dias</b><small>últimas 8 semanas</small></div>
     </div>
     <div class="grade2">
@@ -112,10 +113,10 @@
       <section class="panel"><div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-clock"/></svg></span>Tempo médio em cada etapa</h2><span class="legenda">horas · últimas 8 semanas</span></div><div class="grafico" id="g-etapa"></div></section>
       <section class="panel">
         <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-server"/></svg></span>Quem está em cada ambiente</h2></div>
-        <div class="amb"><span class="h">Projeto</span><span class="h">DEV</span><span class="h">QA</span><span class="h">HML</span><span class="h">PRD</span></div>
-        <div class="amb"><span>valuto-api</span><span class="slot livre">livre</span><span class="slot ocup"><svg class="i"><use href="#i-run"/></svg>Extrato</span><span class="slot ocup"><svg class="i"><use href="#i-wait"/></svg>Pix</span><span class="slot"><svg class="i" style="color:var(--ok-tx)"><use href="#i-ok"/></svg>v3.4.1</span></div>
-        <div class="amb"><span>valuto-frontend</span><span class="slot bloq"><svg class="i"><use href="#i-fail"/></svg>Cartões</span><span class="slot livre">livre</span><span class="slot livre">livre</span><span class="slot"><svg class="i" style="color:var(--ok-tx)"><use href="#i-ok"/></svg>v2.0.3</span></div>
-        <div class="amb"><span>portal-web</span><span class="slot ocup"><svg class="i"><use href="#i-run"/></svg>Novo login</span><span class="slot livre">livre</span><span class="slot livre">livre</span><span class="slot"><svg class="i" style="color:var(--ok-tx)"><use href="#i-ok"/></svg>v1.8.0</span></div>
+        <div class="amb"><span class="h">Projeto</span><span class="h" title="Sem fila: o Artefato novo supera o anterior">QA</span><span class="h" title="Um Fluxo por vez">HML</span><span class="h" title="Um Fluxo por vez">PRD</span></div>
+        <div class="amb"><span>valuto-api</span><span class="slot ocup"><svg class="i"><use href="#i-wait"/></svg>E-12</span><span class="slot ocup"><svg class="i"><use href="#i-wait"/></svg>E-9</span><span class="slot"><svg class="i" style="color:var(--ok-tx)"><use href="#i-ok"/></svg>v3.7.0</span></div>
+        <div class="amb"><span>valuto-frontend</span><span class="slot bloq"><svg class="i"><use href="#i-fail"/></svg>E-13</span><span class="slot livre">livre</span><span class="slot livre">livre</span></div>
+        <div class="amb"><span>contratos-api</span><span class="slot livre">livre</span><span class="slot ocup"><svg class="i"><use href="#i-run"/></svg>E-20</span><span class="slot"><svg class="i" style="color:var(--ok-tx)"><use href="#i-ok"/></svg>v3.1.0</span></div>
       </section>
     </div>
   </section>
@@ -124,29 +125,32 @@
 <script src="comum.js"></script>
 <script>
 const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
-const NOMES=['Abertura','Aprovação da proposta','DEV','QA','HML','Aprovação de negócio','Aprovação da entrega','PRD'];
-const CURTO=['Abertura','Proposta','DEV','QA','HML','Negócio','Entrega','PRD'];
-const ICONE={o:['ok','ok'],r:['run','run'],n:['none','none'],b:['bad','fail'],v:['void','x']};
-const ESTADO={run:['run','run',true],wait:['run','wait'],bad:['bad','fail'],ok:['ok','ok'],x:['none','x']};
-// passos: o concluído · r executando · n não iniciado · b bloqueado/falha · v anulado · "·" não existe (hotfix)
+const NOMES=['Abertura','QA','HML','PRD','Liberação'];
+const CURTO=NOMES;
+const ICONE={o:['ok','ok'],r:['run','run'],w:['run','wait'],f:['run','wait'],n:['none','none'],b:['bad','fail'],v:['void','x']};
+const ESTADO={run:['run','run',true],wait:['run','wait'],fila:['run','wait'],lib:['run','wait'],bad:['bad','fail'],rb:['bad','fail'],ok:['ok','ok'],x:['none','x'],sup:['none','x']};
+const TEXTO={run:'Em andamento',wait:'Aguardando aprovação',fila:'Em fila',lib:'Publicada, aguardando Liberação',bad:'Bloqueada ou com falha',rb:'Em rollback',ok:'Concluída',x:'Cancelada',sup:'Superada'};
+// passos de cada Fluxo, na ordem Abertura · QA · HML · PRD · Liberação: o concluído · r executando · w aguardando aprovação · f em fila · n não iniciado · b bloqueado ou com falha · v anulado · "·" não se aplica (hotfix)
 const base=[
- {n:'Extrato em PDF',app:'Valuto',st:'abertas',e:'run',vez:'Você',dica:'aprovar candidata rc2',t:'40 min',fx:[['valuto-api','v4.0.0-rc2','ooornnnn'],['valuto-frontend','v2.1.0-rc1','oornnnnn']]},
- {n:'Pix agendado',app:'Valuto',st:'abertas',e:'wait',vez:'Negócio',dica:'aprovar 4 issues',t:'3 h',fx:[['valuto-api','v3.5.0-rc1','ooooornn']]},
- {n:'Cadastro de cartões',app:'Valuto',st:'abertas',e:'bad',vez:'Equipe',dica:'1 crítica sem exceção',t:'20 min',fx:[['valuto-frontend','v2.2.0-rc1','oobnnnnn']]},
- {n:'Novo login',app:'Portal do Cliente',st:'abertas',e:'run',vez:'—',dica:'pipeline rodando',t:'5 min',fx:[['portal-web','v1.9.0-rc1','oornnnnn']]},
- {n:'Limite por cartão',app:'Valuto',st:'abertas',e:'wait',vez:'Técnico',dica:'aprovar proposta',t:'1 h',fx:[['valuto-api','v3.6.0','ornnnnnn']]},
- {n:'Notificações por e-mail',app:'Portal do Cliente',st:'abertas',e:'run',vez:'—',dica:'qa-agent rodando',t:'12 min',fx:[['portal-api','v2.3.0-rc1','ooornnnn'],['portal-web','v1.10.0-rc1','oornnnnn']]},
- {n:'Tema escuro',app:'Portal do Cliente',st:'abertas',e:'wait',vez:'Técnico',dica:'aprovar entrega',t:'1 dia',fx:[['portal-web','v1.11.0-rc2','oooooorn']]},
- {n:'Simulador de crédito',app:'Valuto',st:'abertas',e:'run',vez:'—',dica:'aguarda HML liberar',t:'2 h',fx:[['valuto-api','v3.7.0-rc1','oooornnn']]},
- {n:'Busca de transações',app:'Valuto',st:'abertas',e:'wait',vez:'Publicador',dica:'publicar em produção',t:'30 min',fx:[['valuto-api','v3.8.0-rc1','ooooooor']]},
- {n:'Correção de juros',app:'Valuto',st:'concluidas',e:'ok',vez:'—',dica:'publicada em produção',t:'2 dias',hotfix:true,fx:[['valuto-api','v3.4.1','o·····oo']]},
- {n:'Relatório de faturas',app:'Portal do Cliente',st:'concluidas',e:'ok',vez:'—',dica:'publicada em produção',t:'9 dias',fx:[['portal-web','v1.8.0','oooooooo']]},
- {n:'Exportação para ERP',app:'Valuto',st:'canceladas',e:'x',vez:'—',dica:'escopo absorvido',t:'4 dias',fx:[['valuto-api','v3.5.0-rc1','ooovvvvv']]}
+ {n:'Notificações de limite e resumo mensal',app:'Valuto',st:'abertas',e:'wait',vez:'Você',dica:'aprovar QA',t:'40 min',fx:[['valuto-api','v3.8.0','ownnn'],['valuto-frontend','v2.1.0','ornnn']]},
+ {n:'Pix agendado e extrato por período',app:'Valuto',st:'abertas',e:'lib',vez:'Negócio',dica:'liberar as Fatias V11 e V12',t:'3 h',fx:[['valuto-api','v3.7.0','oooow'],['valuto-frontend','v2.0.3','oooow']]},
+ {n:'Cadastro de cartões',app:'Valuto',st:'abertas',e:'bad',vez:'Equipe',dica:'1 crítica sem Exceção',t:'20 min',fx:[['valuto-frontend','v2.1.0','obnnn']]},
+ {n:'Novo login',app:'Portal do Cliente',st:'abertas',e:'run',vez:'—',dica:'pipeline do QA rodando',t:'5 min',fx:[['portal-web','v1.9.0','ornnn']]},
+ {n:'Aditivos de contrato',app:'Gestão de Contratos',st:'abertas',e:'fila',vez:'—',dica:'espera vaga no HML',t:'1 h',fx:[['contratos-api','v3.2.0','oofnn']]},
+ {n:'Notificações por e-mail',app:'Portal do Cliente',st:'abertas',e:'run',vez:'—',dica:'qa-agent rodando',t:'12 min',fx:[['portal-api','v2.3.0','oornn'],['portal-web','v1.10.0','ornnn']]},
+ {n:'Tema escuro',app:'Portal do Cliente',st:'abertas',e:'wait',vez:'Técnico',dica:'aprovar HML',t:'1 dia',fx:[['portal-web','v1.11.0','oownn']]},
+ {n:'Simulador de crédito',app:'Valuto',st:'abertas',e:'run',vez:'—',dica:'DAST do QA rodando',t:'2 h',fx:[['valuto-api','v3.9.0','ornnn']]},
+ {n:'Busca de transações',app:'Valuto',st:'abertas',e:'wait',vez:'Publicador',dica:'confirmar produção',t:'30 min',fx:[['valuto-api','v3.8.0','ooown']]},
+ {n:'Reversão do resumo mensal',app:'Valuto',st:'abertas',e:'rb',vez:'Equipe',dica:'valuto-api voltou ao Artefato anterior',t:'1 h',fx:[['valuto-api','v3.8.0','oooob']]},
+ {n:'Correção de juros',app:'Valuto',st:'concluidas',e:'ok',vez:'—',dica:'publicada em produção',t:'2 dias',hotfix:true,fx:[['valuto-api','v3.7.1','o··o·']]},
+ {n:'Relatório de faturas',app:'Portal do Cliente',st:'concluidas',e:'ok',vez:'—',dica:'Liberação feita',t:'9 dias',fx:[['portal-web','v1.8.0','ooooo']]},
+ {n:'Exportação para ERP',app:'Valuto',st:'canceladas',e:'x',vez:'—',dica:'código absorvido pela próxima Entrega',t:'4 dias',fx:[['valuto-api','v3.5.0','ooovv']]},
+ {n:'Extrato por categoria',app:'Valuto',st:'canceladas',e:'sup',vez:'—',dica:'um Artefato mais novo tomou o QA; as Fatias voltaram para Prontas para Entrega',t:'6 dias',fx:[['valuto-api','v3.6.0','ovvvv']]}
 ];
 const antigas=['Cadastro de favorecidos','Comprovante em PDF','Login com biometria','Extrato por categoria','Limite noturno','Agenda de pagamentos','Pix por QR code','Termos de uso v2','Aviso de vencimento','Painel de investimentos','Recarga de celular','Boleto parcelado'];
-const entregas=[...base,...antigas.map((n,i)=>({n,app:i%3?'Valuto':'Portal do Cliente',st:'concluidas',e:'ok',vez:'—',dica:'publicada em produção',t:`${12+i*4} dias`,fx:[[i%3?'valuto-api':'portal-web',`v${i%3?3:1}.${7-Math.floor(i/3)}.0`,'oooooooo']]}))];
-entregas.forEach((e,i)=>e.id='#ENT-'+String(48-i).padStart(4,'0'));
-const atual=f=>{const i=[...f].findIndex(c=>c==='r'||c==='b');if(i>=0)return CURTO[i];return [...f].includes('v')?'Cancelada':'Publicada'};
+const entregas=[...base,...antigas.map((n,i)=>({n,app:i%3?'Valuto':'Portal do Cliente',st:'concluidas',e:'ok',vez:'—',dica:'publicada em produção',t:`${12+i*4} dias`,fx:[[i%3?'valuto-api':'portal-web',`v${i%3?3:1}.${7-Math.floor(i/3)}.0`,'ooooo']]}))];
+entregas.forEach((e,i)=>e.id='E-'+String(40-i));
+const atual=f=>{const i=[...f].findIndex(c=>'rbwf'.includes(c));if(i>=0)return CURTO[i];return [...f].includes('v')?'Cancelada':'Concluída'};
 const passo=(c,i)=>{if(c==='·')return'';const [cls,icone]=ICONE[c];return `<span class="ps ${cls}" title="${NOMES[i]}">${ic(icone,c==='r'?'spin':'')}</span>`};
 const POR=8;let pagina=0;
 function desenha(){
@@ -155,10 +159,10 @@ function desenha(){
   document.querySelectorAll('[data-c]').forEach(c=>c.textContent=filtra(c.dataset.c).length);
   const l=filtra(st),paginas=Math.max(1,Math.ceil(l.length/POR));pagina=Math.min(Math.max(pagina,0),paginas-1);
   document.querySelector('[data-lista]').innerHTML=l.length?l.slice(pagina*POR,pagina*POR+POR).map(e=>{const [ecls,eic,espin]=ESTADO[e.e];return `
-   <a class="ent" href="prototipo-entrega.html" title="${e.dica} · há ${e.t}">
-     <div><div class="nome"><span class="stat ${ecls}">${ic(eic,espin?'spin':'')}</span>${e.n}${e.hotfix?' <span class="pill">hotfix</span>':''}</div><div class="sub2">${e.app} · <span class="mono">${e.id}</span></div></div>
+   <a class="ent" href="prototipo-entrega.html" title="${TEXTO[e.e]} · ${e.dica} · há ${e.t}">
+     <div><div class="nome"><span class="stat ${ecls}" title="${TEXTO[e.e]}">${ic(eic,espin?'spin':'')}</span>${e.n}${e.hotfix?' <span class="pill">hotfix</span>':''}</div><div class="sub2">${e.app} · <span class="mono">${e.id}</span></div></div>
      <div class="faixas">${e.fx.map(f=>`<div class="fx"><span class="proj mono">${f[0]} <span style="color:var(--di)">${f[1]}</span></span><span class="passos">${[...f[2]].map(passo).join('')}</span></div>`).join('')}</div>
-     <span class="etapa">${atual(e.fx[0][2])}</span>
+     <span class="etapa">${TEXTO[e.e]}<span class="sub2" style="font-weight:400">${atual(e.fx[0][2])}</span></span>
      <span class="vez">${e.vez==='Você'?`<span class="pill blue">${ic('inbox')}Você</span>`:`<span>${e.vez}</span>`}<span>há ${e.t}</span></span>
      ${ic('chev')}
    </a>`}).join(''):`<div class="empty" style="margin:18px;border:0">${ic('layers','lg')}<b style="color:var(--tx)">Nenhuma entrega com esses filtros</b></div>`;
@@ -197,7 +201,7 @@ function colunas(id,series,cores,nomes){
 colunas('g-pub',[[3,5,4,6,2,5,7,5]],['var(--serie-a)'],['Publicações']);
 colunas('g-gate',[[11,14,12,15,9,13,16,12],[2,1,3,1,4,2,1,3]],['var(--serie-a)','var(--serie-b)'],['Liberado','Bloqueado']);
 (function(){
-  const box=document.getElementById('g-etapa'),dados=[['Abertura',1.2],['Proposta',6.5],['DEV',14],['QA',22],['HML',18],['Negócio',41],['Entrega',8],['PRD',2.5]];
+  const box=document.getElementById('g-etapa'),dados=[['Abertura',1.2],['QA',22],['HML',18],['PRD',2.5],['Liberação',41]];
   const W=560,H=250,m={t:6,r:52,b:6,l:76},iw=W-m.l-m.r,max=45,lh=(H-m.t-m.b)/dados.length,bh=Math.min(16,lh*.55),maior=Math.max(...dados.map(d=>d[1]));
   const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Tempo médio em cada etapa'});
   dados.forEach(([n,v],i)=>{const y=m.t+lh*i+(lh-bh)/2,w=iw*v/max;

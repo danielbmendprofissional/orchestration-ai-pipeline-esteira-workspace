@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Esteira — Aguardando você (protótipo)</title>
+<title>Esteira — Aguardando você (protótipo D1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="base.css">
 <style>
@@ -14,7 +14,7 @@
 
 .lista{border:1px solid var(--ln);border-radius:12px;background:var(--s1);box-shadow:inset 0 1px 0 var(--hl);overflow:hidden}
 .secao{display:flex;align-items:center;gap:8px;padding:8px 20px;font-size:12px;font-weight:600;color:var(--mu);background:var(--s2);border-bottom:1px solid var(--ln)}
-.it{display:grid;grid-template-columns:28px minmax(0,1fr) 150px 96px 170px;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--ln);color:inherit;text-decoration:none}
+.it{display:grid;grid-template-columns:28px minmax(0,1fr) 150px 96px 170px;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--ln);color:inherit;text-decoration:none;cursor:pointer}
 .it:last-child{border-bottom:0}.it:hover{background:var(--s2)}
 .ci{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--s3);border:1px solid var(--ln2);color:var(--tx2)}
 .ci .i{width:14px;height:14px}
@@ -30,9 +30,26 @@
 .vazio{display:flex;flex-direction:column;align-items:center;gap:8px;padding:48px 20px;color:var(--mu);text-align:center}
 .vazio .ib{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--ok-bg);border:1px solid var(--ok-ln);color:var(--ok-tx)}
 .obs{color:var(--mu);font-size:12.5px;margin-top:14px}.obs .i{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+.obs a{color:var(--blue-tx)}.obs a:hover{text-decoration:underline}
+
+/* decisão: gaveta no computador, folha embaixo no celular */
+.gaveta{display:flex;flex-direction:column;padding:0}
+.g-corpo{flex:1;overflow-y:auto;padding:22px 24px}
+.g-pe{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 24px;border-top:1px solid var(--ln);background:var(--s1)}
+.g-pe.um{grid-template-columns:1fr}
+.g-pe .btn{justify-content:center;min-height:44px}
+.evl{display:grid;gap:8px;margin:14px 0}
+.evl .linha{border:1px solid var(--ln);border-radius:10px;background:var(--s2);padding:12px 14px}
+.campo2{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--ln2);background:var(--s2);color:var(--tx);font:inherit;min-height:64px}
+.rotc{display:block;font-size:12px;color:var(--mu);margin:12px 0 4px}
 
 @media (max-width:1100px){.it{grid-template-columns:28px minmax(0,1fr) 170px}.it .pq,.it .ha{display:none}}
 @media (max-width:620px){.it{grid-template-columns:28px minmax(0,1fr)}.it .btn{grid-column:2;justify-self:start}}
+@media (max-width:760px){
+  .gaveta{top:auto;left:0;right:0;bottom:0;width:100%;max-height:92vh;border-left:0;border-top:1px solid var(--ln2);border-radius:16px 16px 0 0}
+  .g-corpo{padding:18px 16px}.g-pe{padding:12px 16px}
+  .g-pe .btn{min-height:52px;font-size:15px}
+}
 </style></head>
 <body data-pagina="aguardando">
 <nav data-menu></nav>
@@ -44,8 +61,9 @@
     <select class="sel" data-app aria-label="Aplicação"></select>
   </div>
   <div class="lista" data-lista></div>
-  <p class="obs"><svg class="i"><use href="#i-inbox"/></svg>Cada item também chega por e-mail. Some daqui quando alguém decide ou o motivo deixa de existir.</p>
+  <p class="obs"><svg class="i"><use href="#i-inbox"/></svg>Cada item também chega por e-mail, e o e-mail traz o link para esta tela, já logada: a decisão é sempre tomada aqui, com a evidência na frente, e fica registrada com o seu nome. <a href="#item=qa">Ver como chega pelo link do e-mail</a>.</p>
 </main>
+<div data-gaveta></div>
 
 <script src="comum.js"></script>
 <script>
@@ -54,26 +72,28 @@ const $=s=>document.querySelector(s);
 
 const QUEM={
  mor:{nome:'Daniel',ini:'DB',rot:'MOR'},
- aprovador:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico'},
+ tecnico:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico'},
+ publicador:{nome:'Carla Mendes',ini:'CM',rot:'Publicador'},
  negocio:{nome:'Elisa Prado',ini:'EP',rot:'Aprovadora de negócio'},
  membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro'}};
 let quem='mor';
 
 const SEC={decisao:['Decisões','user-ok'],corrigir:['Para corrigir','alert'],acompanhar:['Para acompanhar','clock']};
-/* para: quem vê o item (o MOR vê tudo); papel: por que é com você; auto: quem abriu/pediu (vira autoaprovação se for o MOR) */
+/* id: usado no link do e-mail (#item=<id>) · para: quem vê (o MOR vê tudo) · auto: quem abriu (vira autoaprovação se for o MOR) · btn: [reprova, aprova] */
 const ITENS=[
- {sec:'decisao',ic:'flask',t:'Aprovar candidata',v:'v4.0.0-rc2',ctx:'Extrato em PDF · valuto-api em QA',ev:[['ok','ok','qa-agent, code-review e security aprovaram'],['shield','','1 alta coberta por exceção']],app:'Valuto',papel:'Aprovador técnico',ha:'40 min',min:40,acao:'Aprovar candidata',href:'prototipo-entrega.html',para:['aprovador'],auto:'Daniel'},
- {sec:'decisao',ic:'rocket',t:'Publicar em produção',v:'v3.8.0',ctx:'Busca de transações · valuto-api',ev:[['ok','ok','aprovação da entrega concluída'],['clock','','janela livre em PRD']],app:'Valuto',papel:'Publicador',ha:'30 min',min:30,acao:'Publicar',href:'prototipo-entrega.html',para:[]},
- {sec:'decisao',ic:'user-ok',t:'Aprovar proposta',v:'v3.6.0',ctx:'Limite por cartão · valuto-api',ev:[['issue','','2 issues'],['file','','1 migration prevista']],app:'Valuto',papel:'Aprovador técnico',ha:'1 h',min:60,acao:'Ver proposta',href:'prototipo-entrega.html',para:['aprovador']},
- {sec:'decisao',ic:'shield',t:'Aprovar exceção',v:'SEC-2310',ctx:'CVE crítica no Npgsql · pedida por Bruno Lima · vale em QA e HML',ev:[['alert','run','risco aceito até 20/11/2026']],app:'Valuto',papel:'Aprovador técnico',ha:'4 h',min:240,acao:'Decidir',href:'prototipo-excecoes.html#ver=SEC-2310',para:[]},
- {sec:'decisao',ic:'brief',t:'Aprovação de negócio',v:'',ctx:'Pix agendado · valuto-api v3.5.0',ev:[['issue','','1 de 4 issues aprovadas'],['file','','notas de entrega prontas']],app:'Valuto',papel:'Aprovador de negócio',ha:'3 h',min:180,acao:'Ler notas',href:'prototipo-entrega.html',para:['negocio']},
- {sec:'decisao',ic:'shield-ok',t:'Aprovar a entrega',v:'v1.11.0-rc2',ctx:'Tema escuro · portal-web',ev:[['ok','ok','conferência de escopo sem pendência'],['ok','ok','banco compatível']],app:'Portal do Cliente',papel:'Aprovador técnico',ha:'1 dia',min:1440,acao:'Aprovar entrega',href:'prototipo-entrega.html',para:[]},
- {sec:'corrigir',ic:'fail',cls:'bad',t:'Gate bloqueou em QA',v:'v2.2.0-rc1',ctx:'Cadastro de cartões · valuto-frontend',ev:[['fail','bad','1 crítica sem exceção (CVE-2026-40112)']],app:'Valuto',dono:'Diego Rocha',papel:'Você abriu a entrega',ha:'20 min',min:20,acao:'Ver o bloqueio',href:'prototipo-entrega.html',para:['membro']},
- {sec:'acompanhar',ic:'alert',cls:'run',t:'Exceção vence em 4 dias',v:'SEC-2291',ctx:'SQL montado com interpolação · Valuto',ev:[['alert','run','depois disso o achado volta a bloquear QA, HML e PRD']],app:'Valuto',dono:'Daniel',papel:'Você pediu',ha:'',min:0,acao:'Renovar ou corrigir',href:'prototipo-excecoes.html#ver=SEC-2291',para:[]},
- {sec:'acompanhar',ic:'fail',cls:'bad',t:'Exceção vencida',v:'SEC-2287',ctx:'Deserialização insegura · Gestão de Contratos',ev:[['fail','bad','o achado voltou a bloquear QA']],app:'Gestão de Contratos',dono:'Diego Rocha',papel:'Você pediu',ha:'3 dias',min:4320,acao:'Renovar',href:'prototipo-excecoes.html#ver=SEC-2287',para:['membro']},
- {sec:'acompanhar',ic:'wait',t:'Seu pedido aguarda outra pessoa',v:'SEC-2310',ctx:'CVE crítica no Npgsql · Valuto',ev:[['user-ok','','quem pediu não aprova: Carla Mendes ou Daniel']],app:'Valuto',dono:'Bruno Lima',papel:'Você pediu',ha:'4 h',min:240,acao:'Ver pedido',href:'prototipo-excecoes.html#ver=SEC-2310',para:['aprovador'],soPara:true}
+ {id:'qa',sec:'decisao',ic:'flask',t:'Aprovar QA',v:'E-12 · valuto-api',ctx:'Notificações de limite e resumo mensal · Fatias V9 e V10',ev:[['ok','ok','qa-agent, code-review e security aprovaram'],['shield','','1 alta coberta por Exceção'],['bug','ok','DAST ativo sem achado novo']],app:'Valuto',papel:'Aprovador técnico',ha:'40 min',min:40,acao:'Aprovar QA',btn:['Reprovar','Aprovar QA'],href:'prototipo-entrega.html',para:['tecnico'],auto:'Daniel'},
+ {id:'hml',sec:'decisao',ic:'monitor',t:'Aprovar HML',v:'E-9 · valuto-frontend',ctx:'Pix agendado e Extrato por período · Fatias V11 e V12',ev:[['ok','ok','mesmo Artefato do QA, em HML'],['bug','ok','DAST passivo sem achado novo'],['server','ok','2 de 2 réplicas']],app:'Valuto',papel:'Aprovador técnico',ha:'2 h',min:120,acao:'Aprovar HML',btn:['Reprovar','Aprovar HML'],href:'prototipo-entrega.html',para:['tecnico']},
+ {id:'prd',sec:'decisao',ic:'rocket',t:'Confirmar produção',v:'E-9 · versão 3.8.0',ctx:'Pix agendado e Extrato por período · valuto-api',ev:[['ok','ok','QA e HML aprovados'],['tag','','versão 3.8.0 (minor), você pode corrigir o tipo'],['flask','','2 flags carregados, desligados em produção']],app:'Valuto',papel:'Publicador',ha:'30 min',min:30,acao:'Confirmar produção',btn:['Reprovar','Confirmar produção'],href:'prototipo-entrega.html',para:['publicador']},
+ {id:'lib',sec:'decisao',ic:'brief',t:'Liberar Fatias',v:'E-9',ctx:'Pix agendado e Extrato por período · em produção, flag desligado',ev:[['file','','notas de entrega prontas'],['clock','run','V12 aguarda há 34 dias e passou do prazo']],app:'Valuto',papel:'Aprovador de negócio',ha:'3 h',min:180,acao:'Ler notas e liberar',btn:null,href:'prototipo-entrega.html',para:['negocio']},
+ {id:'mr',sec:'decisao',ic:'git',t:'Aprovar Fatia (MR)',v:'V4',ctx:'Busca de transações · valuto-api',ev:[['ok','ok','CI verde'],['flask','','review aberto, sem observação bloqueante']],app:'Valuto',papel:'Aprovador técnico',ha:'1 dia',min:1440,acao:'Revisar',btn:['Reprovar','Aprovar Fatia'],href:'prototipo-painel-fatias.html',para:['tecnico']},
+ {id:'exc',sec:'decisao',ic:'shield',t:'Aprovar Exceção',v:'SEC-2310',ctx:'CVE crítica no Npgsql · pedida por Bruno Lima · vale em QA e HML',ev:[['alert','run','risco aceito até 20/11/2026']],app:'Valuto',papel:'Aprovador técnico',ha:'4 h',min:240,acao:'Decidir',btn:['Reprovar','Aprovar Exceção'],href:'prototipo-excecoes.html#ver=SEC-2310',para:[]},
+ {id:'gate',sec:'corrigir',ic:'fail',cls:'bad',t:'Gate bloqueou em QA',v:'E-13 · valuto-frontend',ctx:'Cadastro de cartões',ev:[['fail','bad','1 crítica sem Exceção (CVE-2026-40112)']],app:'Valuto',dono:'Diego Rocha',papel:'Você abriu a Entrega',ha:'20 min',min:20,acao:'Ver o bloqueio',btn:null,href:'prototipo-entrega.html',para:['membro']},
+ {id:'rep',sec:'corrigir',ic:'fail',cls:'bad',t:'Fatia reprovada, em correção',v:'P1',ctx:'Tema escuro · Portal do Cliente',ev:[['fail','bad','reprovada em 20/11: contraste do botão no tema escuro']],app:'Portal do Cliente',dono:'Diego Rocha',papel:'Você abriu a Fatia',ha:'2 dias',min:2880,acao:'Ver o comentário',btn:null,href:'prototipo-painel-fatias.html',para:['membro']},
+ {id:'ven',sec:'acompanhar',ic:'alert',cls:'run',t:'Exceção vence em 4 dias',v:'SEC-2291',ctx:'SQL montado com interpolação · Valuto',ev:[['alert','run','depois disso o achado volta a bloquear QA, HML e produção']],app:'Valuto',dono:'Daniel',papel:'Você pediu',ha:'',min:0,acao:'Renovar ou corrigir',btn:null,href:'prototipo-excecoes.html#ver=SEC-2291',para:[]},
+ {id:'vcd',sec:'acompanhar',ic:'fail',cls:'bad',t:'Exceção vencida',v:'SEC-2287',ctx:'Deserialização insegura · Gestão de Contratos',ev:[['fail','bad','o achado voltou a bloquear QA']],app:'Gestão de Contratos',dono:'Diego Rocha',papel:'Você pediu',ha:'3 dias',min:4320,acao:'Renovar',btn:null,href:'prototipo-excecoes.html#ver=SEC-2287',para:['membro']},
+ {id:'ag',sec:'acompanhar',ic:'wait',t:'Fatia aguardando liberação há 34 dias',v:'V12',ctx:'Extrato por período · Valuto · passou do prazo de 30 dias',ev:[['alert','run','só um lembrete: nunca bloqueia nada']],app:'Valuto',papel:'Aprovador de negócio',ha:'34 dias',min:48960,acao:'Liberar ou excluir',btn:null,href:'prototipo-painel-fatias.html',para:['negocio']},
+ {id:'aguarda',sec:'acompanhar',ic:'wait',t:'Seu pedido aguarda outra pessoa',v:'SEC-2310',ctx:'CVE crítica no Npgsql · Valuto',ev:[['user-ok','','quem pediu não aprova: Carla Mendes ou Daniel']],app:'Valuto',dono:'Bruno Lima',papel:'Você pediu',ha:'4 h',min:240,acao:'Ver pedido',btn:null,href:'prototipo-excecoes.html#ver=SEC-2310',para:['tecnico'],soPara:true}
 ];
-// o MOR vê tudo, menos o que é "seu pedido" de outra pessoa
 const meus=()=>ITENS.filter(i=>quem==='mor'?!i.soPara:i.para.includes(quem));
 
 function crumb(){
@@ -89,17 +109,38 @@ function lista(){
   const cntNav=document.querySelector('nav .ni[data-pagina=aguardando] .cnt');if(cntNav){cntNav.textContent=meus().length;cntNav.hidden=!meus().length}
   $('[data-lista]').innerHTML=l.length?Object.entries(SEC).map(([k,[n,icone]])=>{const its=l.filter(i=>i.sec===k).sort((a,b)=>b.min-a.min);if(!its.length)return'';
     return `<div class="secao">${ic(icone)}${n}</div>`+its.map(i=>{const auto=quem==='mor'&&i.auto==='Daniel';
-      return `<a class="it" href="${i.href}" title="${i.ctx}">
+      return `<a class="it" href="${i.href}" data-id="${i.id}" title="${i.ctx}">
         <span class="ci ${i.cls||''}">${ic(i.ic)}</span>
-        <div style="min-width:0"><div class="tit">${i.t}${i.v?` <span class="mono" style="font-weight:500">${i.v}</span>`:''}${auto?' <span class="pill run" title="Você abriu esta entrega: a aprovação fica marcada como autoaprovação, com motivo">autoaprovação</span>':''}</div>
+        <div style="min-width:0"><div class="tit">${i.t}${i.v?` <span class="mono" style="font-weight:500">${i.v}</span>`:''}${auto?' <span class="pill run" title="Você abriu esta Entrega: a aprovação fica marcada como autoaprovação, com motivo">autoaprovação</span>':''}</div>
           <div class="ctx">${i.ctx}</div>
           <div class="ev">${i.ev.map(([e,c,t])=>`<span class="stat ${c||'none'}" style="font-weight:500">${ic(e)}${t}</span>`).join('<span style="color:var(--ln2)">·</span>')}</div></div>
         <span class="pq" title="${i.dono?'De '+i.dono:'Papel: '+i.papel}">${i.dono?(i.dono===QUEM[quem].nome?i.papel:'como MOR'):quem==='mor'?'como MOR':'como '+i.papel}</span>
         <span class="ha ${i.min>=1440?'run':''}">${i.ha?`há ${i.ha}`:''}</span>
         <span class="btn g sm">${i.acao}${ic('chev')}</span></a>`}).join('')}).join('')
     :`<div class="vazio"><span class="ib">${ic('check','lg')}</span><b style="color:var(--tx)">Nada esperando por você</b><span>Quando alguma decisão depender de você, ela aparece aqui e chega por e-mail.</span></div>`;
+  document.querySelectorAll('.it').forEach(a=>a.onclick=e=>{
+    const i=ITENS.find(x=>x.id===a.dataset.id);
+    /* no celular (ou pelo link do e-mail) a decisão abre numa folha com a evidência; no computador o item leva à tela da Entrega */
+    if(matchMedia('(max-width:760px)').matches){e.preventDefault();decide(i)}});
 }
 $('[data-app]').onchange=lista;
+
+/* decisão: evidência na frente, botões grandes, Reprovar à esquerda */
+function fecha(){$('[data-gaveta]').innerHTML='';if(location.hash.startsWith('#item='))history.replaceState(null,'',location.pathname)}
+function decide(i){
+  const auto=quem==='mor'&&i.auto==='Daniel';
+  $('[data-gaveta]').innerHTML=`<div class="veu" data-fecha></div><aside class="gaveta" role="dialog" aria-modal="true" aria-label="${i.t}"><div class="g-corpo">
+    <div class="dh"><div><span class="pill ${i.sec==='decisao'?'run':''}">${ic(SEC[i.sec][1])}${SEC[i.sec][0]}</span><h2>${i.t}${i.v?` <span class="mono" style="font-size:14px;color:var(--mu)">${i.v}</span>`:''}</h2></div><button class="x" data-fecha aria-label="Fechar">${ic('x')}</button></div>
+    <p class="txt">${i.ctx}</p>
+    <div class="evl">${i.ev.map(([e,c,t])=>`<div class="linha"><span class="rot"><span class="stat ${c||'none'}">${ic(e)}</span>${t}</span></div>`).join('')}</div>
+    <a class="linkr" style="display:inline-flex;gap:6px;color:var(--blue-tx);font-size:13px" href="${i.href}">${ic('ext')}Ver tudo na tela de origem</a>
+    ${auto?`<div class="faixa run" style="margin-top:14px">${ic('alert')}<div><b>Autoaprovação</b><p>Você abriu esta Entrega. A aprovação fica marcada como autoaprovação, com motivo obrigatório.</p></div></div><label class="rotc">Motivo (obrigatório)</label><textarea class="campo2" aria-label="Motivo da autoaprovação"></textarea>`:''}
+  </div><div class="g-pe ${i.btn?'':'um'}">${i.btn?`<button class="btn d" data-fecha>${i.btn[0]}</button><button class="btn p" data-fecha>${ic('check')}${i.btn[1]}</button>`:`<a class="btn p" href="${i.href}" style="text-decoration:none">${i.acao}${ic('chev')}</a>`}</div></aside>`;
+  document.querySelectorAll('[data-fecha]').forEach(x=>x.onclick=fecha);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecha()});
 crumb();apps();lista();
+const abre=()=>{const m=location.hash.match(/#item=(\w+)/);if(m){const i=ITENS.find(x=>x.id===m[1]);if(i)decide(i)}};
+addEventListener('hashchange',abre);abre();
 </script>
 </body></html>

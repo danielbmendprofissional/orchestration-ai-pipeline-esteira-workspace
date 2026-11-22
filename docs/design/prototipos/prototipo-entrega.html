@@ -1,562 +1,298 @@
 ﻿<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Esteira — Entrega (protótipo)</title>
+<title>Esteira — Entrega (protótipo D1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="base.css"></head><body data-pagina="entregas">
-
-
-
+<link rel="stylesheet" href="base.css">
+<style>
+[hidden]{display:none!important}
+.map{grid-template-columns:136px repeat(5,minmax(112px,1fr));min-width:800px}
+.map.um{grid-template-rows:156px}
+.map.um .st.span{grid-row:1/span 1}
+.track.api{background:linear-gradient(90deg,var(--blue2) 0 var(--p,0%),transparent var(--p,0%)),repeating-linear-gradient(90deg,var(--ln2) 0 7px,transparent 7px 13px)}
+.track.front{background:linear-gradient(90deg,var(--front) 0 var(--p,0%),transparent var(--p,0%)),repeating-linear-gradient(90deg,var(--ln2) 0 7px,transparent 7px 13px)}
+.st{cursor:pointer}
+.cod{font-family:var(--mono);font-size:12.5px;color:var(--tx2);margin-right:8px}
+.tt{font-weight:600}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--mu);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px;margin-left:8px;white-space:nowrap}
+.tag .i{width:12px;height:12px}
+.linkr{display:inline-flex;align-items:center;gap:6px;color:var(--blue-tx);font-size:12.5px}
+.linkr:hover{text-decoration:underline}
+.proj{display:inline-flex;gap:6px}
+.faixas{display:grid;gap:10px;margin-bottom:18px}.faixas .faixa{margin:0}
+.fs{display:grid;gap:6px;padding:12px 14px;border-bottom:1px solid var(--ln);font-size:13px}
+.fs:last-child{border-bottom:0}
+.fs .l1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fs .l1 input{width:16px;height:16px;accent-color:var(--blue2)}
+.fs .l1 label{display:flex;align-items:center;gap:10px;cursor:pointer}
+.fs .links{display:flex;gap:6px 16px;flex-wrap:wrap;padding-left:26px}
+.fs .dir2{margin-left:auto;color:var(--mu);font-size:12.5px}
+.ordem{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--tx2);font-size:13px}
+.ordem .i{color:var(--mu)}
+.conf{border:1px solid var(--ln);border-radius:10px;background:var(--s1);margin-top:12px;overflow:hidden}
+.conf summary{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:13px;color:var(--tx2);list-style:none}
+.conf summary::-webkit-details-marker{display:none}
+.conf summary .i{color:var(--run-tx)}
+.conf summary .chev{margin-left:auto;color:var(--mu);transition:transform .15s}
+.conf[open] summary .chev{transform:rotate(90deg)}
+.conf .corpo{border-top:1px solid var(--ln);padding:6px 0}
+.conf .it{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:var(--tx2)}
+.conf .it .d{margin-left:auto;color:var(--mu);font-size:12.5px}
+.gaveta{display:flex;flex-direction:column;padding:0}
+.g-corpo{flex:1;overflow-y:auto;padding:22px 24px}
+.g-pe{display:flex;justify-content:flex-end;gap:10px;padding:14px 24px;border-top:1px solid var(--ln);background:var(--s1)}
+.g-pe .esq{margin-right:auto}
+.campo2{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--ln2);background:var(--s2);color:var(--tx);font:inherit}
+textarea.campo2{min-height:64px}
+.rotc{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
+.excl label{display:flex;gap:8px;align-items:flex-start;color:var(--tx2);font-size:13px;margin-bottom:8px}
+.excl input[type=radio]{margin-top:3px;accent-color:var(--blue2)}
+.vers{font-family:var(--mono);font-size:13px}
+.aut{margin-top:12px}
+</style></head>
+<body data-pagina="entregas">
 <nav data-menu></nav>
-
 <main>
-  <div class="crumb"><svg class="i"><use href="#i-grid"/></svg>Valuto <svg class="i"><use href="#i-chev"/></svg> Entregas <svg class="i"><use href="#i-chev"/></svg> dados fictícios
-    <label class="demo">Cenário de demonstração
-      <select id="cenario"><option value="normal">Normal (API em QA)</option><option value="falha">Falha no deploy</option><option value="gate">Gate bloqueou</option><option value="cancelada">Entrega cancelada</option><option value="rollback">Produção em rollback</option><option value="hotfix">Hotfix</option></select></label></div>
-  <div class="head"><h1><span data-nome>Extrato em PDF</span> <span data-estado class="pill run"><svg class="i spin"><use href="#i-run"/></svg>Em andamento</span></h1>
-    <div class="acoes-topo">
-      <div class="sino-wrap">
-        <button class="sino" aria-label="2 itens aguardando você" aria-expanded="false" aria-controls="avisos"><svg class="i"><use href="#i-bell"/></svg><span class="bolinha">2</span></button>
-        <div class="avisos" id="avisos" role="dialog" aria-label="Aguardando você" hidden>
-          <div class="av-h">Aguardando você</div>
-          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aprovar candidata v4.0.0-rc2</b><p>valuto-api em QA · agentes aprovaram · 1 alta coberta por exceção</p><div class="acts"><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar</button><button class="btn g">Reprovar</button></div></div></div>
-          <div class="av-i"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Exceção SEC-2291 vence em 4 dias</b><p>Opengrep · csharp-sqli · valuto-api</p><div class="acts"><button class="btn g">Revisar</button></div></div></div>
-        </div>
-      </div>
-      <button class="btn g"><svg class="i"><use href="#i-ext"/></svg>Abrir no GitLab</button><button class="btn d"><svg class="i"><use href="#i-x"/></svg>Cancelar entrega</button></div></div>
-  <div class="meta">
-    <span class="mono">#ENT-0042</span>
-    <span><svg class="i"><use href="#i-tag"/></svg><span class="mono">api v4.0.0 · front v2.1.0</span></span>
-    <span><svg class="i"><use href="#i-issue"/></svg>3 issues</span>
-    <span><span class="av sm">DB</span>Daniel · há 3 dias</span>
-  </div>
-  <div id="faixa"></div>
+  <div class="crumb"><svg class="i"><use href="#i-grid"/></svg>Valuto <svg class="i"><use href="#i-chev"/></svg> Entregas <svg class="i"><use href="#i-chev"/></svg> E-12 · dados fictícios
+    <label class="demo">Cenário <select data-cen></select></label>
+    <label class="demo" style="margin-left:0">Ver como <select data-quem></select></label></div>
+  <div class="head"><h1><span data-nome>Notificações de limite e resumo mensal</span> <span data-estado class="pill"></span></h1>
+    <div class="acoes-topo"><button class="btn g"><svg class="i"><use href="#i-ext"/></svg>Abrir no GitLab</button><button class="btn d" data-cancelar><svg class="i"><use href="#i-x"/></svg>Cancelar Entrega</button></div></div>
+  <div class="meta" data-meta></div>
+  <div class="faixas" data-faixas></div>
 
   <section class="panel">
     <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-git"/></svg></span>Etapas</h2></div>
-    <div class="canvas"><div class="map">
-      <div class="track api"></div><div class="track front"></div>
-      <div class="lname" style="grid-row:1"><span><i class="sw" style="background:var(--blue2)"></i>valuto-api</span><small class="mono">v4.0.0-rc2 · .NET</small></div>
-      <div class="lname" style="grid-row:2"><span><i class="sw" style="background:var(--front)"></i>valuto-frontend</span><small class="mono">v2.1.0-rc1 · Angular</small></div>
-
-      <button class="st span done" data-k="aber" style="grid-column:2"><span class="badge"><svg class="i"><use href="#i-check"/></svg></span><div class="t">Abertura</div><div class="ic"><svg class="i"><use href="#i-file"/></svg></div><div class="s"><span class="stat ok">Concluído</span><span class="who">18/10 · Daniel</span></div></button>
-      <button class="st span done" data-k="prop" style="grid-column:3"><span class="badge"><svg class="i"><use href="#i-check"/></svg></span><div class="t">Aprovação<br>da proposta</div><div class="ic"><svg class="i"><use href="#i-user-ok"/></svg></div><div class="s"><span class="stat ok">Concluído</span><span class="who">autoaprovação</span></div></button>
-
-      <button class="st done" data-k="api-dev" style="grid-row:1;grid-column:4"><span class="badge"><svg class="i"><use href="#i-check"/></svg></span><div class="t">DEV</div><div class="ic"><svg class="i"><use href="#i-code"/></svg></div><div class="s"><span class="stat ok">Concluído</span><span class="who">rc2 · 2 deploys</span></div></button>
-      <button class="st run" data-k="api-qa" style="grid-row:1;grid-column:5"><span class="here"><svg class="i"><use href="#i-git"/></svg>você está aqui</span><div class="t">QA</div><div class="ic"><svg class="i"><use href="#i-flask"/></svg></div><div class="s"><span class="stat run"><svg class="i spin"><use href="#i-run"/></svg>Executando</span><span class="who">aguarda aprovação</span></div></button>
-      <button class="st" data-k="api-hml" style="grid-row:1;grid-column:6"><div class="t">HML</div><div class="ic"><svg class="i"><use href="#i-monitor"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div></button>
-
-      <button class="st run" data-k="front-dev" style="grid-row:2;grid-column:4"><span class="here f"><svg class="i"><use href="#i-tag"/></svg>rc1</span><div class="t">DEV</div><div class="ic"><svg class="i"><use href="#i-code"/></svg></div><div class="s"><span class="stat run"><svg class="i"><use href="#i-wait"/></svg>Aguardando</span><span class="who">a API chegar em QA</span></div></button>
-      <button class="st" data-k="front-qa" style="grid-row:2;grid-column:5"><div class="t">QA</div><div class="ic"><svg class="i"><use href="#i-flask"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div></button>
-      <button class="st" data-k="front-hml" style="grid-row:2;grid-column:6"><div class="t">HML</div><div class="ic"><svg class="i"><use href="#i-monitor"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div></button>
-
-      <button class="st span" data-k="neg" style="grid-column:7"><div class="t">Aprovação<br>de negócio</div><div class="ic"><svg class="i"><use href="#i-brief"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div></button>
-      <button class="st span" data-k="ent" style="grid-column:8"><div class="t">Aprovação<br>da entrega</div><div class="ic"><svg class="i"><use href="#i-shield-ok"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div></button>
-
-      <button class="st" data-k="api-prd" style="grid-row:1;grid-column:9"><div class="t">PRD</div><div class="ic"><svg class="i"><use href="#i-rocket"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span><span class="who mono">hoje v3.4.1</span></div></button>
-      <button class="st" data-k="front-prd" style="grid-row:2;grid-column:9"><div class="t">PRD</div><div class="ic"><svg class="i"><use href="#i-rocket"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span><span class="who mono">hoje v2.0.3</span></div></button>
-    </div></div>
+    <div class="canvas"><div class="map" data-mapa></div></div>
     <div class="legend rodape"><span><i class="sw" style="background:var(--blue2)"></i>valuto-api</span><span><i class="sw" style="background:var(--front)"></i>valuto-frontend</span>
-      <span class="stat ok"><svg class="i"><use href="#i-ok"/></svg>Concluído</span><span class="stat run"><svg class="i spin"><use href="#i-run"/></svg>Executando</span><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div>
+      <span class="stat ok"><svg class="i"><use href="#i-ok"/></svg>Concluído</span><span class="stat run"><svg class="i"><use href="#i-wait"/></svg>Aguardando</span><span class="stat bad"><svg class="i"><use href="#i-fail"/></svg>Bloqueada ou falhou</span><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado ou pulada</span></div>
   </section>
 
   <section class="panel" id="detalhe" aria-live="polite"></section>
-  <div class="barra-acao" id="acoes-etapa"></div>
+  <div class="barra-acao" data-acoes></div>
 </main>
-
-<template id="t-aber">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-file"/></svg></span>Abertura</h2><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Concluída 18/10 14:46</span></div>
-  <div class="cols">
-    <div class="box"><h3><svg class="i"><use href="#i-layers"/></svg>Entrega</h3><dl class="kv">
-      <dt>Aberta por</dt><dd><span class="av sm">DB</span>Daniel</dd>
-      <dt>Tipo</dt><dd><span class="pill blue">Normal · MINOR</span></dd>
-      <dt>Status</dt><dd><span class="pill run"><svg class="i spin"><use href="#i-run"/></svg>Em andamento</span></dd>
-      <dt>Abertura</dt><dd>18/10/2026 14:46</dd></dl></div>
-    <div class="box"><h3><svg class="i"><use href="#i-grid"/></svg>Aplicação</h3><dl class="kv">
-      <dt>Nome</dt><dd>Valuto</dd>
-      <dt>Grupo GitLab</dt><dd class="mono">valuto</dd>
-      <dt>Projetos</dt><dd><span class="pill"><svg class="i"><use href="#i-box"/></svg>valuto-api · v4.0.0</span><span class="pill"><svg class="i"><use href="#i-box"/></svg>valuto-frontend · v2.1.0</span></dd>
-      <dt>Dependência</dt><dd>front depende da api</dd></dl></div>
-  </div>
-  <div class="sub entre"><span><svg class="i"><use href="#i-issue"/></svg>Issues da entrega <span class="n" data-qtd>3</span></span><button class="btn g sm" data-add-issue><svg class="i"><use href="#i-issue"/></svg>Adicionar issue</button></div>
-  <div class="busca" data-busca hidden>
-    <input type="search" placeholder="Buscar issue no GitLab do grupo valuto (número ou título)" aria-label="Buscar issue" data-q>
-    <div class="box"><div data-resultados></div></div>
-    <p class="txt aviso-escopo"><svg class="i"><use href="#i-alert"/></svg>Enquanto a aprovação de negócio não começou, mudar o escopo só fica registrado. Depois dela, adicionar ou remover issue reinicia a aprovação de negócio e a da entrega.</p>
-  </div>
-  <div class="box tw"><table><thead><tr><th>Tipo</th><th>Issue</th><th>Título</th><th>Área</th><th>Aprovação de negócio</th><th></th></tr></thead><tbody data-lista-issues>
-  <tr><td><span class="pill blue">Feature</span></td><td class="mono">#118</td><td>Gerar extrato mensal em PDF</td><td>backend</td><td><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></td><td class="dir"><button class="icone" title="Abrir no GitLab"><svg class="i"><use href="#i-ext"/></svg></button><button class="icone" data-remover title="Remover da entrega"><svg class="i"><use href="#i-x"/></svg></button></td></tr>
-  <tr><td><span class="pill blue">Feature</span></td><td class="mono">#121</td><td>Botão de download no extrato</td><td>frontend</td><td><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></td><td class="dir"><button class="icone" title="Abrir no GitLab"><svg class="i"><use href="#i-ext"/></svg></button><button class="icone" data-remover title="Remover da entrega"><svg class="i"><use href="#i-x"/></svg></button></td></tr>
-  <tr><td><span class="pill">Task</span></td><td class="mono">#124</td><td>Template do PDF com marca</td><td>backend</td><td><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></td><td class="dir"><button class="icone" title="Abrir no GitLab"><svg class="i"><use href="#i-ext"/></svg></button><button class="icone" data-remover title="Remover da entrega"><svg class="i"><use href="#i-x"/></svg></button></td></tr></tbody></table></div>
-  <a class="link-aud" href="prototipo-auditoria.html#obj=ENT-0042&cat=escopo"><svg class="i"><use href="#i-clock"/></svg>Quem mudou o escopo e quando: ver na auditoria<svg class="i"><use href="#i-chev"/></svg></a>
-</template>
-
-<template id="t-prop">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-user-ok"/></svg></span>Aprovação da proposta</h2><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovada</span></div>
-  <div class="cols">
-    <div class="box"><h3><svg class="i"><use href="#i-user-ok"/></svg>Decisão</h3><dl class="kv">
-      <dt>Aprovador</dt><dd><span class="av sm">DB</span>Daniel <span class="pill run">autoaprovação</span></dd>
-      <dt>Quando</dt><dd>18/10/2026 15:02</dd>
-      <dt>Motivo</dt><dd>Único aprovador técnico disponível.</dd></dl></div>
-    <div class="box"><h3><svg class="i"><use href="#i-file"/></svg>O que foi proposto</h3><dl class="kv">
-      <dt>Escopo</dt><dd>3 issues · 2 projetos</dd>
-      <dt>Banco</dt><dd>1 migration prevista (nova tabela de extratos)</dd>
-      <dt>Risco declarado</dt><dd><span class="pill ok">Baixo · expand/contract</span></dd></dl></div>
-  </div>
-</template>
-
-<template id="t-api-qa">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-flask"/></svg></span>QA · valuto-api <span class="mono" style="color:var(--mu)">v4.0.0-rc2</span></h2></div>
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-aba="geral"><svg class="i"><use href="#i-list"/></svg>Visão geral</button>
-    <button class="tab" data-aba="vuln"><svg class="i"><use href="#i-bug"/></svg>Vulnerabilidades <span class="n">10</span></button>
-    <button class="tab" data-aba="agentes"><svg class="i"><use href="#i-bot"/></svg>Agentes <span class="n">3</span></button>
-    <button class="tab" data-aba="deploys"><svg class="i"><use href="#i-rocket"/></svg>Deploys</button>
-  </div>
-
-  <div data-painel="geral">
-    <div class="sev">
-      <button class="sv" style="--c:var(--bad)" data-ir="vuln" data-sev="critica"><span class="top">Crítica<svg class="i"><use href="#i-alert"/></svg></span><b>0</b><small>nenhuma</small></button>
-      <button class="sv" style="--c:var(--run)" data-ir="vuln" data-sev="alta"><span class="top">Alta<svg class="i"><use href="#i-alert"/></svg></span><b style="color:var(--run-tx)">1</b><small>1 coberta por exceção</small></button>
-      <button class="sv" style="--c:#C9B458" data-ir="vuln" data-sev="media"><span class="top">Média<svg class="i"><use href="#i-bug"/></svg></span><b>6</b><small>não bloqueiam em QA</small></button>
-      <button class="sv" style="--c:var(--low)" data-ir="vuln" data-sev="baixa"><span class="top">Baixa<svg class="i"><use href="#i-bug"/></svg></span><b>3</b><small>informativas</small></button>
-    </div>
-    <div class="resumo">
-      <button class="linha" data-ir="agentes"><span class="rot"><svg class="i"><use href="#i-bot"/></svg>Agentes</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>qa-agent</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>code-review</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>security</span><svg class="i"><use href="#i-chev"/></svg></span></button>
-      <button class="linha" data-ir="deploys"><span class="rot"><svg class="i"><use href="#i-server"/></svg>Deploy atual</span><span class="val"><span class="mono">k3d-qa / valuto</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Publicado há 12 min</span><svg class="i"><use href="#i-chev"/></svg></span></button>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield-ok"/></svg>Gate de segurança</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Liberado</span>política de QA: bloqueia crítica e alta sem exceção</span></div>
-    </div>
-  </div>
-
-  <div data-painel="vuln" hidden>
-    <div class="filtros" role="group" aria-label="Severidade">
-      <button class="f on" data-f="todas">Todas <span class="n">10</span></button>
-      <button class="f" data-f="critica"><i class="dotc" style="--c:var(--bad)"></i>Crítica <span class="n">0</span></button>
-      <button class="f" data-f="alta"><i class="dotc" style="--c:var(--run)"></i>Alta <span class="n">1</span></button>
-      <button class="f" data-f="media"><i class="dotc" style="--c:#C9B458"></i>Média <span class="n">6</span></button>
-      <button class="f" data-f="baixa"><i class="dotc" style="--c:var(--low)"></i>Baixa <span class="n">3</span></button>
-    </div>
-    <div class="box tw"><table class="clic"><thead><tr><th>Severidade</th><th>Vulnerabilidade</th><th>Local</th><th>Ferramenta</th><th></th></tr></thead><tbody data-vulns></tbody></table></div>
-    <div class="pag"><span data-pag-info></span><span style="display:flex;gap:8px"><button class="btn g" data-pag="-1">Anterior</button><button class="btn g" data-pag="1">Próxima</button></span></div>
-  </div>
-
-  <div data-painel="agentes" hidden>
-    <div class="box">
-      <button class="agent" data-agente="qa"><span class="ai"><svg class="i lg"><use href="#i-flask"/></svg></span><div><b>qa-agent</b><p>12 cenários executados no ambiente de QA · 4 min · nenhuma falha</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-      <button class="agent" data-agente="review"><span class="ai"><svg class="i lg"><use href="#i-code"/></svg></span><div><b>code-review</b><p>Diff rc1 → rc2 · 3 arquivos · nenhuma observação bloqueante</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-      <button class="agent" data-agente="sec"><span class="ai"><svg class="i lg"><use href="#i-shield"/></svg></span><div><b>security</b><p>1 vulnerabilidade alta, coberta pela exceção SEC-2291</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-    </div>
-  </div>
-
-  <div data-painel="deploys" hidden>
-    <h3 class="sub"><svg class="i"><use href="#i-server"/></svg>Deploys por destino</h3>
-    <div class="box tw"><table><thead><tr><th>Destino</th><th>Ambiente</th><th>Tag</th><th>Imagem</th><th>Pipeline</th><th>Rollout</th><th>Smoke</th><th>Estado</th></tr></thead><tbody>
-      <tr><td class="mono">k3d-qa / valuto</td><td><span class="pill">QA</span></td><td class="mono">v4.0.0-rc2</td><td class="mono">sha256:9f2c…e41a</td><td class="mono">#2841</td><td>2/2 réplicas</td><td><span class="stat ok"><svg class="i"><use href="#i-ok"/></svg>ok</span></td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Publicado há 12 min</span></td></tr></tbody></table></div>
-    <h3 class="sub"><svg class="i"><use href="#i-tag"/></svg>Candidatas desta versão</h3>
-    <div class="box tw"><table><thead><tr><th>Candidata</th><th>Origem</th><th>Cortada</th><th>Onde chegou</th><th>Resultado</th></tr></thead><tbody>
-      <tr><td class="mono">v4.0.0-rc2</td><td class="mono">dev</td><td>21/10 09:14 · bot</td><td><span class="pill">QA</span></td><td><span class="pill run"><svg class="i"><use href="#i-wait"/></svg>Aguarda aprovação</span></td></tr>
-      <tr><td class="mono">v4.0.0-rc1</td><td class="mono">dev</td><td>19/10 16:40 · bot</td><td><span class="pill">QA</span></td><td><span class="pill bad"><svg class="i"><use href="#i-fail"/></svg>Reprovada · saldo inicial errado</span></td></tr></tbody></table></div>
-  </div>
-  <div class="barra-acao">
-    <button class="btn g"><svg class="i"><use href="#i-x"/></svg>Reprovar</button>
-    <button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar candidata</button>
-  </div>
-</template>
-
-<template id="t-vuln-det">
-  <div class="dh"><div><span data-sev-pill></span><h2 data-v-titulo></h2></div><button class="x" data-fechar aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button></div>
-  <dl class="kv"><dt><svg class="i"><use href="#i-shield"/></svg>Ferramenta</dt><dd data-v-ferr></dd><dt><svg class="i"><use href="#i-list"/></svg>Regra</dt><dd class="mono" data-v-regra></dd><dt><svg class="i"><use href="#i-file"/></svg>Local</dt><dd class="mono" data-v-local></dd><dt><svg class="i"><use href="#i-tag"/></svg>Primeira vez</dt><dd><span class="mono">v4.0.0-rc1</span> · 19/10</dd></dl>
-  <h3 class="sub">Descrição</h3><p class="txt" data-v-desc></p>
-  <h3 class="sub">Como corrigir</h3><p class="txt" data-v-fix></p>
-  <div data-v-exc></div>
-  <div class="acoes"><button class="btn g"><svg class="i"><use href="#i-ext"/></svg>Abrir no GitLab</button><button class="btn g" data-pedir><svg class="i"><use href="#i-shield"/></svg>Pedir exceção</button></div>
-</template>
-
-<template id="t-agente-det">
-  <div class="dh"><div><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span><h2 data-a-titulo></h2></div><button class="x" data-fechar aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button></div>
-  <p class="txt" data-a-resumo></p>
-  <h3 class="sub"><svg class="i"><use href="#i-list"/></svg>Operações</h3>
-  <ol class="ops" data-a-ops></ol>
-  <div class="acoes"><button class="btn g"><svg class="i"><use href="#i-file"/></svg>Log completo</button></div>
-</template>
-
-<!-- DEV: avança sozinho; DEV só avisa vulnerabilidades -->
-<template id="t-api-dev">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-code"/></svg></span>DEV · valuto-api <span class="mono" style="color:var(--mu)">v4.0.0-rc2</span></h2></div>
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-aba="geral"><svg class="i"><use href="#i-list"/></svg>Visão geral</button>
-    <button class="tab" data-aba="vuln"><svg class="i"><use href="#i-bug"/></svg>Vulnerabilidades <span class="n">10</span></button>
-    <button class="tab" data-aba="agentes"><svg class="i"><use href="#i-bot"/></svg>Agentes <span class="n">2</span></button>
-    <button class="tab" data-aba="deploys"><svg class="i"><use href="#i-rocket"/></svg>Deploys</button>
-  </div>
-  <div data-painel="geral">
-    <div class="sev">
-      <button class="sv" style="--c:var(--bad)" data-ir="vuln" data-sev="critica"><span class="top">Crítica<svg class="i"><use href="#i-alert"/></svg></span><b>0</b><small>nenhuma</small></button>
-      <button class="sv" style="--c:var(--run)" data-ir="vuln" data-sev="alta"><span class="top">Alta<svg class="i"><use href="#i-alert"/></svg></span><b style="color:var(--run-tx)">1</b><small>coberta por exceção</small></button>
-      <button class="sv" style="--c:#C9B458" data-ir="vuln" data-sev="media"><span class="top">Média<svg class="i"><use href="#i-bug"/></svg></span><b>6</b><small>não bloqueiam</small></button>
-      <button class="sv" style="--c:var(--low)" data-ir="vuln" data-sev="baixa"><span class="top">Baixa<svg class="i"><use href="#i-bug"/></svg></span><b>3</b><small>informativas</small></button>
-    </div>
-    <div class="resumo">
-      <button class="linha" data-ir="agentes"><span class="rot"><svg class="i"><use href="#i-bot"/></svg>Agentes</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>code-review</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>security</span><svg class="i"><use href="#i-chev"/></svg></span></button>
-      <button class="linha" data-ir="deploys"><span class="rot"><svg class="i"><use href="#i-server"/></svg>Deploys</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>2 de 2 destinos</span><svg class="i"><use href="#i-chev"/></svg></span></button>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield-ok"/></svg>Gate de segurança</span><span class="val"><span class="pill blue"><svg class="i"><use href="#i-alert"/></svg>Só avisa</span>em DEV nada bloqueia; o gate de QA segura</span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-git"/></svg>Conferência de escopo</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>2 de 3 issues com código</span><span class="pill run">#124 falta entregar</span></span></div>
-    </div>
-  </div>
-  <div data-painel="vuln" hidden>
-    <div class="filtros" role="group" aria-label="Severidade">
-      <button class="f on" data-f="todas">Todas <span class="n">10</span></button><button class="f" data-f="critica"><i class="dotc" style="--c:var(--bad)"></i>Crítica <span class="n">0</span></button><button class="f" data-f="alta"><i class="dotc" style="--c:var(--run)"></i>Alta <span class="n">1</span></button><button class="f" data-f="media"><i class="dotc" style="--c:#C9B458"></i>Média <span class="n">6</span></button><button class="f" data-f="baixa"><i class="dotc" style="--c:var(--low)"></i>Baixa <span class="n">3</span></button>
-    </div>
-    <div class="box tw"><table class="clic"><thead><tr><th>Severidade</th><th>Vulnerabilidade</th><th>Local</th><th>Ferramenta</th><th></th></tr></thead><tbody data-vulns></tbody></table></div>
-    <div class="pag"><span data-pag-info></span><span style="display:flex;gap:8px"><button class="btn g" data-pag="-1">Anterior</button><button class="btn g" data-pag="1">Próxima</button></span></div>
-  </div>
-  <div data-painel="agentes" hidden>
-    <div class="box">
-      <button class="agent" data-agente="review"><span class="ai"><svg class="i lg"><use href="#i-code"/></svg></span><div><b>code-review</b><p>Diff v3.4.1 → v4.0.0-rc2 · 14 arquivos · 2 sugestões não bloqueantes</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-      <button class="agent" data-agente="sec"><span class="ai"><svg class="i lg"><use href="#i-shield"/></svg></span><div><b>security</b><p>Código e imagem analisados junto com as ferramentas do pipeline</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-    </div>
-  </div>
-  <div data-painel="deploys" hidden>
-    <h3 class="sub"><svg class="i"><use href="#i-server"/></svg>Deploys por destino</h3>
-    <div class="box tw"><table><thead><tr><th>Destino</th><th>Tag</th><th>Imagem</th><th>Pipeline</th><th>Rollout</th><th>Estado</th></tr></thead><tbody>
-      <tr><td class="mono">k3d-dev / no-1</td><td class="mono">v4.0.0-rc2</td><td class="mono">sha256:9f2c…e41a</td><td class="mono">#2836</td><td>2/2 réplicas</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Publicado</span></td></tr>
-      <tr><td class="mono">k3d-dev / no-2</td><td class="mono">v4.0.0-rc2</td><td class="mono">sha256:9f2c…e41a</td><td class="mono">#2836</td><td>2/2 réplicas</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Publicado</span></td></tr></tbody></table></div>
-  </div>
-</template>
-
-<template id="t-front-dev">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-code"/></svg></span>DEV · valuto-frontend <span class="mono" style="color:var(--mu)">v2.1.0-rc1</span></h2></div>
-  <div class="aviso-etapa"><svg class="i" style="color:var(--run-tx)"><use href="#i-wait"/></svg><div><b>Aguardando a API chegar em QA</b><p>O front depende da API. Ele só é promovido para QA quando a valuto-api v4.0.0 estiver lá.</p></div></div>
-  <div class="resumo">
-    <div class="linha"><span class="rot"><svg class="i"><use href="#i-bot"/></svg>Agentes</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>code-review</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>security</span></span></div>
-    <div class="linha"><span class="rot"><svg class="i"><use href="#i-server"/></svg>Deploys</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>2 de 2 destinos</span></span></div>
-    <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield-ok"/></svg>Gate de segurança</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Nada encontrado</span></span></div>
-  </div>
-</template>
-
-<template id="t-front-dev-falha">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-code"/></svg></span>DEV · valuto-frontend <span class="mono" style="color:var(--mu)">v2.1.0-rc1</span></h2></div>
-  <div class="aviso-etapa ruim"><svg class="i" style="color:var(--bad-tx)"><use href="#i-fail"/></svg><div><b>O deploy falhou em k3d-dev / no-2</b><p>Rollout não ficou pronto em 5 min (readiness probe falhando em /healthz). O cluster voltou a versão anterior sozinho.</p></div></div>
-  <div class="box tw"><table><thead><tr><th>Destino</th><th>Tag</th><th>Pipeline</th><th>Rollout</th><th>Estado</th></tr></thead><tbody>
-    <tr><td class="mono">k3d-dev / no-1</td><td class="mono">v2.1.0-rc1</td><td class="mono">#912</td><td>2/2 réplicas</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Publicado</span></td></tr>
-    <tr><td class="mono">k3d-dev / no-2</td><td class="mono">v2.1.0-rc1</td><td class="mono">#912</td><td>0/2 réplicas</td><td><span class="pill bad"><svg class="i"><use href="#i-fail"/></svg>Falhou · revertido</span></td></tr></tbody></table></div>
-  <div class="barra-acao"><button class="btn g"><svg class="i"><use href="#i-file"/></svg>Ver log</button><button class="btn g"><svg class="i"><use href="#i-tag"/></svg>Nova candidata</button><button class="btn p"><svg class="i"><use href="#i-run"/></svg>Reexecutar deploy</button></div>
-</template>
-
-<!-- Aprovação de negócio: notas + issue por issue -->
-<template id="t-neg">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-brief"/></svg></span>Aprovação de negócio</h2></div>
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-aba="notas"><svg class="i"><use href="#i-file"/></svg>Notas de entrega</button>
-    <button class="tab" data-aba="issues"><svg class="i"><use href="#i-issue"/></svg>Issues <span class="n" data-cont-issues>0 de 3</span></button>
-  </div>
-  <div data-painel="notas">
-    <div class="notas">
-      <div class="nota"><span class="ib verde"><svg class="i"><use href="#i-file"/></svg></span><div><b>Extrato mensal em PDF</b><p>Na tela de extrato, o cliente agora baixa o extrato do mês em PDF, com saldo inicial, movimentações e saldo final.</p><span class="pill blue">tela nova · Extrato</span></div></div>
-      <div class="nota"><span class="ib verde"><svg class="i"><use href="#i-check"/></svg></span><div><b>Botão "Baixar PDF"</b><p>Aparece no topo do extrato, ao lado do filtro de mês. Fica desativado quando o mês não tem movimentação.</p><span class="pill blue">alteração · Extrato</span></div></div>
-      <div class="nota"><span class="ib verde"><svg class="i"><use href="#i-brief"/></svg></span><div><b>PDF com a marca Valuto</b><p>Cabeçalho com logo, CNPJ e data de emissão; rodapé com paginação.</p><span class="pill">documento</span></div></div>
-      <div class="nota"><span class="ib"><svg class="i"><use href="#i-server"/></svg></span><div><b>Para a equipe técnica</b><p>Endpoint novo <span class="mono">GET /api/v1/extratos/{mes}/pdf</span> · 1 tabela nova · nenhum endpoint removido.</p></div></div>
-    </div>
-  </div>
-  <div data-painel="issues" hidden>
-    <div class="box tw"><table><thead><tr><th>Issue</th><th>Título</th><th>Decisão</th><th></th></tr></thead><tbody data-issues>
-      <tr data-i="118"><td class="mono">#118</td><td>Gerar extrato mensal em PDF</td><td data-dec><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></td><td class="dir"><button class="btn g sm" data-rep>Reprovar</button><button class="btn g sm" data-apr><svg class="i"><use href="#i-check"/></svg>Aprovar</button></td></tr>
-      <tr data-i="121"><td class="mono">#121</td><td>Botão de download no extrato</td><td data-dec><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></td><td class="dir"><button class="btn g sm" data-rep>Reprovar</button><button class="btn g sm" data-apr><svg class="i"><use href="#i-check"/></svg>Aprovar</button></td></tr>
-      <tr data-i="124"><td class="mono">#124</td><td>Template do PDF com marca</td><td data-dec><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></td><td class="dir"><button class="btn g sm" data-rep>Reprovar</button><button class="btn g sm" data-apr><svg class="i"><use href="#i-check"/></svg>Aprovar</button></td></tr>
-    </tbody></table></div>
-  </div>
-  <div class="barra-acao"><button class="btn g"><svg class="i"><use href="#i-x"/></svg>Reprovar</button><button class="btn p" data-final disabled title="Aprove as 3 issues para liberar"><svg class="i"><use href="#i-check"/></svg>Aprovar negócio</button></div>
-</template>
-
-<!-- Aprovação da entrega: resumo, conferência de escopo, banco, notas -->
-<template id="t-ent">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-shield-ok"/></svg></span>Aprovação da entrega</h2></div>
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-aba="resumo"><svg class="i"><use href="#i-list"/></svg>Resumo</button>
-    <button class="tab" data-aba="escopo"><svg class="i"><use href="#i-git"/></svg>Conferência de escopo <span class="n" data-pend-escopo>1</span></button>
-    <button class="tab" data-aba="banco"><svg class="i"><use href="#i-server"/></svg>Banco</button>
-  </div>
-  <div data-painel="resumo">
-    <div class="cols">
-      <div class="box"><h3><svg class="i"><use href="#i-box"/></svg>valuto-api · v3.4.1 → v4.0.0</h3><dl class="kv"><dt>Candidatas</dt><dd>2 (rc1 reprovada)</dd><dt>Diff total</dt><dd>14 arquivos · +612 −88</dd><dt>Agentes</dt><dd><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>3 aprovados</span></dd><dt>Vulnerabilidades</dt><dd>0 crít. · 1 alta (exceção) · 6 méd. · 3 baixas</dd></dl></div>
-      <div class="box"><h3><svg class="i"><use href="#i-box"/></svg>valuto-frontend · v2.0.3 → v2.1.0</h3><dl class="kv"><dt>Candidatas</dt><dd>1</dd><dt>Diff total</dt><dd>6 arquivos · +140 −12</dd><dt>Agentes</dt><dd><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>3 aprovados</span></dd><dt>Vulnerabilidades</dt><dd>nenhuma</dd></dl></div>
-    </div>
-  </div>
-  <div data-painel="escopo" hidden>
-    <div class="box tw"><table><thead><tr><th>Issue</th><th>Título</th><th>No código</th><th>Situação</th><th></th></tr></thead><tbody>
-      <tr><td class="mono">#118</td><td>Gerar extrato mensal em PDF</td><td class="mono">!42 · valuto-api</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Entregue</span></td><td></td></tr>
-      <tr><td class="mono">#121</td><td>Botão de download no extrato</td><td class="mono">!17 · valuto-frontend</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Entregue</span></td><td></td></tr>
-      <tr data-escopo><td class="mono">#124</td><td>Template do PDF com marca</td><td>—</td><td data-sit><span class="pill run"><svg class="i"><use href="#i-alert"/></svg>Falta entregar</span></td><td class="dir"><button class="btn g sm" data-justificar>Justificar</button></td></tr>
-      <tr><td class="mono">—</td><td>chore: atualiza QuestPDF</td><td class="mono">!44 · valuto-api</td><td><span class="pill"><svg class="i"><use href="#i-issue"/></svg>Sem rastreio · só aviso</span></td><td></td></tr>
-    </tbody></table></div>
-  </div>
-  <div data-painel="banco" hidden>
-    <div class="box"><h3><svg class="i"><use href="#i-file"/></svg>migrations.sql · valuto-api</h3>
-<pre class="sql">CREATE TABLE extrato.extrato_mensal (
-  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  public_id uuid NOT NULL UNIQUE,
-  conta_id bigint NOT NULL,
-  mes date NOT NULL,
-  gerado_em timestamptz NOT NULL
-);</pre></div>
-    <label class="check"><input type="checkbox" data-compat> As migrations são compatíveis com a versão anterior (a v3.4.1 continua funcionando com o banco novo). Sem isso, o rollback desta versão só pode ser feito pelo MOR.</label>
-  </div>
-  <div class="barra-acao"><button class="btn g"><svg class="i"><use href="#i-x"/></svg>Reprovar</button><button class="btn p" data-final disabled title="Resolva a conferência de escopo e confirme a compatibilidade do banco"><svg class="i"><use href="#i-check"/></svg>Aprovar entrega</button></div>
-</template>
-
-<!-- PRD: publicar respeitando a ordem dos parceiros -->
-<template id="t-prd">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-rocket"/></svg></span><span data-titulo></span></h2></div>
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-aba="geral"><svg class="i"><use href="#i-list"/></svg>Visão geral</button>
-    <button class="tab" data-aba="seg"><svg class="i"><use href="#i-shield"/></svg>Segurança</button>
-    <button class="tab" data-aba="deploys"><svg class="i"><use href="#i-server"/></svg>Deploys por destino</button>
-    <button class="tab" data-aba="backup"><svg class="i"><use href="#i-box"/></svg>Backup</button>
-  </div>
-  <div data-painel="geral">
-    <div class="resumo">
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-tag"/></svg>Versão</span><span class="val"><span class="mono" data-de></span><svg class="i"><use href="#i-chev"/></svg><span class="mono" data-para></span></span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-list"/></svg>Ordem de publicação</span><span class="val"><span class="pill blue">1 · valuto-api</span><svg class="i"><use href="#i-chev"/></svg><span class="pill">2 · valuto-frontend</span> o front só sai depois da API ficar ok em todos os destinos</span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield-ok"/></svg>Gate de produção</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Liberado</span>reanálise da imagem: nenhuma CVE nova desde o QA</span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-bot"/></svg>Agentes</span><span class="val"><span class="pill">não rodam</span>mesmo código e mesma imagem aprovados em QA e HML</span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield-ok"/></svg>Aprovação da entrega</span><span class="val"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Pendente</span></span></div>
-    </div>
-  </div>
-  <div data-painel="seg" hidden>
-    <p class="txt" style="margin-bottom:12px">A imagem publicada em produção é exatamente a aprovada em QA e HML (mesmo digest). O código não é analisado de novo; a imagem é, porque uma CVE pode ter sido publicada depois. A política de produção bloqueia crítica e alta sem exceção.</p>
-    <div class="box tw"><table><thead><tr><th>Verificação</th><th>Quando</th><th>Resultado</th></tr></thead><tbody>
-      <tr><td>Reanálise da imagem · Trivy</td><td>antes de publicar</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Nenhuma CVE nova</span></td></tr>
-      <tr><td>Gate de produção</td><td>antes de publicar</td><td><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Liberado · 1 alta coberta por exceção</span></td></tr>
-      <tr><td>Smoke test · /health</td><td>depois do deploy, por destino</td><td><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Aguardando publicação</span></td></tr>
-      <tr><td>Análise de código, agentes de code-review e qa</td><td>—</td><td><span class="pill">não rodam · mesmo código de QA e HML</span></td></tr></tbody></table></div>
-  </div>
-  <div data-painel="deploys" hidden><div class="empty"><span class="ib"><svg class="i lg"><use href="#i-server"/></svg></span><b style="color:var(--tx)">Ainda não publicado</b>Os deploys em cada destino de produção aparecem aqui assim que a publicação começar.</div></div>
-  <div data-painel="backup" hidden>
-    <p class="txt" style="margin-bottom:12px">Antes da migration de produção, o banco é salvo. Ficam as 3 últimas publicações. Restaurar perde o que foi gravado depois e só o MOR pode pedir.</p>
-    <div class="box tw"><table><thead><tr><th>Backup</th><th>Feito em</th><th>Tamanho</th></tr></thead><tbody>
-      <tr><td class="mono">valuto-v3.4.1-pre.dump</td><td>10/10 22:04</td><td>412 MB</td></tr>
-      <tr><td class="mono">valuto-v3.4.0-pre.dump</td><td>02/10 21:47</td><td>398 MB</td></tr>
-      <tr><td class="mono">valuto-v3.3.0-pre.dump</td><td>18/09 22:12</td><td>371 MB</td></tr></tbody></table></div>
-  </div>
-  <div class="barra-acao"><button class="btn p" disabled title="Disponível depois da aprovação da entrega"><svg class="i"><use href="#i-rocket"/></svg>Publicar</button></div>
-</template>
-
-<template id="t-prd-rollback">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-rocket"/></svg></span>PRD · valuto-api</h2></div>
-  <div class="aviso-etapa ruim"><svg class="i" style="color:var(--bad-tx)"><use href="#i-alert"/></svg><div><b>Produção voltou para v3.4.1 (rollback)</b><p>Pedido por Daniel em 23/10 15:12 · motivo: erro 500 ao gerar extrato de contas antigas. A próxima publicação deste projeto precisa ser a correção (hotfix v4.0.1 ou versão nova).</p></div></div>
-  <div class="box tw"><table><thead><tr><th>Destino</th><th>Antes</th><th>Agora</th><th>Estado</th></tr></thead><tbody>
-    <tr><td class="mono">prod / valuto</td><td class="mono">v4.0.0</td><td class="mono">v3.4.1</td><td><span class="pill run"><svg class="i"><use href="#i-alert"/></svg>Em rollback</span></td></tr></tbody></table></div>
-  <div class="barra-acao"><button class="btn p"><svg class="i"><use href="#i-code"/></svg>Abrir hotfix</button></div>
-</template>
-
-<!-- mapa curto do hotfix -->
-<template id="t-mapa-hotfix">
-  <div class="track hf"></div>
-  <div class="lname" style="grid-row:1"><span><i class="sw" style="background:var(--blue2)"></i>valuto-api</span><small class="mono">v3.4.2 · hotfix</small></div>
-  <button class="st done" data-k="hf-aber" style="grid-row:1;grid-column:2"><span class="badge"><svg class="i"><use href="#i-check"/></svg></span><div class="t">Abertura</div><div class="ic"><svg class="i"><use href="#i-file"/></svg></div><div class="s"><span class="stat ok">Concluído</span><span class="who">hoje 09:02</span></div></button>
-  <button class="st run" data-k="hf-ent" style="grid-row:1;grid-column:3"><span class="here"><svg class="i"><use href="#i-git"/></svg>você está aqui</span><div class="t">Aprovação<br>da entrega</div><div class="ic"><svg class="i"><use href="#i-shield-ok"/></svg></div><div class="s"><span class="stat run"><svg class="i spin"><use href="#i-run"/></svg>Executando</span></div></button>
-  <button class="st" data-k="hf-prd" style="grid-row:1;grid-column:4"><div class="t">PRD</div><div class="ic"><svg class="i"><use href="#i-rocket"/></svg></div><div class="s"><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span><span class="who mono">hoje v3.4.1</span></div></button>
-</template>
-
-<template id="t-hf-ent">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-shield-ok"/></svg></span>Aprovação da entrega · hotfix</h2></div>
-  <div class="aviso-etapa"><svg class="i" style="color:var(--run-tx)"><use href="#i-alert"/></svg><div><b>Hotfix vai direto para produção</b><p>Imagem nova, então a segurança roda completa com a política de produção. Só o agente de qa não roda, porque não há ambiente antes de PRD.</p></div></div>
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-aba="geral"><svg class="i"><use href="#i-list"/></svg>Visão geral</button>
-    <button class="tab" data-aba="vuln"><svg class="i"><use href="#i-bug"/></svg>Vulnerabilidades <span class="n">2</span></button>
-    <button class="tab" data-aba="agentes"><svg class="i"><use href="#i-bot"/></svg>Agentes <span class="n">2</span></button>
-  </div>
-  <div data-painel="geral">
-    <div class="sev">
-      <div class="sv" style="--c:var(--bad)"><span class="top">Crítica<svg class="i"><use href="#i-alert"/></svg></span><b>0</b><small>nenhuma</small></div>
-      <div class="sv" style="--c:var(--run)"><span class="top">Alta<svg class="i"><use href="#i-alert"/></svg></span><b>0</b><small>nenhuma</small></div>
-      <div class="sv" style="--c:#C9B458"><span class="top">Média<svg class="i"><use href="#i-bug"/></svg></span><b>1</b><small>não bloqueia</small></div>
-      <div class="sv" style="--c:var(--low)"><span class="top">Baixa<svg class="i"><use href="#i-bug"/></svg></span><b>1</b><small>informativa</small></div>
-    </div>
-    <div class="resumo">
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-code"/></svg>Diff</span><span class="val"><span class="mono">v3.4.1 → v3.4.2</span> · 2 arquivos · +9 −3</span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield"/></svg>Análises</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>SAST</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>SCA</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>segredos</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>IaC</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>imagem</span></span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-bot"/></svg>Agentes</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>code-review</span><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>security</span><span class="pill">qa não roda</span></span></div>
-      <div class="linha"><span class="rot"><svg class="i"><use href="#i-shield-ok"/></svg>Gate de produção</span><span class="val"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Liberado</span>bloqueia crítica e alta sem exceção</span></div>
-    </div>
-  </div>
-  <div data-painel="vuln" hidden>
-    <div class="box tw"><table><thead><tr><th>Severidade</th><th>Vulnerabilidade</th><th>Local</th><th>Ferramenta</th></tr></thead><tbody>
-      <tr><td><span class="pill">Média</span></td><td>Timeout ausente em chamada HTTP</td><td class="mono">PdfClient.cs:22</td><td>Opengrep</td></tr>
-      <tr><td><span class="pill blue">Baixa</span></td><td>Versão do servidor exposta</td><td class="mono">Server header</td><td>Trivy</td></tr></tbody></table></div>
-  </div>
-  <div data-painel="agentes" hidden>
-    <div class="box">
-      <button class="agent" data-agente="review"><span class="ai"><svg class="i lg"><use href="#i-code"/></svg></span><div><b>code-review</b><p>Diff v3.4.1 → v3.4.2 · 2 arquivos · correção pontual, sem observação</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-      <button class="agent" data-agente="sec"><span class="ai"><svg class="i lg"><use href="#i-shield"/></svg></span><div><b>security</b><p>Nenhum achado alto ou crítico</p></div><span class="seta"><span class="pill ok"><svg class="i"><use href="#i-ok"/></svg>Aprovado</span></span><svg class="i"><use href="#i-chev"/></svg></button>
-    </div>
-  </div>
-  <div class="barra-acao"><button class="btn g"><svg class="i"><use href="#i-x"/></svg>Reprovar</button><button class="btn p"><svg class="i"><use href="#i-check"/></svg>Aprovar hotfix</button></div>
-</template>
-
-<template id="t-vazio">
-  <div class="ph"><h2><span class="ib"><svg class="i"><use href="#i-git"/></svg></span><span data-titulo></span></h2><span class="stat none"><svg class="i"><use href="#i-none"/></svg>Não iniciado</span></div>
-  <div class="empty"><span class="ib"><svg class="i lg"><use href="#i-clock"/></svg></span><b style="color:var(--tx)">Esta etapa ainda não começou</b>Quando começar, aqui aparecem os deploys, as análises e os resultados dos agentes.</div>
-  <div class="barra-acao"><button class="btn p" disabled title="Aguarda a etapa anterior ser concluída"><svg class="i"><use href="#i-chev"/></svg>Avançar etapa</button></div>
-</template>
+<div data-gaveta></div>
 
 <script src="comum.js"></script>
 <script>
-const titulos={'api-dev':'DEV · valuto-api','api-hml':'HML · valuto-api','api-prd':'PRD · valuto-api','front-dev':'DEV · valuto-frontend','front-qa':'QA · valuto-frontend','front-hml':'HML · valuto-frontend','front-prd':'PRD · valuto-frontend','ent':'Aprovação da entrega'};
-const detalhe=document.getElementById('detalhe');
 const ic=(id,cls='')=>`<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
-function abrir(k){
-  document.querySelectorAll('.st').forEach(b=>{b.classList.toggle('sel',b.dataset.k===k);b.setAttribute('aria-pressed',b.dataset.k===k)});
-  const modelo={'front-dev':cenario==='falha'?'front-dev-falha':'front-dev','api-prd':cenario==='rollback'?'prd-rollback':'prd','front-prd':'prd','hf-aber':'aber','hf-ent':'hf-ent','hf-prd':'prd'}[k]||k;
-  const t=document.getElementById('t-'+modelo)||document.getElementById('t-vazio');
-  detalhe.replaceChildren(t.content.cloneNode(true));
-  const h=detalhe.querySelector('[data-titulo]');if(h)h.textContent=titulos[k]||k;
-  if(detalhe.querySelector('[data-painel]'))ligarAbas();
-  // as ações da etapa ficam fora do bloco, embaixo dele, à direita
-  const barra=detalhe.querySelector('.barra-acao'),acoes=document.getElementById('acoes-etapa');
-  acoes.replaceChildren(...(barra?barra.childNodes:[]));barra?.remove();
-  if(cenario==='cancelada')acoes.replaceChildren();
-  (depois[k]||(()=>{}))();
-}
-const titulosPrd={'api-prd':['PRD · valuto-api','v3.4.1','v4.0.0'],'front-prd':['PRD · valuto-frontend','v2.0.3','v2.1.0'],'hf-prd':['PRD · valuto-api · hotfix','v3.4.1','v3.4.2']};
-const acoesEl=()=>document.getElementById('acoes-etapa');
-const issuesGitlab=[['#118','Gerar extrato mensal em PDF','Feature','backend'],['#121','Botão de download no extrato','Feature','frontend'],['#124','Template do PDF com marca','Task','backend'],['#127','Extrato com filtro por categoria','Feature','frontend'],['#130','Corrigir arredondamento no saldo','Bug','backend'],['#133','Exportar extrato em CSV','Feature','backend']];
-const depois={
-  aber(){ // adicionar e remover issues, com histórico
-    const busca=detalhe.querySelector('[data-busca]'),q=detalhe.querySelector('[data-q]'),res=detalhe.querySelector('[data-resultados]'),lista=detalhe.querySelector('[data-lista-issues]'),qtd=detalhe.querySelector('[data-qtd]');
-    const na=()=>[...lista.querySelectorAll('tr:not(.removida) td.mono')].map(t=>t.textContent);
-    const registra=()=>{qtd.textContent=na().length}; // o registro vai para o módulo de Auditoria
-    const desenha=()=>{const f=q.value.toLowerCase();res.innerHTML=issuesGitlab.filter(i=>(i[0]+i[1]).toLowerCase().includes(f)).map(i=>{const ja=na().includes(i[0]);return `<button class="res${ja?' ja':''}" data-id="${i[0]}" ${ja?'disabled':''}><span class="mono">${i[0]}</span>${i[1]}<span class="pill">${i[2]}</span><span class="dir">${ja?'já na entrega':ic('issue')+'Adicionar'}</span></button>`}).join('')};
-    const liga=tr=>tr.querySelector('[data-remover]').onclick=()=>{tr.classList.add('removida');tr.querySelector('[data-remover]').remove();registra('removeu '+tr.querySelector('td.mono').textContent);desenha()};
-    lista.querySelectorAll('tr').forEach(liga);
-    detalhe.querySelector('[data-add-issue]').onclick=()=>{busca.hidden=!busca.hidden;if(!busca.hidden){desenha();q.focus()}};
-    q.oninput=desenha;
-    res.onclick=e=>{const b=e.target.closest('.res');if(!b||b.disabled)return;const i=issuesGitlab.find(x=>x[0]===b.dataset.id);
-      lista.insertAdjacentHTML('beforeend',`<tr><td><span class="pill${i[2]==='Feature'?' blue':''}">${i[2]}</span></td><td class="mono">${i[0]}</td><td>${i[1]}</td><td>${i[3]}</td><td><span class="stat none">${ic('none')}Pendente</span></td><td class="dir"><button class="icone" title="Abrir no GitLab">${ic('ext')}</button><button class="icone" data-remover title="Remover da entrega">${ic('x')}</button></td></tr>`);
-      liga(lista.lastElementChild);registra('adicionou '+i[0]);desenha()};
-  },
-  neg(){ // libera "Aprovar negócio" quando as 3 issues estiverem aprovadas
-    const cont=detalhe.querySelector('[data-cont-issues]'),final=acoesEl().querySelector('[data-final]');
-    const conta=()=>{const n=detalhe.querySelectorAll('[data-issues] tr.aprovada').length;cont.textContent=`${n} de 3`;if(final){final.disabled=n<3;final.title=n<3?'Aprove as 3 issues para liberar':''}};
-    detalhe.querySelectorAll('[data-issues] tr').forEach(tr=>{
-      tr.querySelector('[data-apr]').onclick=()=>{tr.classList.add('aprovada');tr.querySelector('[data-dec]').innerHTML=`<span class="pill ok">${ic('ok')}Aprovada · Daniel</span>`;tr.querySelector('[data-apr]').hidden=true;tr.querySelector('[data-rep]').hidden=false;conta()};
-      tr.querySelector('[data-rep]').onclick=()=>{tr.classList.remove('aprovada');tr.querySelector('[data-dec]').innerHTML=`<span class="pill bad">${ic('fail')}Reprovada</span>`;conta()};
-    });
-  },
-  ent(){ // libera "Aprovar entrega" com escopo resolvido + banco compatível
-    const final=acoesEl().querySelector('[data-final]'),compat=detalhe.querySelector('[data-compat]');let escopoOk=false;
-    const ver=()=>{if(final)final.disabled=!(escopoOk&&compat.checked)};
-    detalhe.querySelector('[data-justificar]').onclick=e=>{const m=prompt('Por que a #124 pode ficar de fora desta entrega?','Template será entregue na próxima versão; o PDF sai com o layout padrão.');if(!m)return;escopoOk=true;
-      e.target.closest('tr').querySelector('[data-sit]').innerHTML=`<span class="pill blue">${ic('shield')}Justificada</span>`;e.target.remove();detalhe.querySelector('[data-pend-escopo]').textContent='0';ver()};
-    compat.onchange=ver;
-  },
-  'api-prd'(){if(cenario!=='rollback')preencherPrd('api-prd')},'front-prd'(){preencherPrd('front-prd')},'hf-prd'(){preencherPrd('hf-prd')},
-  'api-qa'(){ if(cenario!=='gate')return;
-    const [crit,alta]=detalhe.querySelectorAll('.sv');crit.querySelector('b').textContent='1';crit.querySelector('b').style.color='var(--bad-tx)';crit.querySelector('small').textContent='sem exceção · bloqueia';
-    const gate=[...detalhe.querySelectorAll('.linha')].find(l=>l.textContent.includes('Gate'));gate.querySelector('.val').innerHTML=`<span class="pill bad">${ic('fail')}Bloqueado</span>1 vulnerabilidade crítica sem exceção (CVE-2026-40112 · Npgsql)`;
-    acoesEl().innerHTML=`<a class="btn g" style="text-decoration:none" href="prototipo-excecoes.html#pedir=${encodeURIComponent(JSON.stringify({t:'CVE crítica no Npgsql',f:'Trivy',r:'CVE-2026-40112',s:'critica',app:'Valuto',onde:[['valuto-api','Npgsql 10.0.1','v4.0.0-rc2','QA']]}))}">${ic('shield')}Pedir exceção</a><button class="btn g">${ic('tag')}Nova candidata</button><button class="btn p" disabled title="Bloqueado pelo gate de segurança">${ic('check')}Aprovar candidata</button>`;
-  }
-};
-function preencherPrd(k){const [t,de,para]=titulosPrd[k];detalhe.querySelector('[data-titulo]').textContent=t;detalhe.querySelector('[data-de]').textContent=de;detalhe.querySelector('[data-para]').textContent=para}
+const $=s=>document.querySelector(s);
 
-/* cenários de demonstração */
-let cenario='normal';
-const mapa=document.querySelector('.map'),mapaNormal=mapa.innerHTML,metaNormal=document.querySelector('.meta').innerHTML;
-const card=k=>document.querySelector(`.st[data-k="${k}"]`);
-function estadoCard(k,cls,html){const c=card(k);if(!c)return;c.classList.remove('done','run','fail','void');if(cls)c.classList.add(cls);c.querySelector('.s').innerHTML=html;c.querySelector('.badge')?.remove();if(cls==='fail')c.insertAdjacentHTML('afterbegin',`<span class="badge">${ic('x')}</span>`)}
-function faixa(cls,icone,titulo,txt){document.getElementById('faixa').innerHTML=cls?`<div class="faixa ${cls}">${ic(icone,'lg')}<div><b>${titulo}</b><p>${txt}</p></div></div>`:''}
-function estado(cls,icone,txt,spin){const e=document.querySelector('[data-estado]');e.className='pill '+cls;e.innerHTML=ic(icone,spin?'spin':'')+txt}
-function aplicarCenario(c){
-  cenario=c;mapa.classList.remove('curto');mapa.innerHTML=mapaNormal;faixa();estado('run','run','Em andamento',true);
-  const meta=document.querySelector('.meta');meta.innerHTML=metaNormal;
-  document.querySelector('.btn.d').hidden=c==='cancelada';
-  if(c==='hotfix')meta.innerHTML=`<span class="mono">#ENT-0047</span><span>${ic('tag')}<span class="mono">api v3.4.2 · hotfix</span></span><span>${ic('issue')}1 issue</span><span><span class="av sm">DB</span>Daniel · hoje</span>`;
-  document.querySelector('[data-nome]').textContent='Extrato em PDF';
-  let abre='api-qa';
-  if(c==='falha'){estadoCard('front-dev','fail',`<span class="stat bad">${ic('fail')}Falhou</span><span class="who">deploy em no-2</span>`);abre='front-dev';
-    titulos['front-dev']='DEV · valuto-frontend';}
-  if(c==='gate'){estadoCard('api-qa','fail',`<span class="stat bad">${ic('fail')}Bloqueado</span><span class="who">1 crítica sem exceção</span>`);card('api-qa').insertAdjacentHTML('afterbegin',`<span class="here">${ic('git')}você está aqui</span>`);estado('bad','fail','Bloqueada')}
-  if(c==='cancelada'){faixa('cinza','x','Entrega cancelada por Daniel em 23/10 10:40','Motivo: o cliente desistiu do extrato em PDF neste trimestre. O código da API já em dev foi revertido (MR !47); o do front foi absorvido pela próxima entrega.');estado('', 'x','Cancelada');
-    ['api-qa','api-hml','front-dev','front-qa','front-hml','neg','ent','api-prd','front-prd'].forEach(k=>estadoCard(k,'void',`<span class="stat none">${ic('x')}Anulado</span>`));document.querySelectorAll('.here').forEach(h=>h.remove())}
-  if(c==='rollback'){faixa('bad','alert','valuto-api em produção voltou para v3.4.1','Rollback pedido por Daniel em 23/10 15:12. Nenhuma outra entrega da valuto-api entra em produção até a correção ser publicada.');estado('bad','alert','Em rollback');
-    ['api-qa','api-hml','neg','ent'].forEach(k=>estadoCard(k,'done',`<span class="stat ok">Concluído</span>`));estadoCard('api-prd','fail',`<span class="stat bad">${ic('alert')}Rollback</span><span class="who mono">agora v3.4.1</span>`);document.querySelectorAll('.here').forEach(h=>h.remove());abre='api-prd'}
-  if(c==='hotfix'){mapa.classList.add('curto');mapa.innerHTML=document.getElementById('t-mapa-hotfix').innerHTML;document.querySelector('[data-nome]').textContent='Hotfix · extrato de contas antigas';estado('run','run','Hotfix em andamento',true);abre='hf-ent'}
-  document.querySelector('.legend.rodape').hidden=c==='hotfix';
-  mapa.querySelectorAll('.st').forEach(b=>b.addEventListener('click',()=>abrir(b.dataset.k)));
-  abrir(abre);
-}
-document.getElementById('cenario').onchange=e=>aplicarCenario(e.target.value);
+/* quem vê o quê (ADR-0023, "Papéis por etapa"). Daniel abriu a Entrega: no MOR a aprovação vira autoaprovação */
+const QUEM={
+ mor:{nome:'Daniel',ini:'DB',rot:'MOR',pode:['tecnico','publicador','negocio']},
+ tecnico:{nome:'Bruno Lima',ini:'BL',rot:'Aprovador técnico',pode:['tecnico']},
+ publicador:{nome:'Carla Mendes',ini:'CM',rot:'Publicador',pode:['publicador']},
+ negocio:{nome:'Elisa Prado',ini:'EP',rot:'Aprovadora de negócio',pode:['negocio']},
+ membro:{nome:'Diego Rocha',ini:'DR',rot:'Membro',pode:[]}};
+let quem='mor',cen='normal',sel='';
+const pode=a=>QUEM[quem].pode.includes(a);
 
-/* dados fictícios da candidata v4.0.0-rc2 */
-const SEV={critica:['Crítica','bad'],alta:['Alta','run'],media:['Média',''],baixa:['Baixa','blue']};
-const vulns=[
- {s:'alta',t:'SQL montado com interpolação',l:'ExtratoRepository.cs:88',f:'Opengrep',r:'csharp.lang.security.sqli',exc:'SEC-2291 · falso positivo, o parâmetro vem de enum · vence em 4 dias · aprovada por Daniel (autoaprovação)',d:'A consulta concatena texto vindo de fora sem parâmetro. Se o valor fosse controlado pelo usuário, permitiria injeção de SQL.',x:'Use parâmetros do EF Core ou FromSqlInterpolated em vez de montar a string.'},
- {s:'media',t:'Cabeçalho CSP sem frame-ancestors',l:'nginx/security-headers',f:'ZAP',r:'10020',d:'A página pode ser carregada dentro de um iframe de outro site (clickjacking).',x:"Acrescente frame-ancestors 'none' na política de CSP."},
- {s:'media',t:'Dependência com CVE média',l:'QuestPDF 2026.9.1',f:'Trivy',r:'CVE-2026-31877',d:'Versão com falha de leitura fora dos limites ao processar fontes malformadas.',x:'Atualize para 2026.10.0.'},
- {s:'media',t:'Cookie sem SameSite explícito',l:'/api/v1/auth/callback',f:'ZAP',r:'10054',d:'O cookie depende do padrão do navegador.',x:'Defina SameSite=Strict.'},
- {s:'media',t:'Imagem base com pacote desatualizado',l:'aspnet:10.0 · libssl3',f:'Trivy',r:'CVE-2026-28802',d:'Pacote do sistema operacional da imagem com correção disponível.',x:'Reconstruir com a imagem base atual.'},
- {s:'media',t:'Log com dado pessoal',l:'ExtratoService.cs:41',f:'Opengrep',r:'csharp.logging.pii',d:'O CPF do cliente vai para o log.',x:'Mascare o documento antes de logar.'},
- {s:'media',t:'Timeout ausente em chamada HTTP',l:'PdfClient.cs:22',f:'Opengrep',r:'csharp.http.no-timeout',d:'Chamada pode travar uma thread indefinidamente.',x:'Configure HttpClient.Timeout.'},
- {s:'baixa',t:'Versão do servidor exposta',l:'Server header',f:'ZAP',r:'10036',d:'O cabeçalho Server revela a versão do nginx.',x:'server_tokens off.'},
- {s:'baixa',t:'Recurso sem limite de memória',l:'deploy/k8s/base/api.yaml',f:'Checkov',r:'CKV_K8S_13',d:'O container não declara limite de memória.',x:'Defina resources.limits.memory.'},
- {s:'baixa',t:'Comentário com TODO de segurança',l:'ExtratoController.cs:12',f:'Opengrep',r:'generic.todo-security',d:'Marcação de pendência de segurança no código.',x:'Resolva ou registre como issue.'}
-];
-const agentes={
- qa:{t:'qa-agent',r:'Executou os cenários do extrato no ambiente de QA (k3d-qa / valuto) contra a candidata v4.0.0-rc2. Duração 4 min.',o:['<b>Login</b> com usuário de teste','<b>Gerar extrato</b> de setembro · PDF com 3 páginas','<b>Saldo inicial</b> confere com o fechamento de agosto (falhou na rc1)','<b>Extrato vazio</b> mostra mensagem correta','<b>Download</b> com nome extrato-2026-09.pdf','… mais 7 cenários']},
- review:{t:'code-review',r:'Revisou o diff entre v4.0.0-rc1 e v4.0.0-rc2 (3 arquivos, +42 −18).',o:['<b>ExtratoService.cs</b> · cálculo do saldo inicial corrigido','<b>ExtratoServiceTests.cs</b> · teste novo cobre o caso da rc1','<b>appsettings.json</b> · nenhuma chave nova']},
- sec:{t:'security',r:'Analisou o código e a imagem junto com as ferramentas do pipeline.',o:['<b>Opengrep</b> · 4 achados (1 alto coberto por exceção)','<b>Trivy</b> · 2 achados médios','<b>ZAP</b> · 3 achados (médio e baixo)','<b>Checkov</b> · 1 achado baixo','<b>Decisão</b> · nenhum bloqueio pela política de QA']}
-};
-let filtro='todas',pagina=0;const POR=5;
+/* Entrega fictícia (as mesmas Fatias E-12 do Painel de Fatias) */
+const FATIAS=[
+ {c:'V9',t:'Notificações de limite',p:['API','Front'],flag:true,n:9},
+ {c:'V10',t:'Resumo mensal',p:['API'],flag:true,n:10}];
+const FLUXOS={api:{id:'valuto-api',stack:'.NET',prd:'3.7.0',nova:'3.8.0',tipo:'minor',sha:'9f2c41a',fatias:['V9','V10']},
+              front:{id:'valuto-frontend',stack:'Angular',prd:'2.0.3',nova:'2.1.0',tipo:'minor',sha:'c4a1e07',fatias:['V9']}};
+const num=c=>Number(c.replace(/\D/g,''));
+const sha=c=>(num(c)*2654435+c.charCodeAt(0)*977).toString(16).padStart(7,'0').slice(0,7);
+const links=f=>[['issue',`issue #${20+f.n*3}`],['git',`MR !${f.n+4} mergeada`],['code',`commit ${sha(f.c)}`]];
+const ln=([i,t])=>`<a class="linkr" href="#">${ic(i==='issue'?'issue':i==='git'?'git':'code')}${t}${ic('ext')}</a>`;
+const NOTAS=[['Notificações de limite','O cliente recebe um aviso quando chega a 80% do limite do cartão.'],['Resumo mensal','No primeiro dia do mês, o cliente recebe o resumo dos gastos por categoria.']];
 
-function ligarAbas(){
-  const tabs=detalhe.querySelectorAll('.tab');
-  const ir=aba=>{tabs.forEach(t=>t.classList.toggle('on',t.dataset.aba===aba));detalhe.querySelectorAll('[data-painel]').forEach(p=>p.hidden=p.dataset.painel!==aba)};
-  tabs.forEach(t=>t.onclick=()=>ir(t.dataset.aba));
-  detalhe.querySelectorAll('[data-ir]').forEach(b=>b.onclick=()=>{if(b.dataset.sev){filtro=b.dataset.sev;pagina=0}ir(b.dataset.ir);desenharVulns()});
-  detalhe.querySelectorAll('.f').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;pagina=0;desenharVulns()});
-  detalhe.querySelectorAll('[data-pag]').forEach(b=>b.onclick=()=>{pagina+=+b.dataset.pag;desenharVulns()});
-  detalhe.querySelectorAll('[data-agente]').forEach(b=>b.onclick=()=>abrirAgente(b.dataset.agente));
-  desenharVulns();
+/* estado de cada card: [classe, classe do status, ícone, texto] */
+const ES={ok:['done','ok','ok','Concluído'],run:['run','run','run','Executando'],aguard:['run','run','wait','Aguardando aprovação'],bloq:['fail','bad','lock','Bloqueada'],
+ falha:['fail','bad','fail','Falhou'],pulada:['void','none','arrow','Pulada'],none:['','none','none','Não iniciado'],cancel:['void','none','x','Cancelado'],
+ fila:['run','run','wait','Em fila'],sup:['void','none','x','Superado'],rev:['fail','bad','fail','Revertido'],na:['void','none','none','Sem Fatias']};
+
+/* cenários: c = estado de cada card; vez = de quem é a vez */
+const CEN={
+ normal:{nome:'Normal (API em QA)',est:['Aguardando aprovação · vez do Técnico','run','wait'],aqui:'aqa',c:{aber:'ok',aqa:'aguard',ahml:'none',aprd:'none',fqa:'run',fhml:'none',fprd:'none',lib:'none'},vez:{aqa:'Aprovador técnico'}},
+ fila:{nome:'Em fila no HML',est:['Em fila','run','wait'],aqui:'ahml',c:{aber:'ok',aqa:'ok',ahml:'fila',aprd:'none',fqa:'ok',fhml:'none',fprd:'none',lib:'none'},
+  faixa:['run','wait','valuto-api espera vaga no HML','O HML do Projeto está ocupado pela Entrega E-9 (v3.7.0). Esta Entrega entra assim que ela sair. O QA não tem fila: o Artefato novo supera o anterior.']},
+ sup:{nome:'Superada no QA',est:['Superada','none','x'],aqui:'aqa',c:{aber:'ok',aqa:'sup',ahml:'cancel',aprd:'cancel',fqa:'cancel',fhml:'cancel',fprd:'cancel',lib:'cancel'},
+  faixa:['cinza','alert','Entrega superada: um Artefato mais novo tomou o QA antes da aprovação','A Entrega E-13 abriu um Fluxo novo para valuto-api. Esta Entrega foi encerrada e as Fatias V9 e V10 voltaram para Prontas para Entrega, com a marca "vinha de uma Entrega superada". Nada foi gasto de versão.']},
+ bloq:{nome:'Gate bloqueou',est:['Bloqueada','bad','lock'],aqui:'aqa',c:{aber:'ok',aqa:'bloq',ahml:'none',aprd:'none',fqa:'none',fhml:'none',fprd:'none',lib:'none'},
+  faixa:['bad','lock','O gate de segurança bloqueou o QA de valuto-api','1 vulnerabilidade crítica sem Exceção (CVE-2026-40112, Npgsql). Saídas: corrigir e abrir nova Entrega, pedir uma Exceção, ou o Publicador usar o Atalho.']},
+ falha:{nome:'Falha no deploy',est:['Com falha','bad','fail'],aqui:'ahml',c:{aber:'ok',aqa:'ok',ahml:'falha',aprd:'none',fqa:'ok',fhml:'none',fprd:'none',lib:'none'},
+  faixa:['bad','fail','O deploy falhou no HML de valuto-api','Rollout não ficou pronto em 5 min em k3d-hml / no-2 (readiness probe falhando em /healthz). O cluster voltou à versão anterior sozinho.']},
+ prd:{nome:'Aguardando o Publicador',est:['Aguardando aprovação · vez do Publicador','run','wait'],aqui:'aprd',c:{aber:'ok',aqa:'ok',ahml:'ok',aprd:'aguard',fqa:'ok',fhml:'ok',fprd:'aguard',lib:'none'},vez:{aprd:'Publicador',fprd:'Publicador'}},
+ lib:{nome:'Publicada, aguardando Liberação',est:['Publicada, aguardando Liberação','run','wait'],aqui:'lib',c:{aber:'ok',aqa:'ok',ahml:'ok',aprd:'ok',fqa:'ok',fhml:'ok',fprd:'ok',lib:'aguard'},vez:{lib:'Aprovador de negócio'}},
+ hotfix:{nome:'Hotfix com Atalho',est:['Aguardando aprovação · vez do Publicador','run','wait'],aqui:'aprd',um:true,c:{aber:'ok',aqa:'pulada',ahml:'pulada',aprd:'aguard',lib:'na'},vez:{aprd:'Publicador'},
+  faixa:['cinza','arrow','Atalho usado: QA e HML puladas','Por ordem superior de Carla Mendes, com o motivo "falha no extrato de contas encerradas em produção". O Atalho não pula o gate de segurança sem Exceção, e faz só o Deploy.']},
+ rollback:{nome:'Produção em rollback',est:['Em rollback','bad','fail'],aqui:'aprd',c:{aber:'ok',aqa:'ok',ahml:'ok',aprd:'rev',fqa:'ok',fhml:'ok',fprd:'ok',lib:'none'},
+  faixa:['bad','fail','valuto-api voltou para o Artefato anterior (3.7.0)','Pedido por Carla Mendes: "erro 500 no resumo mensal". O banco não volta. Nada novo de valuto-api entra em produção até a correção (hotfix ou Fatia nova). As Fatias V9 e V10 voltaram para Aguardando liberação, com o flag desligado.']},
+ cancelada:{nome:'Entrega cancelada',est:['Cancelada','none','x'],aqui:'aber',c:{aber:'ok',aqa:'cancel',ahml:'cancel',aprd:'cancel',fqa:'cancel',fhml:'cancel',fprd:'cancel',lib:'cancel'},
+  faixa:['cinza','x','Entrega cancelada por Daniel','Destino do código: absorver. O código e os flags continuam na main e passam a ser declarados na próxima Entrega.']}};
+const ESTADO_PILL={ok:'ok',run:'run',bad:'bad',none:''};
+
+/* mapa de etapas */
+function mapa(){
+  const C=CEN[cen],c=C.c,um=!!C.um;
+  const card=(k,titulo,icone,col,row,extra='')=>{const [cl,sc,si,tx]=ES[c[k]],aqui=sel===k;
+    const who=C.vez&&C.vez[k]?`vez: ${C.vez[k]}`:'';
+    return `<button class="st ${cl} ${aqui?'sel':''} ${extra}" data-k="${k}" style="grid-column:${col};${row}"><span class="badge">${ic(c[k]==='ok'?'check':'x')}</span>
+      ${C.aqui===k?`<span class="here">${ic('git')}você está aqui</span>`:''}<div class="t">${titulo}</div><div class="ic">${ic(icone)}</div><div class="s"><span class="stat ${sc}">${ic(si,c[k]==='run'?'spin':'')}${tx}</span>${who?`<span class="who">${who}</span>`:''}</div></button>`};
+  const feitos=pre=>['aber','qa','hml','prd'].filter((x,i)=>{const k=i?pre+x:'aber';return k==='aber'?c.aber==='ok':c[k]==='ok'||c[k]==='pulada'}).length;
+  const pa=Math.round(feitos('a')/4*100),pf=Math.round(feitos('f')/4*100);
+  $('[data-mapa]').className='map'+(um?' um':'');
+  $('[data-mapa]').innerHTML=`<div class="track api" style="--p:${pa}%"></div>${um?'':`<div class="track front" style="--p:${pf}%"></div>`}
+   <div class="lname" style="grid-row:1"><span><i class="sw" style="background:var(--blue2)"></i>${FLUXOS.api.id}</span><small class="mono">${um?'hotfix · patch → v3.7.1':`${FLUXOS.api.tipo} → v${FLUXOS.api.nova} · .NET`}</small></div>
+   ${um?'':`<div class="lname" style="grid-row:2"><span><i class="sw" style="background:var(--front)"></i>${FLUXOS.front.id}</span><small class="mono">${FLUXOS.front.tipo} → v${FLUXOS.front.nova} · Angular</small></div>`}
+   ${card('aber','Abertura','file',2,'','span')}
+   ${card('aqa','QA','flask',3,'grid-row:1')}${card('ahml','HML','monitor',4,'grid-row:1')}${card('aprd','PRD','rocket',5,'grid-row:1')}
+   ${um?'':card('fqa','QA','flask',3,'grid-row:2')+card('fhml','HML','monitor',4,'grid-row:2')+card('fprd','PRD','rocket',5,'grid-row:2')}
+   ${card('lib','Liberação','brief',6,'','span')}`;
+  document.querySelectorAll('.st[data-k]').forEach(b=>b.onclick=()=>{sel=b.dataset.k;pinta()});
 }
-function desenharVulns(){
-  const corpo=detalhe.querySelector('[data-vulns]');if(!corpo)return;
-  detalhe.querySelectorAll('.f').forEach(b=>b.classList.toggle('on',b.dataset.f===filtro));
-  const lista=vulns.filter(v=>filtro==='todas'||v.s===filtro);
-  const paginas=Math.max(1,Math.ceil(lista.length/POR));pagina=Math.min(Math.max(pagina,0),paginas-1);
-  corpo.replaceChildren(...lista.slice(pagina*POR,pagina*POR+POR).map(v=>{
-    const tr=document.createElement('tr');tr.tabIndex=0;
-    tr.innerHTML=`<td><span class="pill ${SEV[v.s][1]}">${SEV[v.s][0]}</span>${v.exc?` <span class="pill blue">${ic('shield')}Exceção</span>`:''}</td><td>${v.t}</td><td class="mono">${v.l}</td><td>${v.f}</td><td>${ic('chev')}</td>`;
-    tr.onclick=()=>abrirVuln(v);tr.onkeydown=e=>{if(e.key==='Enter')abrirVuln(v)};return tr}));
-  if(!lista.length){const tr=document.createElement('tr');tr.innerHTML=`<td colspan="5" style="text-align:center;color:var(--mu);padding:28px">${ic('ok')} Nenhuma vulnerabilidade com essa severidade.</td>`;corpo.append(tr)}
-  detalhe.querySelector('[data-pag-info]').textContent=`${lista.length} ${lista.length===1?'item':'itens'} · página ${pagina+1} de ${paginas}`;
-  const [ant,prox]=detalhe.querySelectorAll('[data-pag]');ant.disabled=pagina===0;prox.disabled=pagina>=paginas-1;
+
+/* painéis de cada etapa */
+const fl=k=>k[0]==='a'?FLUXOS.api:FLUXOS.front;
+const abas=(nomes,on)=>`<div class="tabs" role="tablist">${nomes.map(([k,n,i])=>`<button class="tab ${k===on?'on':''}" data-aba="${k}">${ic(i)}${n}</button>`).join('')}</div>`;
+const lin=(i,r,v)=>`<div class="linha"><span class="rot">${ic(i)}${r}</span><span class="val">${v}</span></div>`;
+const ok=t=>`<span class="pill ok">${ic('ok')}${t}</span>`,pl=(t,i='')=>`<span class="pill">${i?ic(i):''}${t}</span>`,runp=t=>`<span class="pill run">${ic('wait')}${t}</span>`,badp=t=>`<span class="pill bad">${ic('fail')}${t}</span>`;
+const fatiasDe=f=>FATIAS.filter(x=>f.fatias.includes(x.c));
+
+function detAber(){
+  if(CEN[cen].um)return `<div class="ph"><h2><span class="ib">${ic('file')}</span>Abertura</h2><span class="pill ok">${ic('ok')}Concluída 22/11 09:12</span></div>
+   <div class="cols"><div class="box"><h3>${ic('layers')}Entrega</h3><dl class="kv"><dt>Aberta por</dt><dd><span class="av sm">DB</span>Daniel</dd><dt>Tipo</dt><dd><span class="pill run">Hotfix</span></dd><dt>Projeto</dt><dd>valuto-api · patch → v3.7.1 <span class="pill">prevista</span></dd><dt>Motivo</dt><dd>falha no extrato de contas encerradas em produção</dd></dl></div>
+   <div class="box"><h3>${ic('git')}Correção</h3><dl class="kv"><dt>Como foi feita</dt><dd>issue de hotfix, implementada pelo agente</dd><dt>No GitLab</dt><dd style="gap:6px 16px">${ln(['issue','issue #151 · Hotfix: extrato de contas encerradas'])}${ln(['git','MR !71 · hotfix/extrato-conta-encerrada mergeada'])}${ln(['code','commit 7b3e1c2'])}</dd></dl></div></div>
+   <p class="txt" style="margin-top:12px">Sem Fatias: o hotfix não tem Liberação. Quem preferir pode fazer o código por conta própria, sem issue, numa branch <span class="mono">hotfix/*</span>.</p>
+   <a class="link-aud" href="prototipo-auditoria.html#obj=E-12">${ic('clock')}ver na auditoria</a>`;
+  const vaoJunto=[['V15','Filtros salvos no extrato']],sem=[['valuto-api !66','Ajuste de log do job de conciliação','09/11']];
+  return `<div class="ph"><h2><span class="ib">${ic('file')}</span>Abertura</h2><span class="pill ok">${ic('ok')}Concluída 21/11 14:46</span></div>
+   <div class="cols"><div class="box"><h3>${ic('layers')}Entrega</h3><dl class="kv"><dt>Aberta por</dt><dd><span class="av sm">DB</span>Daniel</dd><dt>Tipo</dt><dd><span class="pill blue">Normal</span></dd><dt>Aplicação</dt><dd>Valuto <span class="mono" style="color:var(--di)">grupo valuto</span></dd><dt>Fatias</dt><dd>${FATIAS.length}</dd></dl></div>
+   <div class="box"><h3>${ic('box')}Fluxos</h3><dl class="kv"><dt>valuto-api</dt><dd>${FLUXOS.api.tipo} → v${FLUXOS.api.nova} <span class="pill">prevista</span></dd><dt>valuto-frontend</dt><dd>${FLUXOS.front.tipo} → v${FLUXOS.front.nova} <span class="pill">prevista</span></dd><dt>Ordem</dt><dd>API → front (do mapa)</dd></dl></div></div>
+   <div class="sub">${ic('list')}Fatias da Entrega <span class="n">${FATIAS.length}</span></div>
+   <div class="box">${FATIAS.map(f=>`<div class="fs"><div class="l1"><span class="cod">${f.c}</span><span class="tt">${f.t}</span><span class="proj">${f.p.map(x=>`<span class="chip">${ic(x==='API'?'server':'monitor')}${x}</span>`).join('')}</span></div><div class="links">${links(f).map(ln).join('')}</div></div>`).join('')}</div>
+   <details class="conf"><summary>${ic('alert')}Vão junto, com o flag desligado <span class="n">${vaoJunto.length}</span>${ic('chev','chev')}</summary><div class="corpo">${vaoJunto.map(([c,t])=>`<div class="it"><span class="mono">${c}</span><span>${t}</span><span class="d">vai no Artefato porque a main é cumulativa</span></div>`).join('')}</div></details>
+   <details class="conf"><summary>${ic('alert')}MRs mergeadas sem Fatia <span class="n">${sem.length}</span>${ic('chev','chev')}</summary><div class="corpo">${sem.map(([m,t,d])=>`<div class="it"><span class="mono">${m}</span><span>${t}</span><span class="d">mergeada em ${d} · só avisa</span></div>`).join('')}</div></details>
+   <a class="link-aud" href="prototipo-auditoria.html#obj=E-12">${ic('clock')}ver na auditoria</a>`;
 }
-function gaveta(tpl,preencher){
-  const veu=document.createElement('div');veu.className='veu';
-  const g=document.createElement('aside');g.className='gaveta';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');
-  g.append(document.getElementById(tpl).content.cloneNode(true));preencher(g);
-  const fechar=()=>{veu.remove();g.remove();document.removeEventListener('keydown',esc)};
-  const esc=e=>{if(e.key==='Escape')fechar()};
-  veu.onclick=fechar;g.querySelector('[data-fechar]').onclick=fechar;document.addEventListener('keydown',esc);
-  document.body.append(veu,g);g.querySelector('[data-fechar]').focus();
+function detQaHml(k,amb){
+  const f=fl(k),est=CEN[cen].c[k],aba=detQaHml.aba||'geral',qa=amb==='qa';
+  const bloq=est==='bloq',falha=est==='falha';
+  const corpo={
+   geral:`<div class="sev"><button class="sv" style="--c:var(--bad)"><span class="top">Crítica${ic('alert')}</span><b ${bloq?'style="color:var(--bad-tx)"':''}>${bloq?1:0}</b><small>${bloq?'sem Exceção':'nenhuma'}</small></button>
+      <button class="sv" style="--c:var(--run)"><span class="top">Alta${ic('alert')}</span><b style="color:var(--run-tx)">1</b><small>1 coberta por Exceção</small></button>
+      <button class="sv" style="--c:#C9B458"><span class="top">Média${ic('bug')}</span><b>6</b><small>não bloqueiam</small></button>
+      <button class="sv" style="--c:var(--low)"><span class="top">Baixa${ic('bug')}</span><b>3</b><small>informativas</small></button></div>
+     <div class="resumo">
+      ${lin('box','Artefato',`<span class="mono">sha ${f.sha}</span> ${pl('último SHA verde da main')} gerado uma vez e promovido por digest`)}
+      ${lin('flask','Flags no '+amb.toUpperCase(),`${f.fatias.map(c=>`<span class="pill blue mono">Features:${c} ligado</span>`).join('')}`)}
+      ${lin('bot','Agentes',qa?`${ok('qa-agent')}${ok('code-review')}${ok('security')}`:`${pl('não rodam de novo','bot')} mesmo Artefato aprovado no QA`)}
+      ${lin('bug','DAST',qa?(falha||bloq?`${pl('ativo','shield')}`:ok('ativo · sem achado novo')):ok('passivo · sem achado novo'))}
+      ${lin('shield-ok','Gate de segurança',bloq?badp('Bloqueou: 1 crítica sem Exceção'):ok(`Liberado · política de ${amb.toUpperCase()}: crítica e alta só passam com Exceção`))}
+      ${lin('server','Deploy',falha?badp('Falhou em k3d-hml / no-2'):est==='aguard'||est==='ok'?ok(`Publicado em k3d-${amb} / valuto · 2/2 réplicas`):pl('aguardando','none'))}</div>`,
+   analises:`<div class="cols"><div class="box"><h3>${ic('code')}Do Artefato <small style="color:var(--di);font-weight:400">roda uma vez</small></h3><div class="resumo" style="border:0;box-shadow:none">
+        ${lin('shield','SAST (Opengrep)',ok('1 alta, coberta'))}${lin('box','SCA e imagem (Trivy)',ok('nenhuma CVE nova'))}${lin('key','Segredos (Gitleaks)',ok('nada'))}${lin('code','code-review (agente)',ok('aprovado'))}${lin('shield','security (agente)',ok('aprovado'))}</div></div>
+      <div class="box"><h3>${ic('server')}Do Deploy <small style="color:var(--di);font-weight:400">por Destino</small></h3><div class="resumo" style="border:0;box-shadow:none">
+        ${lin('bug','DAST '+(qa?'ativo':'passivo'),est==='bloq'?pl('barrado antes','lock'):ok('sem achado novo'))}${lin('flask','Smoke',ok('ok'))}${qa?lin('bot','qa-agent',ok('12 cenários, nenhuma falha')):''}</div></div></div>`,
+   deploys:`<div class="box tw"><table><thead><tr><th>Destino</th><th>Artefato</th><th>Pipeline</th><th>Rollout</th><th>Smoke</th><th>Estado</th></tr></thead><tbody>
+      <tr><td class="mono">k3d-${amb} / valuto</td><td class="mono">sha ${f.sha}</td><td class="mono">#2841</td><td>${falha?'0/2 réplicas':'2/2 réplicas'}</td><td>${falha?'—':'<span class="stat ok">'+ic('ok')+'ok</span>'}</td><td>${falha?badp('Falhou · revertido'):ok('Publicado há 12 min')}</td></tr></tbody></table></div>`}[aba];
+  return `<div class="ph"><h2><span class="ib">${ic(qa?'flask':'monitor')}</span>${amb.toUpperCase()} · ${f.id} <span class="mono" style="color:var(--mu)">sha ${f.sha}</span></h2></div>
+   ${abas([['geral','Visão geral','list'],['analises','Análises','bot'],['deploys','Deploys por Destino','rocket']],aba)}${corpo}`;
 }
-function abrirVuln(v){gaveta('t-vuln-det',g=>{
-  g.querySelector('[data-sev-pill]').innerHTML=`<span class="pill ${SEV[v.s][1]}">${SEV[v.s][0]}</span>`;
-  g.querySelector('[data-v-titulo]').textContent=v.t;g.querySelector('[data-v-ferr]').textContent=v.f;
-  g.querySelector('[data-v-regra]').textContent=v.r;g.querySelector('[data-v-local]').textContent=v.l;
-  g.querySelector('[data-v-desc]').textContent=v.d;g.querySelector('[data-v-fix]').textContent=v.x;
-  const ped=g.querySelector('[data-pedir]');if(v.exc){ped.innerHTML=ic('shield')+'Ver exceção';ped.onclick=()=>location.href='prototipo-excecoes.html#ver='+v.exc.split(' ')[0]}else ped.onclick=()=>location.href='prototipo-excecoes.html#pedir='+encodeURIComponent(JSON.stringify({t:v.t,f:v.f,r:v.r,s:v.s,app:'Valuto',onde:[['valuto-api',v.l,'v4.0.0-rc2','QA']]}));
-  if(v.exc)g.querySelector('[data-v-exc]').innerHTML=`<div class="exc">${ic('shield')}<div><b>Coberta por exceção</b><br>${v.exc}</div></div>`;
-})}
-function abrirAgente(k){const a=agentes[k];gaveta('t-agente-det',g=>{
-  g.querySelector('[data-a-titulo]').textContent=a.t;g.querySelector('[data-a-resumo]').textContent=a.r;
-  g.querySelector('[data-a-ops]').innerHTML=a.o.map(x=>`<li><span class="stat ok">${ic('ok')}</span><span>${x}</span></li>`).join('');
-})}
-document.querySelectorAll('.st').forEach(b=>b.addEventListener('click',()=>abrir(b.dataset.k)));
-const sino=document.querySelector('.sino'),avisos=document.getElementById('avisos');
-const mostrar=v=>{avisos.hidden=!v;sino.setAttribute('aria-expanded',v)};
-sino.onclick=e=>{e.stopPropagation();mostrar(avisos.hidden)};
-document.addEventListener('click',e=>{if(!avisos.hidden&&!avisos.contains(e.target))mostrar(false)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')mostrar(false)});
-aplicarCenario('normal');
+function detPrd(k){
+  const f=fl(k),est=CEN[cen].c[k],um=!!CEN[cen].um,nova=um?'3.7.1':f.nova,tipo=um?'patch':f.tipo,rev=est==='rev';
+  return `<div class="ph"><h2><span class="ib">${ic('rocket')}</span>PRD · ${f.id}</h2></div>
+   <div class="resumo">
+    ${lin('tag','Versão',`<span class="vers">v${f.prd}</span>${ic('chev')}<span class="vers">${nova}</span>${pl(tipo)}${rev?'':`<span style="color:var(--mu);font-size:12.5px">calculada agora sobre a maior versão já publicada; o Publicador pode corrigir o tipo</span>`}`)}
+    ${!um&&k[0]==='a'?lin('branch','Ordem de publicação',`${pl('1 · valuto-api','server')}${ic('chev')}${pl('2 · valuto-frontend','monitor')} <span style="color:var(--mu);font-size:12.5px">o front só confirma se a API já está em produção</span>`):''}
+    ${lin('flask','Flags que o Artefato carrega',um?pl('nenhum: hotfix sem Fatias'):f.fatias.map(c=>`<span class="pill mono">Features:${c} <b style="color:var(--di)">desligado em produção</b></span>`).join(''))}
+    ${lin('shield-ok','Gate de produção',ok('Liberado · reanálise da imagem sem CVE nova'))}
+    ${lin('server','Verificação técnica depois do deploy',est==='ok'?ok('rollout 2/2 e health ok'):rev?badp('rollout ok, resultado revertido a pedido'):pl('roda só depois de confirmar','none')+' <span style="color:var(--mu);font-size:12.5px">smoke e ZAP passivo rodam só depois da Liberação</span>')}
+    ${lin('box','Backup pré-publicação',pl('pg_dump de produção antes da migration, guardando os 3 últimos','file'))}</div>`;
+}
+const libMarcadas=new Set(['V9','V10']);
+function detLib(){
+  const est=CEN[cen].c.lib,libera=est==='aguard';
+  const ambos=['aprd','fprd'].every(k=>['ok'].includes(CEN[cen].c[k]));
+  return `<div class="ph"><h2><span class="ib">${ic('brief')}</span>Liberação</h2></div>
+   <div class="sub">${ic('file')}Notas de entrega</div>
+   <div class="notas">${NOTAS.map(([a,b])=>`<div class="nota"><span class="ib verde">${ic('file')}</span><div><b>${a}</b><p>${b}</p></div></div>`).join('')}</div>
+   <div class="sub">${ic('layers')}Fatias desta Entrega</div>
+   <div class="box">${FATIAS.map(f=>{const dois=f.p.length>1,bloq=dois&&!ambos;
+     return `<div class="fs"><div class="l1"><label><input type="checkbox" data-lib="${f.c}" ${libMarcadas.has(f.c)&&!bloq?'checked':''} ${libera&&!bloq?'':'disabled'} ${bloq?'title="Uma Fatia api + frontend só é liberada quando os dois Fluxos estão em produção"':''}><span class="cod">${f.c}</span><span class="tt">${f.t}</span></label>
+       <span class="proj">${f.p.map(x=>`<span class="chip">${ic(x==='API'?'server':'monitor')}${x}</span>`).join('')}</span>${bloq?`<span class="dir2">${ic('lock')} espera os dois Fluxos em produção</span>`:''}</div>
+       <div class="links">${links(f).map(ln).join('')}</div></div>`}).join('')}</div>
+   <div class="sub">${ic('arrow')}Ordem da Liberação</div>
+   <div class="ordem"><span class="chip">${ic('server')}1 · API</span>${ic('arrow')}<span class="chip">${ic('monitor')}2 · Front</span></div>
+   <p class="txt" style="margin-top:8px">O botão <b>Liberar os dois Fluxos</b> liga a API e depois o front na mesma ação. A Esteira recusa ligar o flag de uma Fatia enquanto a Fatia de que ela depende não estiver liberada, e diz qual é. O Atalho não pula essa trava. Smoke e ZAP passivo rodam uma vez, depois, para o conjunto.</p>
+   <p class="txt" style="margin-top:8px">As Fatias que você não marcar ficam <b>aguardando liberação</b>, em produção com o flag desligado, no menu do Painel de Fatias.</p>`;
+}
+function detSem(k){
+  const est=CEN[cen].c[k];const nome={sup:'Superado',cancel:'Cancelado',pulada:'Pulada',na:'Não se aplica'}[est];
+  return `<div class="ph"><h2><span class="ib">${ic('x')}</span>${nome}</h2></div><p class="txt">${est==='pulada'?'O Atalho passou por cima desta etapa. Quem ordenou: <b>Carla Mendes</b> (ordem superior). Motivo: falha no extrato de contas encerradas em produção.':est==='sup'?'Um Artefato mais novo tomou o QA antes da aprovação. Esta etapa foi encerrada sem aprovação e não gastou número de versão.':est==='na'?'O hotfix não tem Fatias, então não há Liberação.':'A Entrega foi cancelada antes desta etapa.'}</p>`;
+}
+function detalhe(){
+  const k=sel,c=CEN[cen].c[k];let h;
+  if(k==='aber')h=detAber();
+  else if(k==='lib')h=c==='na'||c==='cancel'?detSem(k):detLib();
+  else if(['sup','cancel','pulada','na'].includes(c))h=detSem(k);
+  else if(k.endsWith('prd'))h=detPrd(k);
+  else h=detQaHml(k,k.endsWith('qa')?'qa':'hml');
+  $('#detalhe').innerHTML=h;
+  document.querySelectorAll('[data-aba]').forEach(b=>b.onclick=()=>{detQaHml.aba=b.dataset.aba;detalhe()});
+  document.querySelectorAll('[data-lib]').forEach(x=>x.onclick=()=>{x.checked?libMarcadas.add(x.dataset.lib):libMarcadas.delete(x.dataset.lib)});
+}
+
+/* ações da etapa, no canto inferior direito; o motivo de um botão desativado vai no title */
+function acoes(){
+  const k=sel,c=CEN[cen].c[k],a=$('[data-acoes]'),aut=quem==='mor';let h='';
+  const b=(cls,txt,ico,ok,porque,at='')=>`<button class="btn ${cls}" ${at} ${ok?'':`disabled title="${porque}"`}>${ic(ico)}${txt}</button>`;
+  const atalho=['aqa','ahml','fqa','fhml'].includes(k)&&['aguard','bloq','fila','run'].includes(c)?b('g','Usar o Atalho','arrow',pode('publicador'),'Só o Publicador (ou o MOR) usa o Atalho','data-atalho'):'';
+  if((k.endsWith('qa')||k.endsWith('hml'))&&c==='aguard')h=atalho+b('d','Reprovar','x',pode('tecnico'),'Só o Aprovador técnico ou o MOR aprovam o '+(k.endsWith('qa')?'QA':'HML'))+b('p','Aprovar '+(k.endsWith('qa')?'QA':'HML'),'check',pode('tecnico'),'Só o Aprovador técnico ou o MOR aprovam o '+(k.endsWith('qa')?'QA':'HML'));
+  else if(c==='bloq')h=atalho+b('g','Pedir Exceção','shield',true,'');
+  else if(c==='falha')h=b('g','Ver log','file',true,'')+b('p','Reexecutar deploy','run',true,'');
+  else if(k.endsWith('prd')&&c==='aguard')h=b('p','Confirmar produção','rocket',pode('publicador'),'Só o Publicador (ou o MOR) confirma a produção');
+  else if(k==='lib'&&c==='aguard')h=b('d','Excluir','trash',pode('negocio'),'Só o Aprovador de negócio ou o MOR liberam e excluem','data-excluir')+b('g','Liberar os dois Fluxos','layers',pode('negocio'),'Só o Aprovador de negócio ou o MOR liberam')+b('p','Liberar selecionadas','rocket',pode('negocio'),'Só o Aprovador de negócio ou o MOR liberam');
+  else if(k.endsWith('prd')&&c==='rev')h=b('g','Ver rollback na auditoria','clock',true,'');
+  a.innerHTML=h;
+  const need=h&&aut&&((k.endsWith('qa')||k.endsWith('hml'))&&c==='aguard'||k.endsWith('prd')&&c==='aguard');
+  if(need)a.insertAdjacentHTML('afterbegin',`<span class="pill run aut" title="Você abriu esta Entrega: a aprovação fica marcada como autoaprovação, com motivo obrigatório">${ic('alert')}autoaprovação</span>`);
+  const at=$('[data-atalho]');if(at)at.onclick=()=>abreAtalho();
+  const ex=$('[data-excluir]');if(ex)ex.onclick=()=>abreExcluir();
+}
+
+/* gaveta */
+function fecha(){$('[data-gaveta]').innerHTML=''}
+function gaveta(corpo,pe){
+  $('[data-gaveta]').innerHTML=`<div class="veu" data-fecha></div><aside class="gaveta" role="dialog" aria-modal="true"><div class="g-corpo">${corpo}</div><div class="g-pe">${pe}</div></aside>`;
+  document.querySelectorAll('[data-fecha]').forEach(x=>x.onclick=fecha);
+}
+function abreAtalho(){
+  gaveta(`<div class="dh"><div><span class="pill run">${ic('arrow')}Atalho</span><h2>Pular QA e HML</h2></div><button class="x" data-fecha aria-label="Fechar">${ic('x')}</button></div>
+   <p class="txt">O Atalho faz só o Deploy: ligar o flag é um segundo ato, com o mesmo registro. Ele <b>não pula o gate de segurança</b> sem Exceção e <b>não pula a trava de dependência</b> da Liberação.</p>
+   <label class="rotc">Quem ordenou (obrigatório)</label><input class="campo2" placeholder="Nome de quem deu a ordem">
+   <label class="rotc">Motivo (obrigatório)</label><textarea class="campo2" placeholder="ex.: falha no extrato de contas encerradas em produção"></textarea>
+   <div class="box" style="margin-top:14px"><div class="resumo" style="border:0;box-shadow:none">${lin('shield','Achados bloqueantes',runp('1 crítica sem Exceção'))}</div></div>
+   <label class="check" style="margin-top:12px"><input type="checkbox"> Aceitar todos os achados bloqueantes de uma vez (Exceção em lote: cada um vira Exceção individual, com prazo, nome e motivo)</label>
+   <p class="txt" style="margin-top:10px">O Esteira posta o motivo e o nome na MR da Fatia.</p>`,
+   `<button class="btn g esq" data-fecha>Cancelar</button><button class="btn p" data-fecha>${ic('arrow')}Pular QA e HML</button>`);
+}
+function abreExcluir(){
+  gaveta(`<div class="dh"><div><span class="pill neutro">${ic('trash')}Excluir</span><h2>Excluir as Fatias não liberadas</h2></div><button class="x" data-fecha aria-label="Fechar">${ic('x')}</button></div>
+   <div class="excl"><label><input type="radio" name="d" checked><span><b>Reverter</b> — desliga o flag em todos os ambientes e pede uma Fatia de limpeza (<span class="mono">V9-L</span>) que remove o código.</span></label>
+   <label><input type="radio" name="d"><span><b>Absorver</b> — o código e o flag continuam e passam a ser declarados na próxima Entrega.</span></label></div>
+   <label class="rotc">Motivo (obrigatório)</label><textarea class="campo2" placeholder="Por que excluir?"></textarea>`,
+   `<button class="btn g esq" data-fecha>Cancelar</button><button class="btn d" data-fecha>Confirmar exclusão</button>`);
+}
+
+function pinta(){
+  const C=CEN[cen];
+  $('[data-estado]').className='pill '+ESTADO_PILL[C.est[1]];$('[data-estado]').innerHTML=`${ic(C.est[2],C.est[2]==='run'?'spin':'')}${C.est[0]}`;
+  $('[data-nome]').textContent=C.um?'Hotfix: extrato de contas encerradas':'Notificações de limite e resumo mensal';
+  $('[data-meta]').innerHTML=`<span class="mono">#E-12</span><span>${ic('tag')}<span class="mono">${C.um?'api v3.7.1 (hotfix)':'api v3.8.0 · front v2.1.0'} · previstas</span></span><span>${ic('list')}${C.um?'sem Fatias':'2 Fatias'}</span><span><span class="av sm">DB</span>Daniel · há 3 dias</span>`;
+  $('[data-faixas]').innerHTML=C.faixa?`<div class="faixa ${C.faixa[0]}">${ic(C.faixa[1])}<div><b>${C.faixa[2]}</b><p>${C.faixa[3]}</p></div></div>`:'';
+  $('[data-cancelar]').disabled=['sup','cancelada'].includes(cen);
+  if(!sel||!CEN[cen].c[sel]||(C.um&&sel.startsWith('f')))sel=C.aqui;
+  mapa();detalhe();acoes();
+}
+$('[data-cen]').innerHTML=Object.entries(CEN).map(([k,v])=>`<option value="${k}">${v.nome}</option>`).join('');
+$('[data-quem]').innerHTML=Object.entries(QUEM).map(([k,q])=>`<option value="${k}">${q.nome} · ${q.rot}</option>`).join('');
+$('[data-cen]').onchange=e=>{cen=e.target.value;sel=CEN[cen].aqui;detQaHml.aba='geral';pinta()};
+$('[data-quem]').onchange=e=>{quem=e.target.value;$('.me').innerHTML=`<span class="av">${QUEM[quem].ini}</span><div>${QUEM[quem].nome}<small>${quem==='mor'?'MOR':'papel na Aplicação'}</small></div>`;acoes()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecha()});
+sel=CEN[cen].aqui;pinta();
 </script>
 </body></html>

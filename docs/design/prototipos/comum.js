@@ -13,6 +13,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style=
 const MENU = `<nav>
   <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#logo-cao"/></svg>Esteira</div>
   <a class="ni" data-pagina="aguardando" href="prototipo-aguardando.html"><svg class="i"><use href="#i-inbox"/></svg>Aguardando você <span class="cnt">2</span></a>
+  <a class="ni" data-pagina="painel" href="prototipo-painel-fatias.html"><svg class="i"><use href="#i-list"/></svg>Painel de Fatias</a>
   <a class="ni" data-pagina="entregas" href="prototipo-entregas.html"><svg class="i"><use href="#i-layers"/></svg>Entregas</a>
   <a class="ni" data-pagina="aplicacoes" href="prototipo-aplicacoes.html"><svg class="i"><use href="#i-grid"/></svg>Aplicações</a>
   <a class="ni" data-pagina="excecoes" href="prototipo-excecoes.html"><svg class="i"><use href="#i-shield"/></svg>Exceções</a>
