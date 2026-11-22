@@ -4,6 +4,15 @@ Tudo roda no Claude Code: discovery, spec, tickets, execução e review. A execu
 
 Economia de tokens: RTK ligado pelo hook do Claude Code (setup de máquina). Caveman nunca — medido líquido negativo em sessão de código.
 
+**Onde o gasto realmente está** (medido na A1 da Esteira, 9 tickets, `/gasto`): a cada chamada o modelo relê todo o contexto da sessão, então o custo é *chamadas × contexto*, não só o que se escreve. A sessão principal chegou a 280 mil de contexto só coordenando; um executor chegou a 229 mil numa ticket grande. O que o processo faz a respeito:
+
+- **Sessão limpa para executar:** `/fatia` para depois dos tickets e manda rodar `/clear` + `/implement-task <fatia>` (a execução retoma pelo painel da mãe e pelo git, não pela conversa).
+- **Sessão principal só coordena:** lê da spec só o cabeçalho e a Ideia (`ticket-contexto.mjs --cabecalho`); quem lê código é o executor.
+- **Executor lê o recorte da ticket, não a spec inteira:** `ticket-contexto.mjs` (script, zero token, texto literal; se o recorte não bastar o executor abre a spec e diz o que faltou).
+- **Ticket pequena:** `check-tickets.mjs` falha com mais de 6 critérios por filha; uma camada por ticket.
+- **Cota do plano:** a execução inteira pode rodar nos terminais Claude pago / Claude free (mesmos arquivos, os apelidos viram os combos do OmniRoute). Mantenha cada ticket abaixo de ~150 mil de contexto: os modos assumem janela de 200 mil (`CLAUDE_CODE_MAX_CONTEXT_TOKENS`). A qualidade do free em código .NET/Angular não está medida: comece por uma ticket mecânica e compare com `/gasto`.
+- **Medir sem gastar:** `/gasto` (`.claude/scripts/gasto.mjs`) lê os transcritos e mostra contexto médio/máximo, cache lido e saída por agente; o relatório do `/implement-task` traz a linha `Gasto:`.
+
 ## Três modos, mesma orquestração
 
 O modelo não é decidido aqui: cada subagente declara um **apelido** (`sonnet`, `haiku`), e o modo em que a sessão foi aberta diz o que o apelido significa. Os mesmos arquivos funcionam nos três.

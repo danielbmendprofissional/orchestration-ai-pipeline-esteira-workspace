@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 // Confere que cada critério da spec virou (pelo menos) uma filha, sem ler os tickets à mão.
 //
-//   node .claude/scripts/check-tickets.mjs <fatia> <arquivo-da-spec> <grupo/projeto-workspace>
+//   node .claude/scripts/check-tickets.mjs <fatia> <arquivo-da-spec> <grupo/projeto-workspace> [--max=6]
 //
 // Critério = linha numerada de "## Critérios (EARS)" ou, na fatia de fundação, cada `- [ ]` de "## Checklist"
 // (numerados na ordem). Cada filha `<fatia>.<N> — …` declara na descrição `Cobre: 1, 3, 5-7`.
-// Saída 1 se algum critério ficou sem filha ou se uma filha cita critério que não existe.
+// Saída 1 se algum critério ficou sem filha, se uma filha cita critério que não existe ou se uma filha cobre critérios demais
+// (padrão 6: ticket grande vira subagente com contexto estourado e retrabalho; divida por camada).
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
-const [fatia, specPath, project] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const maxArg = argv.find((x) => x.startsWith('--max='));
+const MAX = maxArg ? Number(maxArg.slice(6)) : 6;
+const [fatia, specPath, project] = argv.filter((x) => !x.startsWith('--'));
 if (!fatia || !specPath || !project) {
   console.error('uso: check-tickets.mjs <fatia> <arquivo-da-spec> <grupo/projeto-workspace>');
   process.exit(2);
@@ -68,6 +72,7 @@ for (const f of filhas) {
     if (!criterios.includes(n)) problemas.push(`#${f.iid} ${f.title}: cita o critério ${n}, que não existe na spec`);
     cobertos.add(n);
   }
+  if (lista.length > MAX) problemas.push(`#${f.iid} ${f.title}: cobre ${lista.length} critérios (máximo ${MAX}); divida por camada ou por assunto`);
 }
 const sem = criterios.filter((n) => !cobertos.has(n));
 if (sem.length) problemas.push(`critérios sem filha: ${sem.join(', ')}`);

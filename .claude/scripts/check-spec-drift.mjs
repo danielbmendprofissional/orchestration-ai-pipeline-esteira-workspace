@@ -72,10 +72,21 @@ for (const spec of specs) {
   const texto = readFileSync(resolve(root, spec), 'utf8').replace(/\r\n/g, '\n');
   const linha = texto.match(/^base:\s*(.+)$/m);
   const problemas = [];
-  if (!linha) {
-    problemas.push('sem linha `base:` — não dá pra saber sobre qual código foi escrita; trate como velha');
+  let bases = null;
+  let estimadaEm = null;
+  if (linha) bases = Object.fromEntries([...linha[1].matchAll(/([\w.-]+)@([0-9a-f]{7,40})/g)].map((m) => [m[1], m[2]]));
+  else {
+    // Sem `base:`: estima pela data do último commit da spec (o código de cada repositório naquele dia). Dá a lista do que mudou, sem reescrever a spec às cegas.
+    estimadaEm = tryGit('workspace', 'log', '-1', '--format=%cI', '--', spec);
+    if (estimadaEm) {
+      bases = {};
+      for (const r of ['workspace', ...codeRepos]) { const s = tryGit(r, 'rev-list', '-1', `--before=${estimadaEm}`, tip(r)); if (s) bases[r] = s; }
+    }
+  }
+  if (!bases) {
+    problemas.push('sem linha `base:` e sem commit da spec para estimar — não dá pra saber sobre qual código foi escrita; trate como velha');
   } else {
-    const bases = Object.fromEntries([...linha[1].matchAll(/([\w.-]+)@([0-9a-f]{7,40})/g)].map((m) => [m[1], m[2]]));
+    if (estimadaEm) console.log(`   (info) ${spec}: sem \`base:\`; base estimada pelo último commit da spec (${estimadaEm.slice(0, 10)}). Confira só o que a lista abaixo aponta.`);
     const paths = citados(texto);
     for (const [repo, sha] of Object.entries(bases)) {
       if (repo !== 'workspace' && !codeRepos.includes(repo)) continue;
@@ -104,7 +115,7 @@ for (const spec of specs) {
   }
   if (problemas.length) {
     algumProblema = true;
-    console.log(`⚠ ${spec} — desatualizada\n${problemas.map((p) => `    - ${p}`).join('\n')}`);
+    console.log(`⚠ ${spec} — desatualizada\n${problemas.map((p) => `    - ${p}`).join('\n')}\n    → revalide só estes pontos, com Edit; não reescreva o arquivo inteiro (docs/agents/spec-format.md, "Spec que já existe"). Depois: --stamp.`);
   } else console.log(`✔ ${spec} — em dia`);
 }
 process.exit(algumProblema ? 1 : 0);

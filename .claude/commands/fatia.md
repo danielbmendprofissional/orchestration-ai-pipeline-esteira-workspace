@@ -8,7 +8,7 @@ Argumento: `$ARGUMENTS` (código da fatia; vazio = a próxima livre do `specs/RE
 
 ## 0. Onde a fatia está
 
-Fechar as mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"), **reconciliar a coluna Status do `specs/README.md` com o git** (fatia cujas MRs estão todas mergeadas na `main` → `feito`; a alteração vai no commit de docs do passo 1, nunca num commit solto) e ver o estado da fatia (`/proximo`, só a parte da fatia). Se a spec da fatia já existe, rode `node .claude/scripts/check-spec-drift.mjs <spec>`: `⚠ desatualizada` (ou sem `base:`) → o passo 1 vira **revalidação** (`docs/agents/spec-format.md`, "Spec que já existe"), não spec nova do zero. Comece no primeiro passo ainda não feito:
+Fechar as mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"), **reconciliar a coluna Status do `specs/README.md` com o git** (fatia cujas MRs estão todas mergeadas na `main` → `feito`; a alteração vai no commit de docs do passo 1, nunca num commit solto) e ver o estado da fatia (`/proximo`, só a parte da fatia). Se a spec da fatia já existe, rode `node .claude/scripts/check-spec-drift.mjs <spec>`: `⚠ desatualizada` → o passo 1 vira **revalidação** (`docs/agents/spec-format.md`, "Spec que já existe"): edite **só os pontos que o script lista**, com `Edit`, nunca reescreva o arquivo inteiro. Sem `base:`, o script estima pela data do último commit da spec. Comece no primeiro passo ainda não feito:
 
 **Outra fatia em execução?** `glab issue list -R <grupo>/<projeto>-workspace --label em-execucao -F json`. Se há mãe `em-execucao` que **não é** esta fatia, avise **antes de escrever a spec**, em uma frase: "A `B3` está em execução em `<área>`. Escrever a spec desta agora é seguro, mas a execução (`/implement-task`) só começa na raiz se a outra terminar; senão será preciso uma área isolada (`node .claude/scripts/worktree-fatia.mjs <código> <slug>`) e o 'Toca em' das duas não pode cruzar." Pergunte se segue; não bloqueie (spec não mexe em código).
 
@@ -35,9 +35,10 @@ Siga `docs/agents/issue-tracker.md` ("Tickets de uma spec"): uma Task filha por 
 - `OK` → siga pro 3 sem mostrar os tickets.
 - `FALHA` → corrija os tickets uma vez e rode de novo; falhou outra vez → **pare** e mostre o que falta (spec ambígua).
 - `risco: alto` → **pare** aqui e mostre os tickets (título + `Cobre:`) pra você ler antes de executar.
+- Uma filha que cobre mais de 6 critérios dá `FALHA` (ticket grande vira subagente com contexto estourado): divida por camada ou por assunto e rode de novo.
 
 ## 3. Execução
 
-Leia `.claude/commands/implement-task.md` e siga-o inteiro a partir do passo 0, com a fatia deste comando. Termine com o relatório dele (que já traz "Você agora" e "Depois").
+**Sessão limpa antes de executar.** Esta sessão carrega a conversa da spec e relê tudo isso a cada chamada; a execução não precisa dela (spec, mãe, filhas e painel estão no GitLab e no git, e o `/implement-task` retoma por eles). Com os tickets `OK` (ou depois de o humano ler os de `risco: alto`), **pare** e diga em duas linhas: "Tickets prontos. Rode `/clear` e depois `/implement-task <fatia>`. Para gastar a cota do modelo livre em vez do plano, abra o terminal Claude pago ou Claude free e rode lá." Só siga nesta mesma sessão se o humano responder `seguir` (ou se o argumento trouxer `— seguir`): então leia `.claude/commands/implement-task.md` e siga-o inteiro a partir do passo 0, com a fatia deste comando, e termine com o relatório dele (que já traz "Você agora" e "Depois").
 
 Isto é só o encadeamento: nenhuma regra de TDD, review, MR ou governança muda. Humano continua decidindo a spec e a MR; promoção entre ambientes segue a esteira.

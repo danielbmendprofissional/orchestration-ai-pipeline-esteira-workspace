@@ -21,7 +21,9 @@ Nomes (`docs/agents/orchestration.md`, "Nomes"): mãe `B2 — <título>`, filhas
 |---|---|---|
 | Quem implementa a task | **você**, direto, com TDD | o subagente executor (`data`/`backend`/`front`/`ui`), com o `$TASK` |
 | `review` por task | não (o `/code-review` do passo 3 revisa tudo) | sim, subagente `review` antes de cada commit |
-| Subagente executor no modo Claude | só se a task for grande demais pro contexto da sessão ou independente de outra (paralelo real) | — |
+| Subagente executor no modo Claude | **obrigatório quando restam mais de 2 filhas** (medido na A1 da Esteira: o pai implementando tudo foi de 127 mil a 390 mil de contexto em 40 min, relendo isso a cada chamada); com 1–2 filhas, direto é aceitável. Também quando a task for grande demais pro contexto ou independente de outra (paralelo real) | — |
+
+No modo Claude com subagente, o `review` por task continua não rodando (o `/code-review` do passo 3 revisa tudo). A sessão principal só prepara o recorte, delega, confere (`check-escopo`), comita e atualiza o painel.
 
 **Registre quem executou cada etapa**, no painel e no commit. Nome do executor: modo Claude → `pai (Claude)`; subagente → `<agente> (<modelo>)`, com o modelo pelo modo (`docs/agents/orchestration.md`, tabela dos três modos: `sonnet` = Sonnet no Claude, `omni-pago` no pago, `omni-free` no free; `haiku` = Haiku / `omni-free` / `omni-light`). Commit: trailer `Executed-by: <executor>` no fim da mensagem.
 
@@ -29,7 +31,9 @@ Nomes (`docs/agents/orchestration.md`, "Nomes"): mãe `B2 — <título>`, filhas
 
 0. **Sincronizar:** `git -C <repo> fetch origin` em cada repositório de código e no workspace, antes de qualquer conferência (feito, bloqueado, mergeado). `origin/main` sem fetch é dado velho.
 1. **Reconciliar:** feche as fatias já mergeadas (`docs/agents/orchestration.md`, "Fechar a fatia"). O CI normalmente já fechou no merge; isto é a rede de segurança. É rápido e nunca bloqueia.
-2. **Resolver a fatia:** `B2` → linha do `specs/README.md` (link da spec e `#<mãe>`); sem `#` no mapa → `glab issue list -R <grupo>/<projeto>-workspace --search "B2 —"`. Leia a mãe e as filhas (Child items: `docs/agents/issue-tracker.md`, "Tickets de uma spec") uma vez cada; a spec inteira e o `## Contexto necessário` dela, uma vez. O `risco:` da spec (`baixo`/`alto`) vale pra fatia toda (passo 3).
+2. **Resolver a fatia:** `B2` → linha do `specs/README.md` (link da spec e `#<mãe>`); sem `#` no mapa → `glab issue list -R <grupo>/<projeto>-workspace --search "B2 —"`. Leia a mãe e as filhas (Child items: `docs/agents/issue-tracker.md`, "Tickets de uma spec") uma vez cada; da spec, **só o cabeçalho e a Ideia**: `node .claude/scripts/ticket-contexto.mjs <spec> --cabecalho` (`risco:`, `flag:`, `preview:`). A spec inteira **não** entra nesta sessão: cada filha lê o recorte dela (passo 1). O `risco:` (`baixo`/`alto`) vale pra fatia toda (passo 3).
+
+   **Contexto da sessão:** ela relê tudo que carrega a cada chamada, então só coordena (lê código só o da task que você mesmo implementa no modo Claude). Rode `node .claude/scripts/gasto.mjs --resumo`: com a sessão principal acima de ~150 mil de contexto médio (veio do `/fatia` com a conversa da spec), avise o humano que `/clear` e `/implement-task <fatia>` retomam de onde está (o estado vive no painel da mãe e no git) e gasta bem menos; siga se ele disser que não precisa.
 3. **Trava e área:**
    - A mãe já tem `em-execucao`? Leia a linha **Área** do painel: é a sua área (mesmo caminho) → retomada, siga; é outra → **pare** ("a fatia está em execução em <área>"), a não ser que o humano tenha escrito `— retomar`.
    - Há outra mãe `em-execucao` (`glab issue list -R … --label em-execucao`) e você está na raiz do workspace, não numa área isolada (`git rev-parse --git-common-dir` ≠ `.git`)? **Pare** e diga: `node .claude/scripts/worktree-fatia.mjs B2 <slug>` e abrir o painel em `<workspace>.wt/b2/`. Sozinha na raiz, trabalhe nela.
@@ -63,7 +67,9 @@ Nomes (`docs/agents/orchestration.md`, "Nomes"): mãe `B2 — <título>`, filhas
 
 Pare se a filha não tiver `ready-for-agent` ou tiver bloqueador que não está feito nem fechado. Guarde o sha de `HEAD` antes de começar (`<base>`); no painel, a linha da filha vira `— em andamento · <executor>`.
 
-Escopo da task: o trecho da spec que é dela (os critérios do `Cobre:` da filha), o que **não** tocar (o que é das outras filhas) e os arquivos onde a mudança deve cair. No modo pago/free, isso vira o `$TASK` autocontido do executor (com os 2–4 arquivos de contexto e o comando de teste) — passe-o inteiro.
+**Em paralelo (só com executores subagentes, no máximo 2 ao mesmo tempo):** duas filhas rodam juntas quando **as três** condições valem: (1) nenhuma está no `Blocked by` da outra, direto ou por outra filha; (2) tocam **repositórios de código diferentes** (ex.: `<projeto>-api` e `<projeto>-frontend`), então não há arquivo nem working tree em comum; (3) a do front só usa da API o que as filhas já **comitadas** entregaram (contrato do OpenAPI na `main` da branch), nunca o que a outra filha em andamento está escrevendo. Duas filhas do mesmo repositório **nunca** rodam juntas. Lance os dois subagentes em segundo plano (`run_in_background`), cada um com o seu `<base>` (o `HEAD` do próprio repositório) e o seu recorte; **você, a sessão principal, faz a conferência, o commit e a atualização do painel de um por vez, na ordem em que voltam** (o painel é um texto só: ler, trocar a linha, gravar, e só então o próximo). Qualquer dúvida sobre as três condições → rode em fila. Pare de paralelizar se um dos dois falhar: termine o outro e trate o que falhou sozinho.
+
+Escopo da task: o trecho da spec que é dela (os critérios do `Cobre:` da filha), o que **não** tocar (o que é das outras filhas) e os arquivos onde a mudança deve cair. **Recorte da spec, sem modelo:** `node .claude/scripts/ticket-contexto.mjs <spec> --cobre "<Cobre da filha>" --area back|front --nome B2.5` grava só o que a filha precisa (cabeçalho, contexto, Ideia, seções da área, critérios dela, Testes) e imprime o caminho. No modo pago/free, o `$TASK` autocontido do executor (com os 2–4 arquivos de contexto e o comando de teste) leva esse caminho: o executor lê o recorte **em vez da spec inteira** e só abre a spec se o recorte não bastar, dizendo no relatório o que faltava. Passe o `$TASK` inteiro.
 
 **Testes — o custo de tempo está aqui** (a suite de integração sobe containers):
 - Durante a task, rode **só os testes da task**, com filtro (`dotnet test <projeto de teste> --filter <classe>`, `npx vitest run <arquivo>`). Vermelho primeiro, depois verde.
@@ -113,6 +119,7 @@ Em cada repositório da fatia (`docs/agents/orchestration.md`, "Entrega"): prova
 B2 — PRONTA PARA SUA REVISÃO          (ou: B2 — PAROU: precisa de você)
 MR: <link> (main ← feature/b2-<slug>)   · filhas B2.1–B2.5 ✔ · review PASS na rodada <n>
 Executores: <ex.: pai (Claude) em B2.1–B2.3 · backend (omni-pago) em B2.4–B2.5 · review: pai (Claude)>
+Gasto: <saída de `node .claude/scripts/gasto.mjs --resumo`; a tabela por ticket é o `/gasto`>
 Suposições: <as que você fez e o humano deve conferir>
 Você agora: <a próxima ação humana, concreta>
 Depois: <o que /proximo diria: fatia que isto destrava e fatias que já podem rodar em paralelo; cada fatia citada com o código e o título do mapa, ex.: `/fatia F0.5` — Shell, sessão compartilhada, interceptors e guards>

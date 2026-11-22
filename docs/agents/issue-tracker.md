@@ -55,7 +55,7 @@ Onde a skill diz "make each ticket its sub-issue": no GitLab, ticket de spec é 
    Se a filha nasceu como Issue, converter antes: `workItemConvert(input:{id:"<gid>", workItemTypeId:"<gid do tipo Task>"})` (o gid do tipo sai de `project { workItemTypes { nodes { id name } } }`).
 3. Conferir: `workItems(iids:["<mãe>"]) { nodes { widgets { ... on WorkItemWidgetHierarchy { children { nodes { iid } } } } } }` lista todas as filhas.
 
-4. Cobertura: `node .claude/scripts/check-tickets.mjs <fatia> <arquivo da spec> <grupo>/<projeto>-workspace` — falha se algum critério ficou sem filha, ou se uma filha cita critério que não existe. Corrija os tickets uma vez; falhou de novo, pare e mostre.
+4. Cobertura: `node .claude/scripts/check-tickets.mjs <fatia> <arquivo da spec> <grupo>/<projeto>-workspace` — falha se algum critério ficou sem filha, ou se uma filha cita critério que não existe. Também falha se uma filha cobre mais de 6 critérios (`--max=N` muda o limite): ticket grande vira subagente com contexto perto do limite (a A1.3 da Esteira chegou a 210 mil) e retrabalho. **Uma camada por ticket** (dados, API, tela) e no máximo ~6 critérios; mais que isso, divida. Corrija os tickets uma vez; falhou de novo, pare e mostre.
 
 Bloqueio continua como texto (`Blocked by:`): o vínculo nativo "blocks" é Premium.
 
