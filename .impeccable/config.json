@@ -20,6 +20,15 @@
         "value": "geist mono",
         "createdAt": "2026-11-22T19:41:12.662Z",
         "reason": "user confirmed: Geist Mono escolhida pelo Daniel em 2026-10-23 como fonte de código, junto com Mona Sans (prototipo-fontes.html, DESIGN.md)"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "esteira-frontend/src/app/features/fatias/pages/fatias.page.ts"
+        ],
+        "createdAt": "2026-11-22T23:46:39.667Z",
+        "reason": "pai (Claude): aba com sublinhado border-b-2, nao card arredondado; rounded so no focus-visible; padrao do prototipo-painel-fatias"
       }
     ]
   }

@@ -19,6 +19,8 @@ Checklist minimo:
 
 O agente-pai só vê o que você devolver: repita aqui contrato, nome ou suposição que o próximo passo (o executor seguinte ou o `review`) precisa.
 
+Resposta curta: só o que o agente-pai precisa para decidir (achados com `arquivo:linha`, riscos, veredito). Não recapitule o que leu nem cole trechos de código; seção sem nada a dizer ocupa uma linha. Um PASS limpo cabe em ~10 linhas.
+
 Formato de saida ao terminar:
 
 ## Verificado

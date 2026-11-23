@@ -31,6 +31,7 @@ O agente-pai só vê o que você devolver: repita aqui contrato, nome ou suposi�
 - **Caminhos** relativos à raiz do workspace; repositório de código com `git -C <repo>`, `dotnet test <repo>/...`, `npm --prefix <repo> ...`.
 - **Testes:** rode só os testes da sua task, com filtro (`dotnet test <projeto> --filter <classe>`, `npx vitest run <arquivo>`) — vermelho primeiro, depois verde. A suite completa (com integração, que sobe containers) quem roda é o agente-pai, uma vez, antes do commit.
 - **Git destrutivo proibido** (o hook do workspace também bloqueia): nada de `stash`, `reset`, `checkout --`/`restore` em arquivo que você não criou nesta task, `clean`, `branch -D`, `push`, nem commit — quem comita é o agente-pai. Mudança que você não reconhece → pare e diga.
+- **Resposta curta:** a saída final tem no máximo ~40 linhas. Não cole diff, trecho de arquivo nem log de teste: cite `arquivo:linha` e o comando; o agente-pai lê o git. O formato abaixo continua valendo, com cada seção em poucas linhas (sem nada a dizer: uma linha).
 - **Sempre** termine com o formato de saída abaixo, mesmo em falha.
 
 Formato de saida ao terminar:

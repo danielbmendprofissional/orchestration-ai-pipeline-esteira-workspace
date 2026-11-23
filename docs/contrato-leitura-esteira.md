@@ -25,6 +25,7 @@ A Esteira mostra ao humano o acompanhamento das fatias **lendo** o que os comand
 | 8 | **Marca nos testes** | Código de teste | .NET `[Trait("Fatia","B2")]`; Vitest `describe('[B2] …')`; Playwright `tag: '@B2'`. Sempre o código da **fatia**, nunca o da filha. | `orchestration.md`, "Marca da fatia nos testes" |
 | 9 | **MR** | GitLab | Título `<fatia> — <título da mãe>`; branch de origem do item 6. | `orchestration.md`, "Nomes" |
 | 10 | **Prova do gate local** | Raiz do repositório de código | `.code-review-ok.json` | ADR-0017 |
+| 11 | **Pedido de hotfix** | GitLab, repositório do workspace (issue) e repositório de código do Projeto (MR) | Issue com título `Hotfix: <motivo>` (prefixo sem diferenciar maiúscula; motivo obrigatório, lido até 200 caracteres) e label `ready-for-human`. A correção é uma MR com alvo `main` e **branch de origem `hotfix/<slug>`** (ex.: `hotfix/juros-boleto`). A MR **cita a issue** no título ou na descrição por `#<n>` (com ou sem o caminho do workspace na frente: `Closes #51`, `Closes grupo/projeto-workspace#51`) ou pelo link `…/-/issues/<n>`. Estado derivado: sem MR aberta nem mergeada que cite a issue = **Aguardando a correção**; MR `hotfix/*` aberta = **MR aberta**; MR `hotfix/*` mergeada = **Pronto para Entrega**; MR fechada sem merge não conta (volta a Aguardando a correção). Aditivo (v1 continua). | ADR-0027 |
 
 ### Bloco de execução (item 5), formato exato
 
@@ -90,7 +91,7 @@ O padrão evolui a cada implementação, então parte do histórico está em for
 
 ## Como o contrato é verificado
 
-- **Fixtures reais** no repositório da Esteira (`esteira-api`, pasta de testes): o mapa de fatias, o bloco de execução, um título de mãe, uma filha e um commit, copiados de casos reais (ex.: a B2). O parser da Esteira tem teste contra cada fixture.
+- **Fixtures reais** no repositório da Esteira (`esteira-api`, pasta de testes): o mapa de fatias, o bloco de execução, um título de mãe, uma filha e um commit, copiados de casos reais (ex.: a B2). O parser da Esteira tem teste contra cada fixture. A P1 acrescentou as do **pedido de hotfix** (item 11): `titulo-issue-hotfix.txt` (título da issue), `branch-hotfix.txt` (branch `hotfix/*`) e `descricao-mr-hotfix.txt` (descrição da MR que cita a issue), em `esteira-api/test/Esteira.Application.Tests/Fixtures/Fatias/`, lidas por `HotfixTests` e `ObterHotfixesTests`. Como ainda não existe um hotfix real no GitLab, essas três são fixtures **sintéticas** escritas conforme a ADR-0027; trocam por cópias de um caso real quando o primeiro existir.
 - **Teste de contrato** em cada formato: o que o escritor gera hoje tem que ser lido hoje. Se o formato mudar sem a fixture mudar, o teste do lado do `ai-base` ou da Esteira falha.
 - **Onde cada teste mora** é decisão de implementação da fatia que construir o leitor. Esta versão do contrato só exige que existam.
 

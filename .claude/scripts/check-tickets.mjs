@@ -6,7 +6,8 @@
 // Critério = linha numerada de "## Critérios (EARS)" ou, na fatia de fundação, cada `- [ ]` de "## Checklist"
 // (numerados na ordem). Cada filha `<fatia>.<N> — …` declara na descrição `Cobre: 1, 3, 5-7`.
 // Saída 1 se algum critério ficou sem filha, se uma filha cita critério que não existe ou se uma filha cobre critérios demais
-// (padrão 6: ticket grande vira subagente com contexto estourado e retrabalho; divida por camada).
+// (padrão 6: ticket grande vira subagente com contexto estourado e retrabalho; divida por camada) ou se uma filha
+// leva as duas labels `backend` e `frontend` (uma camada por ticket).
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
@@ -72,6 +73,8 @@ for (const f of filhas) {
     if (!criterios.includes(n)) problemas.push(`#${f.iid} ${f.title}: cita o critério ${n}, que não existe na spec`);
     cobertos.add(n);
   }
+  const labels = (f.labels || []).map((l) => String(l).toLowerCase());
+  if (labels.includes('backend') && labels.includes('frontend')) problemas.push(`#${f.iid} ${f.title}: mistura backend e frontend (uma camada por ticket); divida`);
   if (lista.length > MAX) problemas.push(`#${f.iid} ${f.title}: cobre ${lista.length} critérios (máximo ${MAX}); divida por camada ou por assunto`);
 }
 const sem = criterios.filter((n) => !cobertos.has(n));

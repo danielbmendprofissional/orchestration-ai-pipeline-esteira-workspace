@@ -1,10 +1,25 @@
 ---
 description: Leva uma fatia do zero à MR com UMA aprovação sua (a spec) — spec → [você aprova] → tickets → execução → review → MR
-argument-hint: "B3 [— instrução extra]"
+argument-hint: "B3 [— modo claude|pago|free] [— instrução extra]"
 ---
 Argumento: `$ARGUMENTS` (código da fatia; vazio = a próxima livre do `specs/README.md`, como no `/implement-task`). Comando de entrada único: retoma de onde a fatia está, então pode ser rodado de novo depois de qualquer parada.
 
 **Fatia de limpeza:** o ponto de partida também pode ser a issue **"Limpeza da Fatia <código>"** que a Esteira cria (rótulo `ready-for-human`) quando o humano exclui uma Fatia. Aí **não há linha no mapa**: crie a linha `<código>-L` (ex.: `B2-L`), com repositório da original, `flag: não`, e a spec de limpeza (remove o código e o flag `Features:<código>` da original, sem mudança de comportamento, com migração só `contract` se houver), e siga o fluxo normal a partir do passo 1. Registre na issue de limpeza o link da nova spec.
+
+## Modo: pergunte primeiro
+
+Antes de qualquer outra coisa, **a não ser que o argumento já traga `— modo claude|pago|free`**, faça uma pergunta só (`AskUserQuestion`, 3 opções):
+
+1. **Claude** — modo completo, pela assinatura (spec e execução no Claude).
+2. **Claude pago** — OmniRoute, combo `omni-pago` (DeepSeek → Luna): gasta a cota paga, não a do plano.
+3. **Claude free** — OmniRoute, combo `omni-free`: gasta a cota livre. Qualidade em .NET/Angular ainda não medida; prefira ticket mecânica.
+
+Modo atual da sessão: `echo "$ANTHROPIC_BASE_URL"` vazio = Claude; preenchido → `echo "$ANTHROPIC_DEFAULT_SONNET_MODEL"`: `omni-pago` = pago, `omni-free` = free.
+
+- **Igual ao escolhido** → diga numa linha "Modo: <modo>" e siga.
+- **Diferente** → **pare sem fazer nada**: o modo é do processo e não troca no meio da sessão. Diga: "Esta sessão está no modo <atual>; você escolheu <escolhido>. Abra o terminal certo (`..claudescriptsdev.ps1 claude|pago|free`; pago e free esperam o OmniRoute subir) e rode `/fatia <código> — modo <escolhido>` lá."
+
+Quando o `/fatia` é rodado de novo depois de uma parada, a pergunta se repete (é uma linha de resposta).
 
 ## 0. Onde a fatia está
 
@@ -35,10 +50,11 @@ Siga `docs/agents/issue-tracker.md` ("Tickets de uma spec"): uma Task filha por 
 - `OK` → siga pro 3 sem mostrar os tickets.
 - `FALHA` → corrija os tickets uma vez e rode de novo; falhou outra vez → **pare** e mostre o que falta (spec ambígua).
 - `risco: alto` → **pare** aqui e mostre os tickets (título + `Cobre:`) pra você ler antes de executar.
+- Uma filha que mistura `backend` e `frontend` (uma camada por ticket) também dá `FALHA`.
 - Uma filha que cobre mais de 6 critérios dá `FALHA` (ticket grande vira subagente com contexto estourado): divida por camada ou por assunto e rode de novo.
 
 ## 3. Execução
 
-**Sessão limpa antes de executar.** Esta sessão carrega a conversa da spec e relê tudo isso a cada chamada; a execução não precisa dela (spec, mãe, filhas e painel estão no GitLab e no git, e o `/implement-task` retoma por eles). Com os tickets `OK` (ou depois de o humano ler os de `risco: alto`), **pare** e diga em duas linhas: "Tickets prontos. Rode `/clear` e depois `/implement-task <fatia>`. Para gastar a cota do modelo livre em vez do plano, abra o terminal Claude pago ou Claude free e rode lá." Só siga nesta mesma sessão se o humano responder `seguir` (ou se o argumento trouxer `— seguir`): então leia `.claude/commands/implement-task.md` e siga-o inteiro a partir do passo 0, com a fatia deste comando, e termine com o relatório dele (que já traz "Você agora" e "Depois").
+**Sessão limpa antes de executar.** Esta sessão carrega a conversa da spec e relê tudo isso a cada chamada; a execução não precisa dela (spec, mãe, filhas e painel estão no GitLab e no git, e o `/implement-task` retoma por eles). Com os tickets `OK` (ou depois de o humano ler os de `risco: alto`), **pare** e diga em duas linhas: "Tickets prontos. Rode `/clear` e depois `/implement-task <fatia>`. No modo Claude, para gastar a cota do OmniRoute em vez do plano, abra o terminal Claude pago ou Claude free e rode o `/implement-task` lá." Só siga nesta mesma sessão se o humano responder `seguir` (ou se o argumento trouxer `— seguir`): então leia `.claude/commands/implement-task.md` e siga-o inteiro a partir do passo 0, com a fatia deste comando, e termine com o relatório dele (que já traz "Você agora" e "Depois").
 
 Isto é só o encadeamento: nenhuma regra de TDD, review, MR ou governança muda. Humano continua decidindo a spec e a MR; promoção entre ambientes segue a esteira.

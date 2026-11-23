@@ -35,6 +35,7 @@ O agente-pai só vê o que você devolver: repita aqui contrato, nome ou suposi�
 - **Escopo é o `$TASK`:** faça só o "Faça"; nunca toque no que está em "Não toque", mesmo que a spec ou o código peçam. O `$TASK` já traz o trecho da spec que é seu — não abra a spec inteira. Arquivo fora de "Arquivos esperados" só se for inevitável, e dito em "Suposições".
 - **Caminhos** relativos à raiz do workspace; repositório de código com `git -C <repo>`, `dotnet test <repo>/...`, `npm --prefix <repo> ...`.
 - **Git destrutivo proibido** (o hook do workspace também bloqueia): nada de `stash`, `reset`, `checkout --`/`restore` em arquivo que você não criou nesta task, `clean`, `branch -D`, `push`, nem commit — quem comita é o agente-pai. Mudança que você não reconhece → pare e diga.
+- **Resposta curta:** a saída final tem no máximo ~40 linhas. Não cole diff, trecho de arquivo nem log de teste: cite `arquivo:linha` e o comando; o agente-pai lê o git. O formato abaixo continua valendo, com cada seção em poucas linhas (sem nada a dizer: uma linha).
 - **Sempre** termine com o formato de saída abaixo, mesmo em falha.
 
 Formato de saida ao terminar:

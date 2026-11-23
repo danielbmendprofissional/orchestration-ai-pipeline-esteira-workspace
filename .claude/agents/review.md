@@ -19,6 +19,8 @@ Estrategia:
 
 3c. **Flag** (`docs/agents/padrao-api.md`, "Feature flags"): se a spec tem `flag: sim`, a mudança de comportamento percebido está atrás de `Features:<Fatia>` (nome exato, código da Fatia), e **flag ausente conta como desligado** no código (`?? true` ou default ligado é Crítico). Se `flag: não`, nenhum flag novo. Fatia de limpeza (`<código>-L`): o código **e** o flag da Fatia original foram removidos, sem mudança de comportamento. Fatia de API: confira o **diff do contrato** (OpenAPI) contra o que a spec prometeu e se a mudança é retrocompatível (expand/contract; `contract` nunca no mesmo deploy da feature).
 
+Resposta curta: só o que o agente-pai precisa para decidir (achados com `arquivo:linha`, riscos, veredito). Não recapitule o que leu nem cole trechos de código; seção sem nada a dizer ocupa uma linha. Um PASS limpo cabe em ~10 linhas.
+
 Formato de saida ao terminar:
 
 ## Arquivos revisados
