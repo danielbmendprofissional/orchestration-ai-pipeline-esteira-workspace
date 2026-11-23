@@ -42,6 +42,7 @@ Para ver: abra qualquer `prototipo-*.html` no navegador. Precisa de internet só
 - **Liberação:** gaveta lateral com Notas de entrega, Fatias com caixa por Fatia e links do GitLab (issue, MR, commit, só o que existir), ordem API e depois front, **Liberar selecionadas** à direita e **Excluir** (reverter ou absorver, com motivo) à esquerda.
 - **Conferência de escopo:** no resumo da Abertura, em blocos recolhidos de uma linha ("Vão junto, com o flag desligado", "MRs mergeadas sem Fatia", "Limpezas pendentes do Projeto"). Só avisam, nunca bloqueiam.
 - **Celular:** só o Aguardando você ganha desenho próprio (folha de decisão com botões grandes). O e-mail leva por link a essa folha, já logado, e **nunca aprova direto**. As outras telas só não quebram ao estreitar.
+- **Diálogos Aprovar e Reprovar do Painel (P2):** não existem nos protótipos. O desenho nasceu no agente `ui`, com spartan/ui e as regras do `DESIGN.md` (Aprovar lista as MRs, API primeiro; Reprovar pede o Comentário com contador de 2000 caracteres); o humano valida na MR da P2.
 
 ## Regras de negócio decididas junto com as telas
 

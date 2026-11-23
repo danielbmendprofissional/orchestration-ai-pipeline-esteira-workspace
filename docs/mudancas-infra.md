@@ -5,7 +5,7 @@ Pedidos da Esteira para o agent `ai-ops/agents/infra/local-environment-config`. 
 ## Pendências abertas
 
 - [ ] **1. E-mail (SMTP):** Mailpit em dev, relay real nos ambientes, chaves `Smtp:*` no contrato.
-- [ ] **2. Token do bot do GitLab:** chaves `GitLab:Url` e `GitLab:Bots:<grupo>:Token`, `read_api` até a P1 e `api` a partir da P2.
+- [ ] **2. Token do bot do GitLab:** chaves `GitLab:Url` e `GitLab:Bots:<grupo>:Token`, `read_api` até a P1 e `api` a partir da P2b.
 - [ ] **3. Guarda dos backups pré-publicação:** local fora do cluster de produção, role de backup e restore testado uma vez.
 - [x] **4. Realm `esteira`:** role `mor`, usuários `dev` e `dev-sem-papel` (fatia B3, B3.1; aplicado, e o smoke manual da B3 foi feito pelo humano, conforme o painel da issue #12).
 
@@ -18,9 +18,9 @@ Pedidos da Esteira para o agent `ai-ops/agents/infra/local-environment-config`. 
 
 ## 2. Token do bot do GitLab
 
-- **Por quê:** a Esteira fala com o GitLab por um bot, **um por grupo** (ADR-0008). Nas fatias A1 e P1 só lê (listar projetos do grupo, o `.gitlab-ci.yml`, mapa, specs e issues); a partir da P2 também comenta, fecha, reabre e mergeia MR, e a partir da E4 cria tag e dá play em job (ADR-0021).
+- **Por quê:** a Esteira fala com o GitLab por um bot, **um por grupo** (ADR-0008). Nas fatias A1 e P1 só lê (listar projetos do grupo, o `.gitlab-ci.yml`, mapa, specs e issues); a partir da P2b também comenta, fecha, reabre e mergeia MR, e a partir da E4 cria tag e dá play em job (ADR-0021).
 - **Precisa:** nome das chaves no contrato (proposta: `GitLab:Url` e `GitLab:Bots:<caminho-do-grupo>:Token`), token só em user-secrets/Secret, rotação antes do vencimento (máx. 1 ano) com alerta.
-- Escopo: `read_api` até a P1; `api` a partir da P2 (o GitLab não tem escopo mais fino para comentar, mergear e criar tag). A `main` fica protegida com merge só do bot.
+- Escopo: `read_api` até a P1; `api` a partir da P2b (o GitLab não tem escopo mais fino para comentar, mergear e criar tag). A `main` fica protegida com merge só do bot.
 
 ## 3. Guarda dos backups pré-publicação
 
