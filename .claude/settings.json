@@ -23,7 +23,9 @@
       }
     ]
   },
+  "enableArtifact": false,
   "permissions": {
+    "deny": ["DesignSync","PowerShell","SendToProject","SendToProjectContext","SendFeedback","RemoteTrigger","EndConversation","CronCreate","CronDelete","CronList","ScheduleWakeup","EnterWorktree","ExitWorktree","NotebookEdit"],
     "allow": ["Bash(git -C *)","Bash(git fetch *)","Bash(git status *)","Bash(git diff *)","Bash(git log *)","Bash(glab issue *)","Bash(glab mr *)","Bash(glab label *)","Bash(glab api *)","Bash(dotnet test *)","Bash(dotnet build *)","Bash(npx vitest *)","Bash(npm test *)","Bash(npm run *)","Bash(node .claude/scripts/*)"]
   }
 }
