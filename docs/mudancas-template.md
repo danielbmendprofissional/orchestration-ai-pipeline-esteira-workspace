@@ -11,6 +11,7 @@ Levantadas no discovery da Esteira (ADR-0008) e **reescritas em 2026-11-16** par
 - [ ] **4.2** Backup pré-publicação (`pg_dump` antes das migrations de produção, guardando os 3 últimos).
 - [ ] **5 e 5.1** Agentes de code-review, security e qa no CI, e os insumos das Notas de entrega (OpenAPI, rotas, screenshots).
 - [ ] **8.** Imagem `tools/agent-runner` (ADR-0012/0017).
+- [ ] **8.1** Documentar `teto_custo_usd` (número, US$ por execução de agente) na tabela da resposta de `template-ci/docs/contrato-pipeline-v2.md`; o `agent-runner` (item 8) o consome. A Esteira o devolve a partir da X3 (`specs/feature/aplicacoes/02-teto-de-custo-dos-agentes.md`, #84): abrir a issue no template-ci com `/issue-ai` ao fim da X3.
 - [ ] **9.** Recusar MR para `main` sem issue referenciada (Conferência de escopo).
 
 | Item | Situação |
