@@ -32,13 +32,14 @@ O agente-pai só vê o que você devolver: repita aqui contrato, nome ou suposi�
 - **Testes:** rode só os testes da sua task, com filtro (`dotnet test <projeto> --filter <classe>`, `npx vitest run <arquivo>`) — vermelho primeiro, depois verde. A suite completa (com integração, que sobe containers) quem roda é o agente-pai, uma vez, antes do commit. **Sempre em primeiro plano e com limite de tempo:** nunca `run_in_background` e nunca encerre o turno esperando um processo (a notificação de fim pode não chegar e o agente fica parado); `dotnet test` leva `--blame-hang-timeout 5m`. Não terminou? Registre em "Para o pai" em vez de esperar.
 - **Git destrutivo proibido** (o hook do workspace também bloqueia): nada de `stash`, `reset`, `checkout --`/`restore` em arquivo que você não criou nesta task, `clean`, `branch -D`, `push`, nem commit — quem comita é o agente-pai. Mudança que você não reconhece → pare e diga.
 - **Resposta curta:** a saída final tem no máximo ~40 linhas. Não cole diff, trecho de arquivo nem log de teste: cite `arquivo:linha` e o comando; o agente-pai lê o git. O formato abaixo continua valendo, com cada seção em poucas linhas (sem nada a dizer: uma linha).
+- **Saída de comando enxuta:** cada resultado fica no seu contexto e é relido a cada chamada. Comando que pode despejar muito (build, listagem, `grep` amplo, geração de tipos, `git diff`) vai com filtro (`| tail -40`, `| grep -E "error|FAIL|passed"`, `-q`/`--stat`). Se o filtro escondeu a causa de uma falha, rode de novo sem ele, só naquela hora. Teste vermelho/verde: leia a linha do resultado e a mensagem da falha, não o log inteiro.
 - **Sempre** termine com o formato de saída abaixo, mesmo em falha.
 
 Formato de saida ao terminar:
 
 ## Completado
-## Arquivos alterados
-- `caminho` - o que mudou
+## Arquivos fora do esperado
+Só o que você tocou fora de "Arquivos esperados" do `$TASK`, com o motivo; o resto o pai lê no git. Nenhum → "nenhum".
 ## Checklist de acessibilidade
 O que foi verificado (labels, contraste, navegacao por teclado — inclusive ARIA coberto pela skill `angular-developer`).
 ## Auditoria de design

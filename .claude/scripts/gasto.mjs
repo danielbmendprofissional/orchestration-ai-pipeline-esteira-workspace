@@ -42,17 +42,17 @@ function ler(arquivo) {
     if (e.timestamp) { const t = new Date(e.timestamp).getTime(); if (fim !== null && t - fim < 600000) ativo += t - fim; fim = t; }
     if (e.type === 'assistant' && e.message?.usage) porMsg.set(e.message.id, e.message.usage);
   }
-  let chamadas = 0, cacheLido = 0, novos = 0, saida = 0, ctxSoma = 0, ctxMax = 0, ctxMin = Infinity, ultima = 0;
+  let chamadas = 0, cacheLido = 0, novos = 0, saida = 0, ctxSoma = 0, ctxMax = 0, ctxMin = Infinity, ultima = 0, ctxUltimo = 0;
   for (const u of porMsg.values()) {
     const ctx = (u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0);
     if (!ctx) continue; // registro sem uso (resposta interrompida)
-    ultima = u.output_tokens || 0;
+    ultima = u.output_tokens || 0; ctxUltimo = ctx;
     chamadas++; cacheLido += u.cache_read_input_tokens || 0;
     novos += (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0);
     saida += u.output_tokens || 0; ctxSoma += ctx; ctxMax = Math.max(ctxMax, ctx); ctxMin = Math.min(ctxMin, ctx);
   }
   // a saída de cada chamada (menos a última) volta como token "novo" na chamada seguinte (gravação no cache): está nos dois números
-  return { chamadas, cacheLido, novos, saida, reentrada: Math.max(0, saida - ultima), ctxMedio: chamadas ? Math.round(ctxSoma / chamadas) : 0, ctxMax, ctxMin: chamadas ? ctxMin : 0, seg: Math.round(ativo / 1000) };
+  return { chamadas, cacheLido, novos, saida, reentrada: Math.max(0, saida - ultima), ctxUltimo, ctxMedio: chamadas ? Math.round(ctxSoma / chamadas) : 0, ctxMax, ctxMin: chamadas ? ctxMin : 0, seg: Math.round(ativo / 1000) };
 }
 
 const linhas = [{ nome: 'sessão principal', ...ler(join(dir, alvo.f)) }];
@@ -77,7 +77,7 @@ const p = linhas[0];
 const base = p.ctxMin; // 1ª chamada da sessão principal ≈ o que é reenviado antes de qualquer mensagem (prompt, ferramentas, MCPs, instruções)
 
 if (resumo) {
-  console.log(`Gasto: TOTAL ${k(total)} tokens (${k(tot.novos)} novos + ${k(tot.saida)} gerados) em ${tot.chamadas} chamadas${subs ? `, ${subs} subagente${subs === 1 ? '' : 's'}` : ''}; mais ${k(tot.cacheLido)} relidos do cache. Base reenviada a cada chamada: ${k(base)}.`);
+  console.log(`Gasto: TOTAL ${k(total)} tokens (${k(tot.novos)} novos + ${k(tot.saida)} gerados) em ${tot.chamadas} chamadas${subs ? `, ${subs} subagente${subs === 1 ? '' : 's'}` : ''}; mais ${k(tot.cacheLido)} relidos do cache. Base reenviada a cada chamada: ${k(base)}. Contexto atual da sessão principal: ${k(p.ctxUltimo)}.`);
   process.exit(0);
 }
 
